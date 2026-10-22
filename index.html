@@ -1,1 +1,2292 @@
+<!DOCTYPE html>
+<!-- النسخة المستقلة من المنصة (GitHub Pages) — تُولَّد من ملفات Apps Script -->
+<!--
+  index.html — الهيكل الرئيسي للمنصة
+  ✏️ النصوص العربية الظاهرة هنا يمكنكِ تعديلها بحرية.
+  العناصر التي تحمل data-i تتحول تلقائياً إلى أيقونات خطية (أسماؤها في App.html).
+-->
+<html lang="ar" dir="rtl">
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>English Language Club | منصة اللغة الإنجليزية للتعلم الذاتي</title>
+  <script>
+    /* =====================================================================
+     * ✏️ رابط الخادم: الصقي هنا رابط Web app الخاص بكِ (ينتهي بـ /exec)
+     *    بين علامتي التنصيص، بدلاً من النص PASTE_YOUR_WEB_APP_URL_HERE
+     * ===================================================================== */
+    window.ELC_API_URL = 'https://script.google.com/macros/s/AKfycbx9QPEYuX-MkSsmCP3Ou_PU8Ja-86Wcl5z8NwsKVCG_3bcvLmWXb5CpSLOHTGXMUFuCzQ/exec';
+  </script>
+  <!--
+  Styles.html — نظام التصميم الكامل للمنصة
+  ✏️ لتعديل الألوان أو الخطوط: غيّري القيم داخل :root في الأعلى فقط،
+     وستتغير في كل المنصة تلقائياً.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+   * 1) الهوية البصرية — الألوان والخطوط
+   * ========================================================= */
+  :root {
+    /* الكحلي */
+    --navy: #0B1F3A;
+    --navy-2: #132B4D;
+    --navy-3: #1B3863;
+    /* الذهبي الشمبانيا */
+    --gold: #C9A86A;
+    --gold-d: #A88A4E;
+    --gold-l: #E6D7B4;
+    --gold-xl: #F5EEDD;
+    /* الخلفيات والنصوص */
+    --ivory: #FAF7F0;
+    --card: #FFFFFF;
+    --text: #1E1E24;
+    --muted: #6E6C73;
+    --muted-2: #9C99A0;
+    --line: #ECE5D6;
+    --field: #DCD4C2;
+    /* الصحيح والخطأ */
+    --ok: #2F6B55;
+    --ok-l: #EDF4F0;
+    --err: #7A2E3A;
+    --err-l: #F7EEF0;
 
+    --r: 14px;
+    --r-lg: 16px;
+    --sh-1: 0 1px 2px rgba(11, 31, 58, .04), 0 3px 10px rgba(11, 31, 58, .045);
+    --sh-2: 0 1px 2px rgba(11, 31, 58, .05), 0 10px 28px rgba(11, 31, 58, .08), 0 30px 60px -30px rgba(11, 31, 58, .18);
+    --ease: cubic-bezier(.22, .68, .2, 1);
+
+    --f-ar-h: 'El Messiri', 'IBM Plex Sans Arabic', serif;
+    --f-ar: 'IBM Plex Sans Arabic', 'Inter', Tahoma, sans-serif;
+    --f-en-h: 'Playfair Display', Georgia, serif;
+    --f-en: 'Inter', 'IBM Plex Sans Arabic', sans-serif;
+  }
+
+  /* =========================================================
+   * 2) الأساسيات
+   * ========================================================= */
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--ivory); color: var(--text);
+    font-family: var(--f-ar); font-size: 16px; line-height: 1.75; font-weight: 400;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection { background: var(--gold-l); color: var(--navy); }
+  .app { max-width: 640px; margin: 0 auto; padding: 16px 18px 72px; min-height: 100vh; }
+
+  h1, h2, h3 { font-family: var(--f-ar-h); font-weight: 600; color: var(--navy); margin: 0; line-height: 1.4; }
+  h2 { font-size: 25px; }
+  h3 { font-size: 18px; }
+  p { margin: 0; }
+  .center { text-align: center; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+  .en { font-family: var(--f-en); direction: ltr; text-align: left; }
+  .en-inline { font-family: var(--f-en); direction: ltr; unicode-bidi: isolate; }
+  .link { color: var(--navy); font-weight: 500; cursor: pointer; border-bottom: 1px solid var(--gold); padding-bottom: 1px; transition: color .2s; }
+  .link:hover { color: var(--gold-d); }
+
+  .eyebrow {
+    display: block; font-family: var(--f-en); font-size: 11px; font-weight: 600;
+    letter-spacing: .24em; text-transform: uppercase; color: var(--gold-d); margin-bottom: 8px;
+  }
+  .page-head { margin: 10px 0 22px; }
+  .page-head p { color: var(--muted); margin-top: 8px; font-size: 15px; }
+
+  /* الأيقونات الخطية */
+  .ic { display: inline-flex; width: 20px; height: 20px; flex-shrink: 0; vertical-align: middle; }
+  .ic svg { width: 100%; height: 100%; }
+  svg.i { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* =========================================================
+   * 3) الانتقال بين الشاشات
+   * ========================================================= */
+  .screen { display: none; }
+  .screen.active { display: block; animation: enter .55s var(--ease) both; }
+  .screen.leave { animation: leave .18s ease forwards; }
+  @keyframes enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes leave { to { opacity: 0; transform: translateY(-6px); } }
+  .stagger > * { animation: enter .6s var(--ease) both; }
+  .stagger > *:nth-child(2) { animation-delay: .05s; }
+  .stagger > *:nth-child(3) { animation-delay: .10s; }
+  .stagger > *:nth-child(4) { animation-delay: .15s; }
+  .stagger > *:nth-child(5) { animation-delay: .20s; }
+  .stagger > *:nth-child(6) { animation-delay: .25s; }
+  .stagger > *:nth-child(7) { animation-delay: .30s; }
+  .stagger > *:nth-child(8) { animation-delay: .35s; }
+
+  /* =========================================================
+   * 4) البطاقات والفواصل
+   * ========================================================= */
+  .card {
+    position: relative; background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
+    padding: 22px 20px; margin: 14px 0; box-shadow: var(--sh-1), inset 0 2px 0 var(--gold);
+  }
+  .card.flat { box-shadow: var(--sh-1); }
+  .card-title { font-family: var(--f-ar-h); font-size: 18px; color: var(--navy); font-weight: 600; margin-bottom: 4px; }
+
+  .rule { height: 1px; border: 0; margin: 20px 0; background: linear-gradient(90deg, transparent, var(--gold-l) 20%, var(--gold-l) 80%, transparent); }
+  .ornament { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 18px auto; max-width: 240px; color: var(--gold); }
+  .ornament span { flex: 1; height: 1px; background: linear-gradient(270deg, transparent, var(--gold)); }
+  .ornament span:last-child { background: linear-gradient(90deg, transparent, var(--gold)); }
+  .ornament svg { width: 9px; height: 9px; }
+
+  /* =========================================================
+   * 5) الأزرار
+   * ========================================================= */
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
+    border: 1px solid transparent; border-radius: 12px; padding: 14px 20px; margin: 10px 0;
+    font-family: var(--f-ar); font-size: 16px; font-weight: 500; letter-spacing: .01em; cursor: pointer;
+    transition: background .25s var(--ease), border-color .25s var(--ease), color .25s, box-shadow .25s, transform .15s;
+  }
+  .btn .ic { width: 18px; height: 18px; }
+  .btn:active:not(:disabled) { transform: scale(.985); }
+  .btn:disabled { opacity: .38; cursor: default; }
+  .btn:focus-visible, .pill:focus-visible, .role:focus-visible, .track:focus-visible, .more:focus-visible, .opt:focus-visible {
+    outline: 2px solid var(--gold); outline-offset: 2px;
+  }
+  .btn.primary {
+    background: var(--gold); border-color: var(--gold); color: var(--navy); font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 8px 18px -10px rgba(168, 138, 78, .8);
+  }
+  .btn.primary:hover:not(:disabled) { background: #D1B37A; }
+  .btn.navy { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .btn.navy:hover:not(:disabled) { background: var(--navy-2); }
+  .btn.ghost { background: transparent; border-color: var(--field); color: var(--navy); }
+  .btn.ghost:hover:not(:disabled) { border-color: var(--gold); background: #fff; }
+  .btn.on-dark { background: transparent; border-color: rgba(201, 168, 106, .55); color: var(--ivory); }
+  .btn.on-dark:hover { background: rgba(201, 168, 106, .1); }
+  .btn.small { display: inline-flex; width: auto; padding: 8px 14px; font-size: 14px; margin: 4px 0; }
+
+  .back {
+    display: inline-flex; align-items: center; gap: 6px; background: none; border: none; padding: 6px 0;
+    color: var(--muted); font-family: var(--f-ar); font-size: 14px; cursor: pointer; transition: color .2s;
+  }
+  .back .ic { width: 16px; height: 16px; }
+  .back:hover { color: var(--navy); }
+  .icon-btn {
+    display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; cursor: pointer;
+    border: 1px solid rgba(201, 168, 106, .45); background: transparent; color: var(--gold); transition: background .2s;
+  }
+  .icon-btn .ic { width: 18px; height: 18px; }
+  .icon-btn:hover { background: rgba(201, 168, 106, .12); }
+
+  /* =========================================================
+   * 6) شاشة الترحيب (مدخل المنصة)
+   * ========================================================= */
+  .hero {
+    position: relative; overflow: hidden; margin: -16px -18px 0; padding: 52px 26px 44px; text-align: center;
+    color: var(--ivory); border-bottom: 1px solid var(--gold);
+    background: radial-gradient(120% 80% at 50% 0%, #193761 0%, var(--navy) 62%);
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 12px; border: 1px solid rgba(201, 168, 106, .22); border-radius: 10px; pointer-events: none;
+  }
+  .hero::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+    background-image: radial-gradient(rgba(201, 168, 106, .08) 1px, transparent 1px); background-size: 22px 22px;
+  }
+  .hero > * { position: relative; z-index: 1; }
+  @media (min-width: 676px) { .hero { margin: 10px 0 0; border-radius: var(--r-lg); border: 1px solid rgba(201, 168, 106, .55); } }
+  .emblem { width: 156px; height: 156px; display: block; margin: 0 auto 22px; filter: drop-shadow(0 10px 26px rgba(0, 0, 0, .35)); }
+  .hero h1 { color: #fff; font-size: 25px; font-weight: 600; }
+  .hero .en-title { font-family: var(--f-en-h); font-style: italic; color: var(--gold); font-size: 21px; margin-top: 4px; letter-spacing: .02em; }
+  .hero .tagline { color: rgba(250, 247, 240, .7); font-size: 14px; }
+
+  .features { list-style: none; padding: 0; margin: 0; }
+  .features li { display: flex; gap: 16px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .features li:first-child { padding-top: 4px; }
+  .features li:last-child { border-bottom: 0; padding-bottom: 4px; }
+  .f-ico { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold-l); display: grid; place-items: center; color: var(--gold-d); flex-shrink: 0; }
+  .f-ico .ic { width: 19px; height: 19px; }
+  .features b { display: block; font-family: var(--f-ar-h); font-weight: 600; color: var(--navy); font-size: 16px; }
+  .features small { color: var(--muted); font-size: 13.5px; line-height: 1.7; }
+  .foot { margin-top: 30px; text-align: center; color: var(--muted-2); font-size: 12px; letter-spacing: .03em; }
+  .foot .en-inline { letter-spacing: .14em; font-size: 10.5px; text-transform: uppercase; }
+
+  /* =========================================================
+   * 7) النماذج
+   * ========================================================= */
+  .form label { display: block; font-weight: 500; color: var(--navy); margin: 20px 0 8px; font-size: 15px; }
+  .form label:first-child { margin-top: 0; }
+  input {
+    width: 100%; padding: 13px 15px; border-radius: 12px; border: 1px solid var(--field); background: #fff;
+    font-family: var(--f-ar); font-size: 16px; color: var(--text); outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  input::placeholder { color: #B5AFA3; }
+  input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(201, 168, 106, .16); }
+  input.pin { text-align: center; letter-spacing: .9em; padding-left: calc(15px + .9em); font-size: 20px; direction: ltr; font-family: var(--f-en); }
+  .hint { display: flex; gap: 7px; align-items: center; color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .hint .ic { width: 14px; height: 14px; color: var(--gold-d); }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    border: 1px solid var(--field); background: #fff; border-radius: 10px; padding: 9px 20px; cursor: pointer;
+    font-family: var(--f-ar); font-size: 15px; color: var(--text); transition: all .22s var(--ease);
+  }
+  .pill:hover { border-color: var(--gold); }
+  .pill.sq { min-width: 48px; padding: 9px 0; font-family: var(--f-en); }
+  .pill.active { background: var(--navy); border-color: var(--navy); color: #fff; box-shadow: inset 0 -2px 0 var(--gold); }
+
+  .roles { display: grid; grid-template-columns: repeat(auto-fill, minmax(106px, 1fr)); gap: 8px; }
+  .role {
+    display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 8px 13px; cursor: pointer;
+    border: 1px solid var(--field); background: #fff; border-radius: 12px; color: var(--text);
+    font-family: var(--f-ar); transition: all .22s var(--ease);
+  }
+  .role .ic { width: 24px; height: 24px; color: var(--gold-d); transition: color .2s; }
+  .role span { font-size: 14px; }
+  .role:hover { border-color: var(--gold); }
+  .role.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .role.active .ic { color: var(--gold); }
+
+  /* اختيار اللهجة */
+  .accent { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 14px; font-size: 13px; color: var(--muted); }
+  .seg { display: inline-flex; border: 1px solid var(--field); border-radius: 10px; padding: 3px; background: #fff; }
+  .seg button {
+    display: flex; align-items: center; gap: 6px; border: 0; background: transparent; border-radius: 7px;
+    padding: 6px 12px; font-family: var(--f-ar); font-size: 13px; color: var(--muted); cursor: pointer; transition: all .2s;
+  }
+  .seg button small { font-family: var(--f-en); font-size: 10px; letter-spacing: .1em; opacity: .7; }
+  .seg button.active { background: var(--navy); color: #fff; }
+  .home-head .accent { color: rgba(250, 247, 240, .6); }
+  .home-head .seg { background: transparent; border-color: rgba(201, 168, 106, .4); }
+  .home-head .seg button { color: rgba(250, 247, 240, .7); }
+  .home-head .seg button.active { background: var(--gold); color: var(--navy); }
+
+  /* =========================================================
+   * 8) النص الإنجليزي + أدوات الاستماع والترجمة
+   * ========================================================= */
+  .tb { margin: 2px 0 18px; }
+  .tb-en { font-size: 18px; line-height: 1.75; white-space: pre-line; color: var(--text); }
+  .tb-tools { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .tool {
+    display: inline-flex; align-items: center; gap: 7px; background: #fff; border: 1px solid var(--line); color: var(--navy);
+    border-radius: 999px; padding: 6px 14px; font-family: var(--f-ar); font-size: 13px; cursor: pointer; transition: all .2s;
+  }
+  .tool .ic { width: 15px; height: 15px; color: var(--gold-d); }
+  .tool:hover { border-color: var(--gold); }
+  .tool.on { background: var(--gold-xl); border-color: var(--gold-l); }
+  .tb-ar {
+    margin-top: 12px; padding: 13px 16px; background: var(--ivory); border-radius: 10px;
+    border-inline-start: 2px solid var(--gold); white-space: pre-line; font-size: 15px; color: #3A3A42;
+    animation: enter .35s var(--ease);
+  }
+  .audio-box {
+    display: flex; gap: 16px; align-items: flex-start; padding: 18px; margin-bottom: 20px;
+    background: var(--ivory); border: 1px solid var(--gold-l); border-radius: 12px;
+  }
+  .play {
+    width: 54px; height: 54px; border-radius: 50%; border: 0; flex-shrink: 0; cursor: pointer;
+    background: var(--navy); color: var(--gold); display: grid; place-items: center;
+    box-shadow: 0 0 0 4px rgba(201, 168, 106, .18); transition: transform .2s var(--ease), box-shadow .2s;
+  }
+  .play:hover { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(201, 168, 106, .22); }
+  .play .ic { width: 20px; height: 20px; margin-left: 3px; }
+  .audio-box b { display: block; font-family: var(--f-ar-h); color: var(--navy); font-weight: 600; }
+  .audio-box small { display: block; color: var(--muted); font-size: 13px; }
+  .audio-box .tool { margin-top: 10px; }
+
+  /* =========================================================
+   * 9) خيارات الإجابة
+   * ========================================================= */
+  .opts { display: grid; gap: 10px; margin-top: 6px; }
+  .opt {
+    display: flex; align-items: center; gap: 14px; width: 100%; padding: 13px 14px; cursor: pointer; direction: ltr; text-align: left;
+    border: 1px solid #E3DBCB; background: #fff; border-radius: 12px; font-family: var(--f-en); font-size: 16px; color: var(--text);
+    transition: border-color .22s var(--ease), box-shadow .22s, background .22s;
+  }
+  .opt:hover { border-color: var(--gold); box-shadow: var(--sh-1); }
+  .opt .en { flex: 1; }
+  .opt-k {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--gold-l); display: grid; place-items: center; flex-shrink: 0;
+    font-family: var(--f-en-h); font-weight: 600; color: var(--gold-d); transition: all .22s;
+  }
+  .opt.sel { border-color: var(--navy); box-shadow: 0 0 0 1px var(--navy); }
+  .opt.sel .opt-k { background: var(--navy); border-color: var(--navy); color: var(--gold); }
+  .opt.correct { border-color: var(--ok); background: var(--ok-l); box-shadow: none; }
+  .opt.correct .opt-k { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .opt.wrong { border-color: var(--err); background: var(--err-l); box-shadow: none; }
+  .opt.wrong .opt-k { background: var(--err); border-color: var(--err); color: #fff; }
+
+  /* =========================================================
+   * 10) التقدم والمستويات
+   * ========================================================= */
+  .bar { height: 4px; background: #ECE5D6; border-radius: 999px; overflow: hidden; margin: 12px 0; }
+  .bar > div { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--gold-d), var(--gold)); transition: width .8s var(--ease); }
+  .q-top { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--muted); }
+  .q-top b { font-family: var(--f-en-h); color: var(--navy); font-size: 19px; font-weight: 600; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--gold-l); background: #fff;
+    color: var(--navy); border-radius: 999px; padding: 4px 13px; font-size: 13px;
+  }
+  .chip .ic { width: 14px; height: 14px; color: var(--gold-d); }
+  .nav { display: flex; gap: 10px; margin-top: 4px; }
+  .nav .btn { flex: 1; }
+
+  .lvl { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 3px 11px; font-size: 12px; margin-top: 8px; white-space: nowrap; align-self: flex-start; }
+  .lvl .rn { font-family: var(--f-en-h); font-weight: 600; }
+  .lvl .ic { width: 12px; height: 12px; }
+  .lvl-1 { background: var(--gold-xl); color: #7A5F2E; }
+  .lvl-2 { background: #E8EDF4; color: var(--navy-2); }
+  .lvl-3 { background: var(--navy); color: var(--gold); }
+  .lvl-done { background: var(--ok-l); color: var(--ok); }
+
+  /* =========================================================
+   * 11) مقدمة الاختبار والنتائج
+   * ========================================================= */
+  .intro-ico {
+    width: 68px; height: 68px; border-radius: 50%; margin: 6px auto 18px; display: grid; place-items: center;
+    border: 1px solid var(--gold); color: var(--gold-d); box-shadow: 0 0 0 6px var(--gold-xl);
+  }
+  .intro-ico .ic { width: 28px; height: 28px; }
+  .meta-row { display: flex; justify-content: center; gap: 22px; margin-top: 16px; color: var(--muted); font-size: 13px; }
+  .meta-row b { display: block; font-family: var(--f-en-h); font-size: 22px; color: var(--navy); font-weight: 600; }
+  .steps-list { list-style: none; margin: 0; padding: 0; }
+  .steps-list li { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .steps-list li:last-child { border-bottom: 0; }
+  .steps-list .ic { width: 18px; height: 18px; color: var(--gold-d); margin-top: 4px; }
+
+  .hero-card {
+    position: relative; overflow: hidden; text-align: center; color: var(--ivory); border-radius: var(--r-lg);
+    padding: 30px 22px 26px; margin: 6px 0 14px; border: 1px solid rgba(201, 168, 106, .5); box-shadow: var(--sh-2);
+    background: radial-gradient(120% 90% at 50% 0%, #193761, var(--navy) 65%);
+  }
+  .hero-card h2 { color: #fff; }
+  .hero-card .eyebrow { color: var(--gold); }
+  .hero-card .score { font-family: var(--f-en-h); font-size: 54px; color: var(--gold); line-height: 1; margin: 18px 0 4px; direction: ltr; }
+  .hero-card .score small { font-size: 22px; color: rgba(250, 247, 240, .55); }
+  .hero-card p { color: rgba(250, 247, 240, .78); font-size: 15px; margin-top: 10px; }
+  .sheen::after {
+    content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 45%; pointer-events: none;
+    background: linear-gradient(105deg, transparent, rgba(232, 217, 181, .16), transparent);
+    animation: sheen 2.8s var(--ease) .5s 1 forwards;
+  }
+  @keyframes sheen { to { left: 130%; } }
+
+  .res-row { display: flex; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .res-row:first-child { padding-top: 2px; }
+  .res-row:last-child { border-bottom: 0; padding-bottom: 2px; }
+  .res-ico { width: 44px; height: 44px; border-radius: 12px; background: var(--navy); color: var(--gold); display: grid; place-items: center; flex-shrink: 0; }
+  .res-ico .ic { width: 21px; height: 21px; }
+  .res-txt { flex: 1; min-width: 0; }
+  .res-txt .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .res-txt b { font-family: var(--f-ar-h); color: var(--navy); font-weight: 600; }
+  .res-txt .en-sub { font-family: var(--f-en-h); font-style: italic; color: var(--muted); font-size: 13px; }
+  .res-txt small { display: block; color: var(--muted); font-size: 13px; margin-top: 6px; line-height: 1.6; }
+  .dots { display: flex; gap: 5px; direction: ltr; }
+  .dots i { width: 8px; height: 8px; border-radius: 50%; border: 1px solid var(--gold); display: block; }
+  .dots i.f { background: var(--gold); }
+  .note {
+    display: flex; gap: 12px; align-items: flex-start; margin: 14px 0; padding: 15px 16px; border-radius: 12px;
+    background: var(--gold-xl); border: 1px solid var(--gold-l); font-size: 14px; color: #5A4A2A;
+  }
+  .note .ic { width: 18px; height: 18px; color: var(--gold-d); margin-top: 3px; }
+
+  /* =========================================================
+   * 12) الصفحة الرئيسية
+   * ========================================================= */
+  .home-head {
+    position: relative; overflow: hidden; color: var(--ivory); border-radius: var(--r-lg); padding: 20px 20px 18px; margin-top: 4px;
+    border: 1px solid rgba(201, 168, 106, .45); box-shadow: var(--sh-2);
+    background: radial-gradient(130% 110% at 100% 0%, #193761, var(--navy) 60%);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .mini-mark { width: 34px; height: 34px; }
+  .brand .en-h { font-family: var(--f-en-h); font-style: italic; color: var(--gold); font-size: 15px; direction: ltr; }
+  .hello { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .home-head h2 { color: #fff; font-size: 23px; margin-top: 18px; }
+  .home-head .sub { color: rgba(250, 247, 240, .62); font-size: 14px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(201, 168, 106, .25); }
+  .stat { text-align: center; padding: 0 6px; }
+  .stat + .stat { border-inline-start: 1px solid rgba(201, 168, 106, .22); }
+  .stat .ic { width: 17px; height: 17px; color: var(--gold); }
+  .stat b { display: block; font-family: var(--f-en-h); font-size: 25px; font-weight: 500; color: #fff; line-height: 1.25; margin-top: 4px; }
+  .stat small { color: rgba(250, 247, 240, .58); font-size: 12px; }
+
+  .quote { text-align: center; padding: 24px 22px 20px; }
+  .quote .en { text-align: center; font-family: var(--f-en-h); font-style: italic; color: var(--navy); font-size: 18px; line-height: 1.6; }
+  .quote .ornament { margin: 12px auto; max-width: 160px; }
+  .quote p { color: var(--muted); font-size: 14px; }
+
+  .sec-title { display: flex; align-items: baseline; gap: 12px; margin: 30px 2px 14px; }
+  .sec-title h3 { font-size: 19px; white-space: nowrap; }
+  .sec-title .eyebrow { margin: 0; white-space: nowrap; }
+  .sec-title::after { content: ''; flex: 1; height: 1px; align-self: center; background: linear-gradient(270deg, var(--gold-l), transparent); }
+
+  .tracks { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (min-width: 600px) { .tracks { grid-template-columns: repeat(3, 1fr); } }
+  .track {
+    display: flex; flex-direction: column; gap: 1px; padding: 18px 16px 15px; text-align: right; cursor: pointer;
+    background: #fff; border: 1px solid var(--line); border-radius: var(--r); color: var(--text); font-family: var(--f-ar);
+    box-shadow: var(--sh-1), inset 0 2px 0 var(--gold); transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .track:hover { transform: translateY(-3px); box-shadow: var(--sh-2), inset 0 2px 0 var(--gold); }
+  .track:active { transform: translateY(-1px) scale(.99); }
+  .t-ico { width: 44px; height: 44px; border-radius: 12px; background: var(--navy); color: var(--gold); display: grid; place-items: center; margin-bottom: 14px; }
+  .t-ico .ic { width: 21px; height: 21px; }
+  .track b { font-family: var(--f-ar-h); font-size: 18px; font-weight: 600; color: var(--navy); }
+  .track .en-sub { font-family: var(--f-en-h); font-style: italic; font-size: 13px; color: var(--muted); }
+  .track .bar { margin: 14px 0 8px; }
+  .t-foot { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); }
+  .t-foot b { font-family: var(--f-en); font-size: 12px; font-weight: 600; color: var(--navy); }
+
+  .more-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (min-width: 600px) { .more-grid { grid-template-columns: repeat(4, 1fr); } }
+  .more {
+    display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 20px 12px 16px; text-align: center; cursor: pointer;
+    background: #fff; border: 1px solid var(--line); border-radius: var(--r); color: var(--text); font-family: var(--f-ar);
+    transition: border-color .25s, transform .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .more:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: var(--sh-1); }
+  .more .ic { width: 26px; height: 26px; color: var(--gold-d); margin-bottom: 4px; }
+  .more b { font-family: var(--f-ar-h); font-size: 15px; font-weight: 600; color: var(--navy); }
+  .more small { color: var(--muted); font-size: 12px; }
+
+  /* =========================================================
+   * 13) التحميل: الشاشة الافتتاحية + المؤشر + الهياكل
+   * ========================================================= */
+  .splash {
+    position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+    background: radial-gradient(100% 70% at 50% 30%, #193761, var(--navy) 65%); transition: opacity .7s var(--ease), visibility .7s;
+  }
+  .splash.hide { opacity: 0; visibility: hidden; }
+  .splash .emblem { width: 124px; height: 124px; margin: 0; animation: breathe 2.6s ease-in-out infinite; }
+  .splash-line { width: 150px; height: 1px; background: rgba(201, 168, 106, .2); overflow: hidden; position: relative; }
+  .splash-line::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: var(--gold); animation: slide 1.5s var(--ease) infinite; }
+  @keyframes slide { from { transform: translateX(-120%); } to { transform: translateX(320%); } }
+  @keyframes breathe { 50% { opacity: .8; transform: scale(.985); } }
+
+  .loader {
+    position: fixed; inset: 0; z-index: 900; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+    background: rgba(250, 247, 240, .8); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    color: var(--navy); font-size: 15px; opacity: 0; pointer-events: none; transition: opacity .25s;
+  }
+  .loader.show { opacity: 1; pointer-events: auto; }
+  .ring { position: relative; width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--gold-l); border-top-color: var(--gold); animation: spin 1.1s linear infinite; }
+  .ring::after { content: ''; position: absolute; inset: 7px; border-radius: 50%; border: 1px solid transparent; border-bottom-color: var(--navy); animation: spin 1.7s linear infinite reverse; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .sk { background: linear-gradient(90deg, #F0EBDF 0%, #F9F6EF 45%, #F0EBDF 90%); background-size: 220% 100%; animation: shimmer 1.5s ease-in-out infinite; border-radius: 8px; }
+  @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+  .sk-line { height: 13px; margin: 12px 0; }
+  .w30 { width: 30%; } .w50 { width: 50%; } .w70 { width: 70%; } .w90 { width: 90%; }
+  .sk-opt { height: 52px; border-radius: 12px; margin-top: 10px; }
+  .sk-head { height: 210px; border-radius: var(--r-lg); margin-top: 4px; }
+  .sk-quote { height: 120px; border-radius: var(--r); margin: 14px 0; }
+  .sk-track { height: 172px; border-radius: var(--r); }
+  .sk-more { height: 110px; border-radius: var(--r); }
+  .sk-ico { width: 44px; height: 44px; border-radius: 12px; }
+
+  /* =========================================================
+   * 14) الرسائل المنبثقة + تأثير الاحتفال الذهبي
+   * ========================================================= */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; z-index: 950; transform: translate(-50%, 18px); opacity: 0; pointer-events: none;
+    display: flex; gap: 12px; align-items: flex-start; width: max-content; max-width: min(92vw, 460px);
+    padding: 14px 18px; border-radius: 12px; font-size: 14.5px; line-height: 1.65;
+    background: var(--navy); color: var(--ivory); border: 1px solid rgba(201, 168, 106, .35); border-inline-start: 3px solid var(--gold);
+    box-shadow: 0 14px 34px -10px rgba(11, 31, 58, .5); transition: opacity .3s var(--ease), transform .35s var(--ease);
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast .ic { width: 18px; height: 18px; color: var(--gold); margin-top: 2px; }
+  .toast.err { border-inline-start-color: #B4596B; }
+  .toast.err .ic { color: #D9A3AE; }
+  .toast.ok { border-inline-start-color: #5E9C82; }
+  .toast.ok .ic { color: #93C6AE; }
+
+  .shimmer-fx { position: fixed; inset: 0; pointer-events: none; z-index: 999; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+</style>
+
+</head>
+<body>
+
+  <!-- ============ الشاشة الافتتاحية ============ -->
+  <div id="splash" class="splash">
+    <svg class="emblem" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" direction="ltr" aria-hidden="true">
+      <defs>
+        <linearGradient id="eg1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#E8D6A8"/><stop offset=".5" stop-color="#C9A86A"/><stop offset="1" stop-color="#A88A4E"/>
+        </linearGradient>
+        <path id="ep1" d="M 26,100 A 74,74 0 1,1 174,100 A 74,74 0 1,1 26,100"/>
+      </defs>
+      <circle cx="100" cy="100" r="97" fill="none" stroke="url(#eg1)" stroke-width="1.4"/>
+      <circle cx="100" cy="100" r="91" fill="none" stroke="url(#eg1)" stroke-width=".5"/>
+      <text font-family="Inter, sans-serif" font-size="8.6" font-weight="500" fill="#C9A86A" direction="ltr">
+        <textPath href="#ep1" xlink:href="#ep1" textLength="458" lengthAdjust="spacing">ENGLISH LANGUAGE CLUB · SELF-LEARNING PLATFORM ·</textPath>
+      </text>
+      <circle cx="100" cy="100" r="62" fill="#0B1F3A" stroke="url(#eg1)" stroke-width="1.2"/>
+      <circle cx="100" cy="100" r="56" fill="none" stroke="url(#eg1)" stroke-width=".45"/>
+      <text x="100" y="109" text-anchor="middle" font-family="Playfair Display, Georgia, serif" font-style="italic" font-size="31" fill="url(#eg1)" direction="ltr">ELC</text>
+      <line x1="80" y1="119" x2="120" y2="119" stroke="#C9A86A" stroke-width=".6"/>
+      <path d="M100 115.5 l3 3.5 -3 3.5 -3 -3.5z" fill="#C9A86A"/>
+      <text x="100" y="134" text-anchor="middle" font-family="Inter, sans-serif" font-size="6.5" letter-spacing="2.4" fill="#C9A86A" direction="ltr">MMXXVI</text>
+    </svg>
+    <div class="splash-line"></div>
+  </div>
+
+  <!-- مؤشر التحميل -->
+  <div id="loader" class="loader"><div class="ring"></div><div id="loader-text">جارٍ التحميل</div></div>
+  <!-- الرسائل المنبثقة -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <main class="app">
+
+    <!-- ================= الترحيب ================= -->
+    <section class="screen" id="scr-welcome">
+      <div class="hero">
+        <svg class="emblem" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" direction="ltr" aria-hidden="true">
+          <defs>
+            <linearGradient id="eg2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#E8D6A8"/><stop offset=".5" stop-color="#C9A86A"/><stop offset="1" stop-color="#A88A4E"/>
+            </linearGradient>
+            <path id="ep2" d="M 26,100 A 74,74 0 1,1 174,100 A 74,74 0 1,1 26,100"/>
+          </defs>
+          <circle cx="100" cy="100" r="97" fill="none" stroke="url(#eg2)" stroke-width="1.4"/>
+          <circle cx="100" cy="100" r="91" fill="none" stroke="url(#eg2)" stroke-width=".5"/>
+          <text font-family="Inter, sans-serif" font-size="8.6" font-weight="500" fill="#C9A86A" direction="ltr">
+            <textPath href="#ep2" xlink:href="#ep2" textLength="458" lengthAdjust="spacing">ENGLISH LANGUAGE CLUB · SELF-LEARNING PLATFORM ·</textPath>
+          </text>
+          <circle cx="100" cy="100" r="62" fill="#0B1F3A" stroke="url(#eg2)" stroke-width="1.2"/>
+          <circle cx="100" cy="100" r="56" fill="none" stroke="url(#eg2)" stroke-width=".45"/>
+          <text x="100" y="109" text-anchor="middle" font-family="Playfair Display, Georgia, serif" font-style="italic" font-size="31" fill="url(#eg2)" direction="ltr">ELC</text>
+          <line x1="80" y1="119" x2="120" y2="119" stroke="#C9A86A" stroke-width=".6"/>
+          <path d="M100 115.5 l3 3.5 -3 3.5 -3 -3.5z" fill="#C9A86A"/>
+          <text x="100" y="134" text-anchor="middle" font-family="Inter, sans-serif" font-size="6.5" letter-spacing="2.4" fill="#C9A86A" direction="ltr">MMXXVI</text>
+        </svg>
+        <h1>منصة اللغة الإنجليزية للتعلم الذاتي</h1>
+        <div class="en-title" dir="ltr">English Language Club</div>
+        <div class="ornament"><span></span><svg viewBox="0 0 10 10"><path d="M5 0 L10 5 L5 10 L0 5Z" fill="currentColor"/></svg><span></span></div>
+        <p class="tagline">بيئة تعلّم ذاتي متكاملة لإتقان اللغة الإنجليزية بثقة</p>
+      </div>
+
+      <div class="card">
+        <ul class="features">
+          <li><div class="f-ico"><span data-i="compass"></span></div>
+            <div><b>تحديد المستوى</b><small>اختبار قصير يحدد مستواكِ في كل مهارة على حدة.</small></div></li>
+          <li><div class="f-ico"><span data-i="layers"></span></div>
+            <div><b>ستة مسارات تعليمية</b><small>القراءة، والكتابة، والاستماع، والتحدث، والقواعد، والمفردات.</small></div></li>
+          <li><div class="f-ico"><span data-i="target"></span></div>
+            <div><b>الاستعداد لاختبار STEP</b><small>بنك أسئلة واختبارات محاكية مع تقارير تفصيلية.</small></div></li>
+          <li><div class="f-ico"><span data-i="award"></span></div>
+            <div><b>متابعة الإنجاز</b><small>نقاط وأوسمة وشهادات إتمام تحمل اسم النادي.</small></div></li>
+        </ul>
+      </div>
+
+      <button class="btn primary" onclick="showScreen('register')">إنشاء حساب جديد</button>
+      <button class="btn ghost" onclick="showScreen('login')">تسجيل الدخول</button>
+
+      <div class="foot">الثانوية التاسعة عشر<br><span class="en-inline">English Language Club · Est. 2026</span></div>
+    </section>
+
+    <!-- ================= تسجيل جديد ================= -->
+    <section class="screen" id="scr-register">
+      <button class="back" onclick="showScreen('welcome')"><span data-i="arrowRight"></span>رجوع</button>
+      <div class="page-head">
+        <span class="eyebrow">New Account</span>
+        <h2>إنشاء حساب جديد</h2>
+        <p>يُرجى استكمال البيانات التالية للبدء.</p>
+      </div>
+      <div class="card form">
+        <label>الاسم الأول واسم العائلة</label>
+        <input id="reg-name" autocomplete="off" placeholder="مثال: نورة أحمد">
+        <small class="hint"><span data-i="info"></span>سيُستخدم هذا الاسم لتسجيل الدخول؛ يُرجى الاحتفاظ به كما هو.</small>
+
+        <label>هل أنتِ من منسوبات الثانوية التاسعة عشر؟</label>
+        <div class="pills" id="reg-in">
+          <button class="pill" data-v="yes">نعم</button>
+          <button class="pill" data-v="no">لا</button>
+        </div>
+
+        <label>الصفة</label>
+        <div class="roles" id="reg-roles"></div>
+
+        <div id="reg-grade-box" hidden>
+          <label>الصف الدراسي</label>
+          <div class="pills" id="reg-grades"></div>
+        </div>
+        <div id="reg-section-box" hidden>
+          <label>الشعبة</label>
+          <div class="pills" id="reg-sections"></div>
+        </div>
+        <div id="reg-other-box" hidden>
+          <label>يُرجى تحديد الصفة</label>
+          <input id="reg-other" placeholder="مثال: خريجة، معلمة من مدرسة أخرى">
+        </div>
+
+        <label>الرقم السري (أربعة أرقام)</label>
+        <input id="reg-pin" class="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="····">
+        <label>تأكيد الرقم السري</label>
+        <input id="reg-pin2" class="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="····">
+        <small class="hint"><span data-i="lock"></span>يُرجى عدم مشاركة الرقم السري مع أي شخص.</small>
+
+        <button class="btn primary" style="margin-top:24px" onclick="submitRegister()">إنشاء الحساب</button>
+      </div>
+      <p class="center muted small">لديكِ حساب مسبقاً؟ <a class="link" onclick="showScreen('login')">تسجيل الدخول</a></p>
+    </section>
+
+    <!-- ================= تسجيل الدخول ================= -->
+    <section class="screen" id="scr-login">
+      <button class="back" onclick="showScreen('welcome')"><span data-i="arrowRight"></span>رجوع</button>
+      <div class="page-head">
+        <span class="eyebrow">Sign In</span>
+        <h2>تسجيل الدخول</h2>
+        <p>أهلاً بعودتكِ. أدخلي بياناتكِ لمتابعة التعلّم من حيث توقفتِ.</p>
+      </div>
+      <div class="card form">
+        <label>الاسم كما سُجّل</label>
+        <input id="login-name" autocomplete="off" placeholder="الاسم الأول واسم العائلة">
+        <label>الرقم السري</label>
+        <input id="login-pin" class="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="····">
+        <button class="btn primary" style="margin-top:24px" onclick="submitLogin()">دخول</button>
+      </div>
+      <p class="center muted small">ليس لديكِ حساب؟ <a class="link" onclick="showScreen('register')">إنشاء حساب جديد</a></p>
+      <p class="center muted small" style="margin-top:8px">في حال نسيان الرقم السري، يُرجى التواصل مع مشرفة النادي.</p>
+    </section>
+
+    <!-- ================= مقدمة تحديد المستوى ================= -->
+    <section class="screen" id="scr-placement-intro">
+      <div class="card center">
+        <div class="intro-ico"><span data-i="compass"></span></div>
+        <span class="eyebrow">Placement Assessment</span>
+        <h2>اختبار تحديد المستوى</h2>
+        <p class="muted" style="margin-top:8px">اختبار قصير يحدد نقطة البداية المناسبة لكِ في كل مسار.</p>
+        <div class="meta-row">
+          <div><b>12</b>سؤالاً</div>
+          <div><b>6</b>مهارات</div>
+          <div><b>10</b>دقائق تقريباً</div>
+        </div>
+      </div>
+      <div class="card">
+        <ul class="steps-list">
+          <li><span data-i="target"></span><span>لا يوجد نجاح أو رسوب؛ الغرض تحديد مستواكِ في كل مهارة على حدة.</span></li>
+          <li><span data-i="volume"></span><span>يُرجى رفع مستوى الصوت عند أسئلة الاستماع.</span></li>
+          <li><span data-i="globe"></span><span>يمكنكِ عرض الترجمة العربية لأي سؤال عند الحاجة.</span></li>
+          <li><span data-i="pause"></span><span>في حال الخروج قبل الإنهاء، تُستأنف الأسئلة من حيث توقفتِ.</span></li>
+        </ul>
+        <div id="pi-accent"></div>
+      </div>
+      <button class="btn primary" onclick="startPlacement()">بدء الاختبار<span data-i="arrowLeft"></span></button>
+    </section>
+
+    <!-- ================= أسئلة تحديد المستوى ================= -->
+    <section class="screen" id="scr-placement"><div id="pl-body"></div></section>
+
+    <!-- ================= نتيجة تحديد المستوى ================= -->
+    <section class="screen" id="scr-placement-result"><div id="pr-body"></div></section>
+
+    <!-- ================= الصفحة الرئيسية ================= -->
+    <section class="screen" id="scr-home">
+      <div id="home-head"></div>
+      <div id="home-quote"></div>
+      <div class="sec-title"><h3>المسارات التعليمية</h3><span class="eyebrow">Learning Tracks</span></div>
+      <div class="tracks stagger" id="home-tracks"></div>
+      <div class="sec-title"><h3>الأقسام</h3><span class="eyebrow">Resources</span></div>
+      <div class="more-grid stagger" id="home-more"></div>
+      <div class="foot">English Language Club · الثانوية التاسعة عشر</div>
+    </section>
+
+    <!-- شاشات المراحل القادمة تُضاف هنا تلقائياً -->
+    <div id="extra-screens"></div>
+  </main>
+
+  <!-- App.html — المنطق الأساسي للواجهة -->
+<script>
+/* =========================================================
+ * ✏️ 1) نصوص يمكنكِ تعديلها
+ * ========================================================= */
+
+// حِكَم الصفحة الرئيسية (تظهر واحدة عشوائياً عند كل زيارة)
+const HOME_QUOTES = [
+  { en: 'Little by little, one travels far.',          ar: 'خطوة بعد خطوة، يبلغ المرء غايته.' },
+  { en: 'Practice is the best of all instructors.',    ar: 'الممارسة خير معلّم.' },
+  { en: 'The expert in anything was once a beginner.', ar: 'كل خبير كان يوماً ما مبتدئاً.' },
+  { en: 'Consistency is the key to mastery.',          ar: 'الاستمرارية مفتاح الإتقان.' },
+  { en: 'Learning never exhausts the mind.',           ar: 'التعلّم لا يُرهق العقل أبداً.' }
+];
+
+// أيقونات الأدوار والمسارات (أسماء من قائمة ICONS بالأسفل)
+const ROLE_ICONS  = { student: 'cap', teacher: 'board', staff: 'briefcase', parent: 'users', other: 'dots' };
+const TRACK_ICONS = { reading: 'book', writing: 'feather', listening: 'headphones',
+                      speaking: 'mic', grammar: 'layers', vocabulary: 'type' };
+const ROMAN = { 1: 'I', 2: 'II', 3: 'III' };
+
+// أقسام "الأقسام" في الصفحة الرئيسية — تُفعَّل في المراحل القادمة
+const MORE = [
+  { icon: 'target',  ar: 'التدريب على STEP', sub: 'تدريب واختبارات محاكية', fn: 'openStep' },
+  { icon: 'rotate',  ar: 'أخطائي',           sub: 'مراجعة الأسئلة السابقة', fn: 'openMistakes' },
+  { icon: 'chart',   ar: 'لوحة الشرف',       sub: 'ترتيب المتميزات',         fn: 'openLeaderboard' },
+  { icon: 'award',   ar: 'شهاداتي',          sub: 'شهادات الإتمام',          fn: 'openCertificates' }
+];
+
+
+/* =========================================================
+ * 2) الأيقونات الخطية (نمط موحّد: خط رفيع بدون تعبئة)
+ * ========================================================= */
+const ICONS = {
+  book:        '<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/>',
+  feather:     '<path d="M20.2 12.2a6 6 0 0 0-8.5-8.5L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/>',
+  headphones:  '<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>',
+  mic:         '<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/>',
+  layers:      '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+  type:        '<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>',
+  compass:     '<circle cx="12" cy="12" r="10"/><polygon points="16.2 7.8 14.1 14.1 7.8 16.2 9.9 9.9 16.2 7.8"/>',
+  target:      '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  award:       '<circle cx="12" cy="8" r="6"/><polyline points="8.2 13.2 7 22 12 19 17 22 15.8 13.2"/>',
+  chart:       '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/>',
+  rotate:      '<polyline points="1 4 1 10 7 10"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/>',
+  volume:      '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.1 4.9a10 10 0 0 1 0 14.2M15.5 8.5a5 5 0 0 1 0 7"/>',
+  globe:       '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+  play:        '<polygon points="6 4 20 12 6 20 6 4"/>',
+  pause:       '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>',
+  clock:       '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  check:       '<polyline points="20 6 9 17 4 12"/>',
+  checkCircle: '<path d="M22 11.1V12a10 10 0 1 1-5.9-9.1"/><polyline points="22 4 12 14 9 11"/>',
+  x:           '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  arrowRight:  '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+  arrowLeft:   '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+  logout:      '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+  flame:       '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  star:        '<polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/>',
+  trending:    '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+  lock:        '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  info:        '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+  alert:       '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+  cap:         '<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2.7 9 2.7 12 0v-5"/><line x1="22" y1="10" x2="22" y2="16"/>',
+  board:       '<line x1="2" y1="3" x2="22" y2="3"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><polyline points="7 21 12 16 17 21"/>',
+  briefcase:   '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  users:       '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+  dots:        '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>'
+};
+
+function icon(name) {
+  return `<span class="ic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg></span>`;
+}
+// تحويل كل <span data-i="..."> في الصفحة إلى أيقونة
+function hydrateIcons(root) {
+  (root || document).querySelectorAll('[data-i]').forEach(el => { el.outerHTML = icon(el.dataset.i); });
+}
+// شعار مصغّر للرأس
+function miniMark() {
+  return `<svg class="mini-mark" viewBox="0 0 40 40" aria-hidden="true">
+    <circle cx="20" cy="20" r="19" fill="none" stroke="#C9A86A" stroke-width=".8"/>
+    <circle cx="20" cy="20" r="16" fill="none" stroke="#C9A86A" stroke-width=".4"/>
+    <text x="20" y="24.5" text-anchor="middle" direction="ltr" font-family="Playfair Display, Georgia, serif"
+      font-style="italic" font-size="12" fill="#C9A86A">ELC</text></svg>`;
+}
+function ornament() {
+  return `<div class="ornament"><span></span><svg viewBox="0 0 10 10"><path d="M5 0 L10 5 L5 10 L0 5Z" fill="currentColor"/></svg><span></span></div>`;
+}
+
+
+/* =========================================================
+ * 3) الحالة العامة + أدوات
+ * ========================================================= */
+const S = {
+  token: null, user: null, progress: {}, percent: {}, config: null, accent: 'en-US', screen: null,
+  reg: { inSchool: null, role: null, grade: null, section: null },
+  pl: { questions: [], idx: 0, answers: {} },
+  texts: []
+};
+
+const $ = (sel, el) => (el || document).querySelector(sel);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g,
+  c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+function store(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
+function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+// استدعاء دالة من الخادم وإرجاع Promise
+// - داخل رابط Google: عبر google.script.run
+// - على الرابط المستقل (GitHub Pages): عبر بوابة Api.gs باستخدام window.ELC_API_URL
+function call(fn, ...args) {
+  const onAuth = r => { clearSession(); showScreen('welcome'); toast(r.error, 'err'); };
+  if (window.google && google.script && google.script.run) {
+    return new Promise((resolve, reject) => {
+      google.script.run
+        .withSuccessHandler(r => { if (r && r.code === 'AUTH') { onAuth(r); reject(r); } else resolve(r); })
+        .withFailureHandler(e => reject({ ok: false, error: 'تعذّر الاتصال بالخادم. ' + (e && e.message ? e.message : e) }))[fn](...args);
+    });
+  }
+  const url = window.ELC_API_URL || '';
+  if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) {
+    return Promise.reject({ ok: false, error: 'لم يُضبط رابط الخادم في ملف الواجهة (ELC_API_URL).' });
+  }
+  return fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) })
+    .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+    .then(r => { if (r && r.code === 'AUTH') { onAuth(r); throw r; } return r; })
+    .catch(e => { if (e && e.code === 'AUTH') throw e; throw { ok: false, error: 'تعذّر الاتصال بالخادم. يُرجى التحقق من الاتصال بالإنترنت ثم المحاولة مجدداً.' }; });
+}
+
+// الانتقال بين الشاشات (تلاشٍ وانزلاق ناعم)
+let screenSeq = 0;
+function showScreen(id) {
+  const next = $('#scr-' + id);
+  if (!next) return;
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  S.screen = id;
+  const seq = ++screenSeq;
+  const cur = document.querySelector('.screen.active');
+  const enter = () => {
+    if (seq !== screenSeq) return;
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active', 'leave'));
+    next.classList.add('active');
+    window.scrollTo(0, 0);
+  };
+  if (cur && cur !== next) { cur.classList.add('leave'); setTimeout(enter, 170); }
+  else enter();
+}
+
+function loading(on, text) {
+  $('#loader').classList.toggle('show', !!on);
+  if (text) $('#loader-text').textContent = text;
+}
+function hideSplash() {
+  const s = $('#splash');
+  if (!s || s.classList.contains('hide')) return;
+  s.classList.add('hide');
+  setTimeout(() => s.remove(), 800);
+}
+
+let toastTimer;
+function toast(msg, type) {
+  const t = $('#toast');
+  t.innerHTML = icon(type === 'err' ? 'alert' : type === 'ok' ? 'checkCircle' : 'info') + `<span>${esc(msg)}</span>`;
+  t.className = 'toast show ' + (type || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = 'toast ' + (type || ''), 3600);
+}
+
+// تأثير احتفالي هادئ: جسيمات ذهبية متلألئة
+function goldShimmer() {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = document.createElement('canvas');
+  c.className = 'shimmer-fx'; document.body.appendChild(c);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2), W = innerWidth, H = innerHeight;
+  c.width = W * dpr; c.height = H * dpr; c.style.width = W + 'px'; c.style.height = H + 'px';
+  const ctx = c.getContext('2d'); ctx.scale(dpr, dpr);
+  const N = Math.round(Math.min(90, W / 5));
+  const ps = Array.from({ length: N }, () => ({
+    x: W * (.1 + Math.random() * .8), y: H * (.3 + Math.random() * .6), r: .6 + Math.random() * 1.7,
+    vy: -(.25 + Math.random() * .7), vx: (Math.random() - .5) * .3,
+    ph: Math.random() * Math.PI * 2, sp: .04 + Math.random() * .07, delay: Math.random() * 45
+  }));
+  const T = 210; let t = 0;
+  (function frame() {
+    ctx.clearRect(0, 0, W, H);
+    const fade = t < 30 ? t / 30 : (t > T - 60 ? Math.max(0, (T - t) / 60) : 1);
+    ps.forEach(p => {
+      if (t < p.delay) return;
+      p.x += p.vx; p.y += p.vy; p.ph += p.sp;
+      const a = (.3 + .7 * Math.abs(Math.sin(p.ph))) * fade;
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+      g.addColorStop(0, `rgba(240,226,190,${a})`);
+      g.addColorStop(.35, `rgba(201,168,106,${a * .55})`);
+      g.addColorStop(1, 'rgba(201,168,106,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2); ctx.fill();
+    });
+    if (++t < T) requestAnimationFrame(frame); else c.remove();
+  })();
+}
+// اسم بديل حتى تعمل المراحل القادمة بنفس الاستدعاء
+const confetti = goldShimmer;
+
+
+/* =========================================================
+ * 4) النطق والترجمة (تُستخدم في كل المنصة)
+ * ========================================================= */
+function speak(text, accent, rate) {
+  if (!('speechSynthesis' in window)) { toast('المتصفح الحالي لا يدعم خاصية النطق. يُنصح باستخدام Google Chrome.', 'err'); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = accent || S.accent;
+  u.rate = rate || 0.9;
+  const voices = speechSynthesis.getVoices();
+  const v = voices.find(x => x.lang === u.lang) || voices.find(x => x.lang.replace('_', '-').indexOf(u.lang) === 0);
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+if ('speechSynthesis' in window) { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); }
+
+// نص إنجليزي مع زر استماع وزر ترجمة
+function textBlock(en, ar) {
+  const i = S.texts.push({ en, ar }) - 1;
+  return `<div class="tb">
+    <div class="tb-en en">${esc(en)}</div>
+    <div class="tb-tools">
+      <button class="tool" onclick="speakText(${i})">${icon('volume')}استماع</button>
+      ${ar ? `<button class="tool" onclick="toggleTr(${i}, this)">${icon('globe')}<span>ترجمة</span></button>` : ''}
+    </div>
+    ${ar ? `<div class="tb-ar" id="tr-${i}" hidden>${esc(ar)}</div>` : ''}
+  </div>`;
+}
+// مقطع استماع (النص مخفي)
+function audioBlock(text) {
+  const i = S.texts.push({ en: text }) - 1;
+  return `<div class="audio-box">
+    <button class="play" onclick="speakText(${i})" aria-label="تشغيل">${icon('play')}</button>
+    <div><b>مقطع استماع</b><small>استمعي إلى المقطع ثم اختاري الإجابة الصحيحة.</small>
+      <button class="tool" onclick="speakText(${i}, .65)">${icon('clock')}تشغيل بطيء</button>
+      ${accentPicker()}</div></div>`;
+}
+function speakText(i, rate) { if (S.texts[i]) speak(S.texts[i].en, null, rate); }
+function toggleTr(i, btn) {
+  const el = $('#tr-' + i); if (!el) return;
+  el.hidden = !el.hidden;
+  btn.classList.toggle('on', !el.hidden);
+  btn.querySelector('span:last-child').textContent = el.hidden ? 'ترجمة' : 'إخفاء الترجمة';
+}
+
+// اختيار النطق (الأمريكي / البريطاني)
+function accentPicker() {
+  return `<div class="accent"><span>النطق</span><div class="seg">
+    <button class="${S.accent === 'en-US' ? 'active' : ''}" onclick="setAccent('en-US')">الأمريكي <small>US</small></button>
+    <button class="${S.accent === 'en-GB' ? 'active' : ''}" onclick="setAccent('en-GB')">البريطاني <small>UK</small></button>
+  </div></div>`;
+}
+function setAccent(a) {
+  S.accent = a; store('elc_accent', a);
+  document.querySelectorAll('.accent').forEach(el => el.outerHTML = accentPicker());
+  speak(a === 'en-US' ? 'This is the American accent.' : 'This is the British accent.', a);
+}
+
+// شارة المستوى
+function lvlChip(level, done) {
+  if (done) return `<span class="lvl lvl-done">${icon('check')}مكتمل</span>`;
+  const L = (S.config.levels || {})[level] || {};
+  return `<span class="lvl lvl-${level}"><span class="rn">${ROMAN[level] || level}</span>${esc(L.ar || '')} · <span class="en-inline">${L.cefr || ''}</span></span>`;
+}
+
+
+/* =========================================================
+ * 5) الهياكل المؤقتة أثناء التحميل
+ * ========================================================= */
+function skeletonHome() {
+  $('#home-head').innerHTML = '<div class="sk sk-head"></div>';
+  $('#home-quote').innerHTML = '<div class="sk sk-quote"></div>';
+  $('#home-tracks').innerHTML = Array(6).fill('<div class="sk sk-track"></div>').join('');
+  $('#home-more').innerHTML = Array(4).fill('<div class="sk sk-more"></div>').join('');
+}
+function skeletonPlacement() {
+  return `<div class="q-top"><div class="sk sk-line w30"></div><div class="sk sk-line w30"></div></div>
+    <div class="sk" style="height:4px;margin:12px 0"></div>
+    <div class="card flat"><div class="sk sk-line w90"></div><div class="sk sk-line w70"></div>
+      <div class="sk sk-line w50" style="margin-bottom:22px"></div>
+      ${Array(4).fill('<div class="sk sk-opt"></div>').join('')}</div>`;
+}
+
+
+/* =========================================================
+ * 6) بدء التشغيل
+ * ========================================================= */
+window.addEventListener('load', boot);
+
+async function boot() {
+  hydrateIcons();
+  S.accent = load('elc_accent') || 'en-US';
+  try {
+    S.config = await call('getAppConfig');
+    initRegister();
+    S.token = load('elc_token');
+    if (S.token) {
+      skeletonHome(); showScreen('home'); hideSplash();
+      const h = await call('getHomeData', S.token);
+      if (h.ok) {
+        applyHome(h);
+        await routeAfterLogin();
+        if (h.newDay && S.user.streak > 1) toast(`أحسنتِ، لقد واصلتِ التعلّم ${S.user.streak} أيام متتالية.`, 'ok');
+        return;
+      }
+    }
+    showScreen('welcome');
+  } catch (e) {
+    showScreen('welcome');
+    if (e && e.code !== 'AUTH') toast(e.error || 'تعذّر الاتصال بالخادم.', 'err');
+  } finally {
+    hideSplash();
+  }
+}
+
+function applyHome(h) { S.user = h.user; S.progress = h.progress || {}; S.percent = h.percent || {}; }
+function onLoggedIn(r) { S.token = r.token; store('elc_token', r.token); S.user = r.user; S.progress = r.progress || {}; }
+function clearSession() { S.token = null; S.user = null; store('elc_token', null); }
+
+async function refreshHome() {
+  const h = await call('getHomeData', S.token);
+  if (h.ok) applyHome(h);
+  return h;
+}
+
+// توجيه المستخدمة بعد الدخول (استكمال من حيث توقفت)
+async function routeAfterLogin() {
+  if (!S.user.placementDone) {
+    const r = S.user.resume;
+    if (r && r.screen === 'placement') await startPlacement(r);
+    else { $('#pi-accent').innerHTML = accentPicker(); showScreen('placement-intro'); }
+    return;
+  }
+  renderHome(); showScreen('home');
+  // المرحلة 3 تضيف دالة resumeLearning لاستكمال الدرس الأخير
+  if (typeof window.resumeLearning === 'function') window.resumeLearning(S.user.resume);
+}
+
+
+/* =========================================================
+ * 7) التسجيل
+ * ========================================================= */
+function initRegister() {
+  const c = S.config;
+  $('#reg-roles').innerHTML = Object.keys(c.roles).map(k =>
+    `<button class="role" data-v="${k}">${icon(ROLE_ICONS[k] || 'dots')}<span>${esc(c.roles[k])}</span></button>`).join('');
+  $('#reg-grades').innerHTML = Object.keys(c.grades).map(k =>
+    `<button class="pill" data-v="${k}">${esc(c.grades[k].ar)}</button>`).join('');
+  bindPills('#reg-in', v => { S.reg.inSchool = v; updateRegVis(); });
+  bindPills('#reg-roles', v => { S.reg.role = v; updateRegVis(); });
+  bindPills('#reg-grades', v => { S.reg.grade = v; S.reg.section = null; renderSections(); updateRegVis(); });
+  $('#login-pin').addEventListener('keydown', e => { if (e.key === 'Enter') submitLogin(); });
+}
+
+function bindPills(sel, cb) {
+  $(sel).onclick = e => {
+    const b = e.target.closest('[data-v]'); if (!b) return;
+    $(sel).querySelectorAll('[data-v]').forEach(x => x.classList.toggle('active', x === b));
+    cb(b.dataset.v);
+  };
+}
+
+function renderSections() {
+  const g = S.config.grades[S.reg.grade];
+  $('#reg-sections').innerHTML = g ? Array.from({ length: g.sections }, (_, i) =>
+    `<button class="pill sq" data-v="${i + 1}">${i + 1}</button>`).join('') : '';
+  bindPills('#reg-sections', v => S.reg.section = v);
+}
+
+function updateRegVis() {
+  const R = S.reg;
+  $('#reg-grade-box').hidden = R.role !== 'student';
+  $('#reg-section-box').hidden = !(R.role === 'student' && R.inSchool === 'yes' && R.grade);
+  $('#reg-other-box').hidden = R.role !== 'other';
+}
+
+async function submitRegister() {
+  const R = S.reg;
+  const name = $('#reg-name').value.trim().replace(/\s+/g, ' ');
+  const pin = $('#reg-pin').value.trim(), pin2 = $('#reg-pin2').value.trim();
+  const other = $('#reg-other').value.trim();
+
+  if (name.split(' ').length < 2) return toast('يُرجى إدخال الاسم الأول واسم العائلة.', 'err');
+  if (!R.inSchool) return toast('يُرجى تحديد ما إذا كنتِ من منسوبات المدرسة.', 'err');
+  if (!R.role) return toast('يُرجى اختيار الصفة.', 'err');
+  if (R.role === 'student' && !R.grade) return toast('يُرجى اختيار الصف الدراسي.', 'err');
+  if (R.role === 'student' && R.inSchool === 'yes' && !R.section) return toast('يُرجى اختيار الشعبة.', 'err');
+  if (R.role === 'other' && other.length < 2) return toast('يُرجى كتابة الصفة.', 'err');
+  if (!/^\d{4}$/.test(pin)) return toast('يجب أن يتكوّن الرقم السري من أربعة أرقام.', 'err');
+  if (pin !== pin2) return toast('الرقمان السريان غير متطابقين.', 'err');
+
+  loading(true, 'جارٍ إنشاء الحساب');
+  try {
+    const r = await call('registerUser', {
+      name, inSchool: R.inSchool, role: R.role, grade: R.role === 'student' ? R.grade : '',
+      section: R.section || '', roleOther: other, pin
+    });
+    if (!r.ok) return toast(r.error, 'err');
+    onLoggedIn(r);
+    toast(`تم إنشاء الحساب بنجاح. مرحباً بكِ، ${r.user.firstName}.`, 'ok');
+    await routeAfterLogin();
+  } catch (e) { if (e.code !== 'AUTH') toast(e.error, 'err'); }
+  finally { loading(false); }
+}
+
+
+/* =========================================================
+ * 8) الدخول والخروج
+ * ========================================================= */
+async function submitLogin() {
+  const name = $('#login-name').value.trim(), pin = $('#login-pin').value.trim();
+  if (!name || !/^\d{4}$/.test(pin)) return toast('يُرجى إدخال الاسم والرقم السري المكوّن من أربعة أرقام.', 'err');
+  loading(true, 'جارٍ تسجيل الدخول');
+  try {
+    const r = await call('loginUser', name, pin);
+    if (!r.ok) return toast(r.error, 'err');
+    onLoggedIn(r);
+    await refreshHome();
+    $('#login-pin').value = '';
+    toast(`مرحباً بعودتكِ، ${S.user.firstName}.`, 'ok');
+    await routeAfterLogin();
+  } catch (e) { if (e.code !== 'AUTH') toast(e.error, 'err'); }
+  finally { loading(false); }
+}
+
+function logout() {
+  if (!confirm('هل ترغبين في تسجيل الخروج؟')) return;
+  const t = S.token;
+  clearSession();
+  if (t) call('logoutUser', t).catch(() => {});
+  showScreen('welcome');
+  toast('تم تسجيل الخروج بنجاح.');
+}
+
+
+/* =========================================================
+ * 9) اختبار تحديد المستوى
+ * ========================================================= */
+async function startPlacement(resume) {
+  showScreen('placement');
+  $('#pl-body').innerHTML = skeletonPlacement();
+  try {
+    const r = await call('getPlacementTest', S.token);
+    if (!r.ok) { toast(r.error, 'err'); return goHome(); }
+    if (!r.questions.length) {
+      toast('لم تُضف أسئلة تحديد المستوى بعد. يُرجى التواصل مع مشرفة النادي.', 'err');
+      $('#pi-accent').innerHTML = accentPicker();
+      return showScreen('placement-intro');
+    }
+    S.pl = { questions: r.questions, idx: 0, answers: {} };
+    if (resume && resume.answers) {
+      S.pl.answers = resume.answers;
+      S.pl.idx = Math.min(resume.idx || 0, r.questions.length - 1);
+    }
+    renderPlacementQ();
+  } catch (e) {
+    if (e.code !== 'AUTH') { toast(e.error, 'err'); $('#pi-accent').innerHTML = accentPicker(); showScreen('placement-intro'); }
+  }
+}
+
+function renderPlacementQ() {
+  S.texts = [];
+  const P = S.pl, q = P.questions[P.idx], n = P.questions.length;
+  const t = S.config.tracks[q.track] || {};
+  const sel = P.answers[q.id];
+  const last = P.idx === n - 1;
+  $('#pl-body').innerHTML = `
+    <div class="q-top">
+      <span class="chip">${icon(TRACK_ICONS[q.track] || 'book')}${esc(t.ar || '')}</span>
+      <span>السؤال <b>${P.idx + 1}</b> من ${n}</span>
+    </div>
+    <div class="bar"><div style="width:${(P.idx / n) * 100}%"></div></div>
+    <div class="card">
+      ${q.audioText ? audioBlock(q.audioText) : ''}
+      ${textBlock(q.prompt, q.promptAr)}
+      <div class="opts">${q.options.map(o => `
+        <button class="opt ${sel === o.key ? 'sel' : ''}" data-k="${o.key}" onclick="pickPl('${o.key}')">
+          <span class="opt-k">${o.key}</span><span class="en">${esc(o.text)}</span></button>`).join('')}
+      </div>
+    </div>
+    <div class="nav">
+      ${P.idx > 0 ? `<button class="btn ghost" onclick="movePl(-1)">${icon('arrowRight')}السابق</button>` : ''}
+      <button class="btn primary" id="pl-next" ${sel ? '' : 'disabled'} onclick="movePl(1)">
+        ${last ? 'إنهاء الاختبار' + icon('check') : 'التالي' + icon('arrowLeft')}</button>
+    </div>`;
+}
+
+function pickPl(k) {
+  S.pl.answers[S.pl.questions[S.pl.idx].id] = k;
+  document.querySelectorAll('#pl-body .opt').forEach(b => b.classList.toggle('sel', b.dataset.k === k));
+  $('#pl-next').disabled = false;
+}
+
+function movePl(d) {
+  const P = S.pl;
+  if (d > 0 && P.idx === P.questions.length - 1) return finishPlacement();
+  P.idx = Math.max(0, Math.min(P.questions.length - 1, P.idx + d));
+  renderPlacementQ();
+  window.scrollTo(0, 0);
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  // حفظ نقطة الاستكمال بصمت
+  call('saveResumeState', S.token, { screen: 'placement', idx: P.idx, answers: P.answers }).catch(() => {});
+}
+
+async function finishPlacement() {
+  const P = S.pl;
+  const missing = P.questions.filter(q => !P.answers[q.id]).length;
+  if (missing) return toast(`تبقّى ${missing} من الأسئلة دون إجابة.`, 'err');
+  loading(true, 'جارٍ احتساب النتيجة');
+  try {
+    const r = await call('submitPlacement', S.token, P.answers);
+    if (!r.ok) return toast(r.error, 'err');
+    S.user.placementDone = true; S.user.resume = null;
+    renderPlacementResult(r);
+    showScreen('placement-result');
+    setTimeout(goldShimmer, 350);
+    refreshHome().catch(() => {});
+  } catch (e) { if (e.code !== 'AUTH') toast(e.error, 'err'); }
+  finally { loading(false); }
+}
+
+function renderPlacementResult(r) {
+  const tracks = S.config.tracks;
+  const pct = r.total ? Math.round(r.totalCorrect / r.total * 100) : 0;
+  const head = pct >= 75 ? 'أداء متميز' : pct >= 40 ? 'بداية موفّقة' : 'نقطة انطلاق واضحة';
+  $('#pr-body').innerHTML = `
+    <div class="hero-card sheen">
+      <span class="eyebrow">Placement Complete</span>
+      <h2>${head}</h2>
+      <div class="score">${r.totalCorrect}<small> / ${r.total}</small></div>
+      <p>حُدّد مستواكِ في كل مسار بناءً على إجاباتكِ، وستبدئين كل مسار من المستوى الملائم لكِ.</p>
+    </div>
+    <div class="card stagger">
+      ${Object.keys(tracks).map(k => {
+        const t = tracks[k], x = r.results[k];
+        const dots = Array.from({ length: x.total }, (_, i) => `<i class="${i < x.correct ? 'f' : ''}"></i>`).join('');
+        return `<div class="res-row">
+          <div class="res-ico">${icon(TRACK_ICONS[k] || 'book')}</div>
+          <div class="res-txt">
+            <div class="top"><div><b>${esc(t.ar)}</b> <span class="en-sub">${t.en}</span></div><div class="dots">${dots}</div></div>
+            ${lvlChip(x.level)}
+            <small>${esc(x.message)}</small>
+          </div></div>`;
+      }).join('')}
+    </div>
+    <div class="note">${icon('info')}<span>المستوى ليس ثابتاً؛ عند تحقيق ${S.config.passPercent}% أو أكثر في اختبار نهاية المستوى تنتقلين إلى المستوى التالي.</span></div>
+    <button class="btn primary" onclick="goHome()">الانتقال إلى المسارات${icon('arrowLeft')}</button>`;
+}
+
+
+/* =========================================================
+ * 10) الصفحة الرئيسية
+ * ========================================================= */
+function goHome() {
+  renderHome(); showScreen('home');
+  refreshHome().then(() => { if (S.screen === 'home') renderHome(); }).catch(() => {});
+}
+
+function totalLevels() {
+  return Object.values(S.progress || {}).reduce((s, p) => s + (Number(p.levelsAdvanced) || 0), 0);
+}
+
+function renderHome() {
+  const u = S.user, c = S.config;
+  if (!u) return;
+  const sub = u.role === 'student' ? `${u.gradeAr}${u.section ? ' — الشعبة ' + u.section : ''}`
+            : (u.role === 'other' ? u.roleOther : u.roleAr);
+  $('#home-head').innerHTML = `<div class="home-head">
+    <div class="hello">
+      <div class="brand">${miniMark()}<span class="en-h">English Language Club</span></div>
+      <button class="icon-btn" onclick="logout()" title="تسجيل الخروج" aria-label="تسجيل الخروج">${icon('logout')}</button>
+    </div>
+    <h2>مرحباً، ${esc(u.firstName)}</h2>
+    <div class="sub">${esc(sub)}</div>
+    <div class="stats">
+      <div class="stat">${icon('flame')}<b>${u.streak}</b><small>أيام متتالية</small></div>
+      <div class="stat">${icon('star')}<b>${u.points}</b><small>نقطة</small></div>
+      <div class="stat">${icon('trending')}<b>${totalLevels()}</b><small>مستويات مُجتازة</small></div>
+    </div>
+    ${accentPicker()}
+  </div>`;
+
+  const q = pick(HOME_QUOTES);
+  $('#home-quote').innerHTML = `<div class="card quote"><div class="en">“${esc(q.en)}”</div>${ornament()}<p>${esc(q.ar)}</p></div>`;
+
+  $('#home-tracks').innerHTML = Object.keys(c.tracks).map(k => {
+    const t = c.tracks[k], p = S.progress[k] || { level: 1 }, pc = S.percent[k] || 0;
+    return `<button class="track" onclick="openTrack('${k}')">
+      <div class="t-ico">${icon(TRACK_ICONS[k] || 'book')}</div>
+      <b>${esc(t.ar)}</b><span class="en-sub">${t.en}</span>
+      ${lvlChip(p.level, p.completed)}
+      <div class="bar"><div style="width:${pc}%"></div></div>
+      <div class="t-foot"><span>نسبة الإنجاز</span><b>${pc}%</b></div></button>`;
+  }).join('');
+
+  $('#home-more').innerHTML = MORE.map(m =>
+    `<button class="more" onclick="${m.fn}()">${icon(m.icon)}<b>${m.ar}</b><small>${m.sub}</small></button>`).join('');
+}
+
+/* أقسام تُفعَّل في المراحل القادمة (ستُستبدل تلقائياً) */
+window.openTrack        = window.openTrack        || (k => toast('ستُتاح دروس هذا المسار قريباً.'));
+window.openStep         = window.openStep         || (() => toast('سيُتاح قسم التدريب على اختبار STEP قريباً.'));
+window.openMistakes     = window.openMistakes     || (() => toast('سيُتاح قسم «أخطائي» قريباً.'));
+window.openLeaderboard  = window.openLeaderboard  || (() => toast('ستُتاح لوحة الشرف قريباً.'));
+window.openCertificates = window.openCertificates || (() => toast('سيُتاح قسم الشهادات قريباً.'));
+</script>
+
+  <!-- ملفات المراحل القادمة تُضاف تحت هذا السطر -->
+  <!-- Lesson.html — المرحلة 3: صفحة المسار + الدرس + الأسئلة + اختبار المستوى -->
+<style>
+  /* ---------- رأس المسار ---------- */
+  .track-hero {
+    position: relative; overflow: hidden; color: var(--ivory); border-radius: var(--r-lg); padding: 22px 20px 18px; margin-top: 8px;
+    border: 1px solid rgba(201, 168, 106, .45); box-shadow: var(--sh-2);
+    background: radial-gradient(130% 110% at 100% 0%, #193761, var(--navy) 60%);
+  }
+  .th-row { display: flex; gap: 16px; align-items: center; }
+  .t-ico.lg { width: 58px; height: 58px; border-radius: 14px; margin: 0; border: 1px solid rgba(201, 168, 106, .5); background: rgba(255, 255, 255, .03); }
+  .t-ico.lg .ic { width: 26px; height: 26px; }
+  .track-hero .eyebrow { color: var(--gold); margin-bottom: 2px; }
+  .track-hero h2 { color: #fff; font-size: 24px; }
+  .track-hero .bar { background: rgba(255, 255, 255, .12); margin: 18px 0 8px; }
+  .th-meta { display: flex; justify-content: space-between; font-size: 13px; color: rgba(250, 247, 240, .65); }
+  .th-meta b { font-family: var(--f-en); color: #fff; font-weight: 600; }
+
+  /* ---------- تبويبات المستويات ---------- */
+  .lv-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 22px 0 6px; }
+  .lv-tab {
+    position: relative; display: flex; flex-direction: column; align-items: center; gap: 0; padding: 12px 6px 10px; cursor: pointer;
+    background: #fff; border: 1px solid var(--line); border-radius: 12px; font-family: var(--f-ar); color: var(--muted); transition: all .22s var(--ease);
+  }
+  .lv-tab .rn { font-family: var(--f-en-h); font-size: 20px; font-weight: 600; color: var(--navy); line-height: 1.3; }
+  .lv-tab span:not(.rn) { font-size: 13px; }
+  .lv-tab .st-ic { position: absolute; top: 8px; left: 8px; color: var(--gold-d); }
+  .lv-tab .st-ic .ic { width: 13px; height: 13px; }
+  .lv-tab:hover { border-color: var(--gold); }
+  .lv-tab.active { background: var(--navy); border-color: var(--navy); color: rgba(250, 247, 240, .75); box-shadow: inset 0 -2px 0 var(--gold); }
+  .lv-tab.active .rn { color: var(--gold); }
+  .lv-tab.locked { opacity: .6; }
+
+  .lv-summary { display: flex; justify-content: space-between; align-items: center; margin: 18px 2px 10px; font-size: 13px; color: var(--muted); }
+  .lv-summary b { font-family: var(--f-ar-h); color: var(--navy); font-size: 17px; font-weight: 600; }
+
+  /* ---------- قائمة الدروس ---------- */
+  .lesson-row {
+    display: flex; align-items: center; gap: 14px; width: 100%; padding: 16px; margin-bottom: 10px; cursor: pointer; text-align: right;
+    background: #fff; border: 1px solid var(--line); border-radius: var(--r); font-family: var(--f-ar); color: var(--text);
+    box-shadow: var(--sh-1); transition: transform .25s var(--ease), box-shadow .25s, border-color .25s;
+  }
+  .lesson-row:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--sh-2); border-color: var(--gold-l); }
+  .lesson-row:disabled { cursor: default; opacity: .55; box-shadow: none; }
+  .ln { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--gold-l); display: grid; place-items: center; flex-shrink: 0;
+        font-family: var(--f-en-h); font-weight: 600; color: var(--gold-d); font-size: 15px; }
+  .lesson-row.done .ln { background: var(--navy); border-color: var(--navy); color: var(--gold); }
+  .lt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .lt .en { font-family: var(--f-en-h); font-size: 16.5px; font-weight: 600; color: var(--navy); line-height: 1.4; }
+  .lt span { font-size: 14px; color: var(--text); }
+  .lt small { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .ls-ic { color: var(--gold-d); }
+  .lesson-row.done .ls-ic { color: var(--ok); }
+
+  .test-card { background: #fff; border: 1px solid var(--gold-l); border-radius: var(--r); padding: 18px; margin-top: 18px;
+               box-shadow: var(--sh-1), inset 0 2px 0 var(--gold); }
+  .tc-head { display: flex; gap: 14px; align-items: center; }
+  .tc-head > .ic { width: 26px; height: 26px; color: var(--gold-d); }
+  .tc-head b { display: block; font-family: var(--f-ar-h); color: var(--navy); font-weight: 600; font-size: 17px; }
+  .tc-head small { color: var(--muted); font-size: 13px; }
+  .test-card.passed .tc-head > .ic { color: var(--ok); }
+  .empty { text-align: center; padding: 36px 16px; color: var(--muted); border: 1px dashed var(--field); border-radius: var(--r); background: #fff; }
+  .empty .ic { width: 30px; height: 30px; color: var(--gold-d); margin-bottom: 8px; }
+
+  /* ---------- الدرس ---------- */
+  .ls-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .stepper { display: flex; align-items: center; gap: 8px; margin: 18px 0 6px; }
+  .st { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted-2); white-space: nowrap; }
+  .st i { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--field); display: grid; place-items: center;
+          font-style: normal; font-family: var(--f-en-h); font-size: 13px; color: var(--muted-2); background: #fff; }
+  .st i .ic { width: 13px; height: 13px; }
+  .st.cur { color: var(--navy); font-weight: 500; }
+  .st.cur i { background: var(--navy); border-color: var(--navy); color: var(--gold); }
+  .st.done { color: var(--gold-d); }
+  .st.done i { border-color: var(--gold); color: var(--gold-d); }
+  .st-line { flex: 1; height: 1px; background: var(--line); min-width: 12px; }
+
+  .lesson-card h2.en-h2 { font-family: var(--f-en-h); font-size: 26px; direction: ltr; text-align: left; color: var(--navy); }
+  .lesson-card .ar-title { color: var(--muted); font-size: 15px; margin-top: 2px; }
+  .audio-row { display: flex; gap: 16px; align-items: flex-start; padding: 16px; margin: 4px 0 20px; background: var(--ivory);
+               border: 1px solid var(--gold-l); border-radius: 12px; }
+  .audio-row b { display: block; font-family: var(--f-ar-h); color: var(--navy); font-weight: 600; }
+  .audio-row small { display: block; color: var(--muted); font-size: 13px; }
+  .audio-row .tb-tools { margin-top: 10px; }
+  .passage { font-size: 17.5px; line-height: 1.95; color: var(--text); }
+  .passage p { margin: 0 0 14px; }
+  .sent { cursor: pointer; border-radius: 4px; padding: 1px 0; transition: background .2s, color .2s; }
+  .sent:hover { background: var(--gold-xl); }
+  .sent.speaking { background: var(--gold-l); color: var(--navy); }
+
+  .vocab { display: grid; gap: 10px; margin-top: 14px; }
+  .vw { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: #fff; }
+  .vw-top { display: flex; align-items: center; gap: 12px; }
+  .vw-say { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--gold-l); background: #fff; color: var(--gold-d);
+            display: grid; place-items: center; cursor: pointer; flex-shrink: 0; transition: all .2s; }
+  .vw-say:hover { background: var(--navy); border-color: var(--navy); color: var(--gold); }
+  .vw-say .ic { width: 15px; height: 15px; }
+  .vw-top b.en { font-family: var(--f-en-h); font-size: 18px; font-weight: 600; color: var(--navy); }
+  .vw-ar { margin-inline-start: auto; color: var(--muted); font-size: 14px; }
+  .vw-ex { margin-top: 10px; font-style: italic; color: #3A3A42; cursor: pointer; font-size: 15px; }
+  .vw-ex:hover { color: var(--navy); }
+  .vw-exar { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+
+  details.peek { background: #fff; border: 1px solid var(--line); border-radius: 12px; margin: 14px 0 0; }
+  details.peek summary { cursor: pointer; padding: 12px 16px; display: flex; gap: 8px; align-items: center; color: var(--navy); font-size: 14px; list-style: none; }
+  details.peek summary::-webkit-details-marker { display: none; }
+  details.peek summary .ic { width: 16px; height: 16px; color: var(--gold-d); }
+  details.peek .passage { font-size: 15px; padding: 0 16px 14px; white-space: pre-line; }
+
+  /* ---------- التغذية الراجعة ---------- */
+  .opt:disabled { cursor: default; }
+  .opt:disabled:hover { box-shadow: none; }
+  .opt > .ic { width: 18px; height: 18px; }
+  .opt.correct > .ic { color: var(--ok); }
+  .opt.wrong > .ic { color: var(--err); }
+  .opt.checking { animation: pulse 1.1s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 4px rgba(201, 168, 106, .25); } }
+  .fb { margin-top: 18px; padding: 16px 18px; border-radius: 12px; border: 1px solid; animation: enter .45s var(--ease); }
+  .fb.ok { background: var(--ok-l); border-color: #CFE2D7; }
+  .fb.bad { background: var(--err-l); border-color: #EBD2D8; }
+  .fb-head { display: flex; gap: 8px; align-items: center; font-family: var(--f-ar-h); font-weight: 600; font-size: 16px; }
+  .fb.ok .fb-head { color: var(--ok); }
+  .fb.bad .fb-head { color: var(--err); }
+  .fb-ans { margin-top: 8px; font-size: 14px; }
+  .fb-ans .en-inline { font-weight: 600; color: var(--navy); }
+  .fb p { margin-top: 8px; font-size: 14.5px; color: #3A3A42; }
+  .fb small { display: block; margin-top: 8px; color: var(--muted); font-size: 12.5px; }
+
+  /* ---------- الملخص والاختبار ---------- */
+  .sum-row { display: flex; gap: 12px; align-items: flex-start; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+  .sum-row:last-child { border-bottom: 0; }
+  .sum-row > .ic { width: 18px; height: 18px; margin-top: 3px; }
+  .sum-row.ok > .ic { color: var(--ok); }
+  .sum-row.bad > .ic { color: var(--err); }
+  .sum-row .en { flex: 1; }
+  .test-banner { text-align: center; padding: 16px 0 6px; }
+  .test-banner h3 { font-size: 20px; }
+  .test-banner small { color: var(--muted); }
+  .hero-card.neutral { background: #fff; color: var(--text); border-color: var(--gold-l); }
+  .hero-card.neutral h2 { color: var(--navy); }
+  .hero-card.neutral .eyebrow { color: var(--gold-d); }
+  .hero-card.neutral p { color: var(--muted); }
+  .hero-card.neutral .score { color: var(--navy); }
+  .hero-card.neutral .score small { color: var(--muted-2); }
+
+  /* ---------- المرحلة 4: بطاقة القاعدة + دروس الاستماع ---------- */
+  .rule-card .rule-body { white-space: pre-line; font-size: 15px; color: #33333B; line-height: 1.95; margin-top: 6px; }
+  .ex-list { display: grid; gap: 8px; margin-top: 16px; }
+  .ex { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--ivory); }
+  .ex .en { font-size: 16px; color: var(--navy); font-weight: 500; }
+  .ex small { display: block; color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+  .listen-hero { text-align: center; padding: 28px 18px 22px; margin: 4px 0 16px; background: var(--ivory); border: 1px solid var(--gold-l); border-radius: 14px; }
+  .listen-hero .play.xl { width: 78px; height: 78px; margin: 0 auto 16px; }
+  .listen-hero .play.xl .ic { width: 28px; height: 28px; }
+  .listen-hero b { display: block; font-family: var(--f-ar-h); color: var(--navy); font-weight: 600; font-size: 18px; }
+  .listen-hero small { display: block; color: var(--muted); font-size: 13.5px; max-width: 360px; margin: 4px auto 0; }
+  .listen-hero .tb-tools, .listen-hero .accent { justify-content: center; }
+  details.peek .tb-tools { padding: 0 16px 14px; margin-top: 0; }
+  details.peek .tb-ar { margin: 0 16px 14px; }
+  .passage p { white-space: pre-line; }
+  .fb.neutral { background: var(--ivory); border-color: var(--line); }
+  .fb.neutral .fb-head { color: var(--navy); }
+</style>
+
+<script>
+/* =========================================================
+ * ✏️ رسائل التشجيع — يمكنكِ تعديلها
+ * ========================================================= */
+const CORRECT_MSGS = [
+  'إجابة صحيحة. أحسنتِ.',
+  'ممتاز، إجابة دقيقة.',
+  'أحسنتِ، استمري على هذا المستوى.',
+  'إجابة موفّقة، فهمٌ واضح.',
+  'صحيح تماماً. تقدّم رائع.'
+];
+const WRONG_MSGS = [
+  'إجابة غير صحيحة.',
+  'ليست الإجابة الصحيحة هذه المرة.',
+  'قريبة، لكنها غير صحيحة.'
+];
+const LESSON_RESULT = [
+  { min: 1,   head: 'أداء كامل',      msg: 'أتقنتِ هذا الدرس بالكامل. عمل متميز.' },
+  { min: .8,  head: 'أداء متميز',     msg: 'فهمٌ ممتاز للدرس، مع ملاحظات بسيطة للمراجعة.' },
+  { min: .6,  head: 'أداء جيد',       msg: 'أحسنتِ. يمكنكِ مراجعة الأسئلة التي أخطأتِ فيها من قسم «أخطائي».' },
+  { min: 0,   head: 'خطوة في الطريق', msg: 'الأخطاء جزء طبيعي من التعلّم. يُنصح بإعادة قراءة النص ثم المحاولة مجدداً.' }
+];
+
+
+/* =========================================================
+ * إضافة شاشات هذه المرحلة
+ * ========================================================= */
+document.getElementById('extra-screens').insertAdjacentHTML('beforeend', `
+  <section class="screen" id="scr-track"><div id="tr-body"></div></section>
+  <section class="screen" id="scr-lesson"><div id="ls-body"></div></section>
+  <section class="screen" id="scr-test"><div id="lt-body"></div></section>
+`);
+
+S.mode = 'lesson';   // 'lesson' أو 'test'
+S.tr = null;         // المسار المفتوح
+S.ls = null;         // الدرس المفتوح
+S.lt = null;         // اختبار المستوى الجاري
+
+
+/* =========================================================
+ * حفظ نقطة الاستكمال
+ * ========================================================= */
+function saveResume(state) {
+  if (S.user) S.user.resume = state;
+  if (S.token) call('saveResumeState', S.token, state).catch(() => {});
+}
+function saveLessonResume() {
+  const L = S.ls;
+  if (!L || L.step === 'done') return;
+  const res = {};
+  Object.keys(L.results).forEach(k => res[k] = L.results[k].correct ? 1 : 0);
+  saveResume({ screen: 'lesson', track: L.lesson.track, lessonId: L.lesson.id, step: L.step, idx: L.idx, results: res });
+}
+
+// تُستدعى تلقائياً بعد الدخول لاستكمال آخر نشاط
+window.resumeLearning = function (r) {
+  if (!r) return;
+  if (r.screen === 'lesson' && r.lessonId) { toast('تمت متابعة الدرس من حيث توقفتِ.'); openLesson(r.lessonId, r); }
+  else if (r.screen === 'track' && r.track && S.config.tracks[r.track]) openTrack(r.track);
+};
+
+// عند العودة للرئيسية نحفظ ذلك أيضاً
+const _goHomeBase = goHome;
+goHome = function () { S.mode = 'lesson'; stopSpeech(); saveResume({ screen: 'home' }); _goHomeBase(); };
+
+
+/* =========================================================
+ * النطق مع تظليل الجملة الجاري قراءتها
+ * ========================================================= */
+function utter(text, rate) {
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = S.accent; u.rate = rate || 0.9;
+  const vs = speechSynthesis.getVoices();
+  const v = vs.find(x => x.lang === u.lang) || vs.find(x => x.lang.replace('_', '-').indexOf(u.lang) === 0);
+  if (v) u.voice = v;
+  return u;
+}
+function stopSpeech() {
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  document.querySelectorAll('.sent.speaking').forEach(e => e.classList.remove('speaking'));
+}
+function playPassage(rate) {
+  if (!('speechSynthesis' in window)) return speak('');
+  stopSpeech();
+  document.querySelectorAll('#ls-body .passage .sent').forEach(el => {
+    const u = utter(el.textContent, rate);
+    u.onstart = () => { document.querySelectorAll('.sent.speaking').forEach(e => e.classList.remove('speaking')); el.classList.add('speaking'); };
+    u.onend = () => el.classList.remove('speaking');
+    speechSynthesis.speak(u);
+  });
+}
+function speakSent(el) {
+  if (!('speechSynthesis' in window)) return speak('');
+  stopSpeech();
+  const u = utter(el.textContent);
+  u.onstart = () => el.classList.add('speaking');
+  u.onend = () => el.classList.remove('speaking');
+  speechSynthesis.speak(u);
+}
+// تقسيم الفقرة إلى جمل (مع حماية الاختصارات مثل Ms. و a.m.)
+function splitSentences(pg) {
+  const D = '\u2024';
+  const safe = pg.replace(/\b(?:Mr|Mrs|Ms|Dr|St)\.|\b[ap]\.m\./gi, m => m.replace(/\./g, D));
+  const parts = safe.match(/[^.!?]+[.!?]+["'”’)]*\s*|[^.!?]+$/g) || [safe];
+  return parts.map(s => s.split(D).join('.'));
+}
+
+
+/* =========================================================
+ * صفحة المسار
+ * ========================================================= */
+window.openTrack = async function (track) {
+  S.mode = 'lesson';
+  if (!S.tr || S.tr.track !== track) S.tr = { track, data: null, view: null };
+  showScreen('track');
+  $('#tr-body').innerHTML = skeletonTrack();
+  saveResume({ screen: 'track', track });
+  try {
+    const r = await call('getTrackData', S.token, track);
+    if (!r.ok) { toast(r.error, 'err'); return goHome(); }
+    S.tr.data = r;
+    if (!S.tr.view) S.tr.view = r.progress.completed ? 3 : r.progress.level;
+    S.progress[track] = r.progress; S.percent[track] = r.percent;
+    renderTrack();
+  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); goHome(); } }
+};
+
+function backToTrack() { stopSpeech(); openTrack(S.tr ? S.tr.track : (S.ls && S.ls.lesson.track)); }
+function viewLevel(l) { S.tr.view = l; renderTrack(); }
+
+function skeletonTrack() {
+  return `<div class="sk sk-line w30"></div><div class="sk sk-head" style="height:170px"></div>
+    <div class="lv-tabs">${Array(3).fill('<div class="sk" style="height:68px;border-radius:12px"></div>').join('')}</div>
+    ${Array(3).fill('<div class="sk" style="height:78px;border-radius:14px;margin-bottom:10px"></div>').join('')}`;
+}
+
+function renderTrack() {
+  const d = S.tr.data, k = d.track, t = S.config.tracks[k], p = d.progress, view = S.tr.view;
+  const lessons = d.levels[view] || [];
+  const locked = !p.completed && view > p.level;
+  const doneCount = lessons.filter(x => x.completed).length;
+  const allDone = lessons.length > 0 && doneCount === lessons.length;
+
+  const tabs = [1, 2, 3].map(l => {
+    const lk = !p.completed && l > p.level, passed = p.completed || l < p.level;
+    return `<button class="lv-tab ${view === l ? 'active' : ''} ${lk ? 'locked' : ''}" onclick="viewLevel(${l})">
+      <span class="st-ic">${lk ? icon('lock') : passed ? icon('check') : ''}</span>
+      <span class="rn">${ROMAN[l]}</span><span>${esc(S.config.levels[l].ar)}</span></button>`;
+  }).join('');
+
+  const list = !lessons.length
+    ? `<div class="empty">${icon('book')}<p>لم تُضف دروس لهذا المستوى بعد.</p></div>`
+    : lessons.map((x, i) => `
+      <button class="lesson-row ${x.completed ? 'done' : ''}" data-id="${esc(x.id)}" ${locked ? 'disabled' : ''} onclick="openLesson(this.dataset.id)">
+        <span class="ln">${String(i + 1).padStart(2, '0')}</span>
+        <span class="lt"><b class="en">${esc(x.title)}</b><span>${esc(x.titleAr)}</span>
+          <small>${x.topicAr ? esc(x.topicAr) + ' · ' : ''}${x.minutes} دقائق تقريباً</small></span>
+        <span class="ls-ic">${locked ? icon('lock') : x.completed ? icon('checkCircle') : icon('arrowLeft')}</span>
+      </button>`).join('');
+
+  let test;
+  if (p.completed || view < p.level) {
+    test = `<div class="test-card passed"><div class="tc-head">${icon('award')}<div><b>اختبار نهاية المستوى</b><small>اجتزتِ هذا المستوى بنجاح.</small></div></div></div>`;
+  } else if (locked) {
+    test = `<div class="test-card"><div class="tc-head">${icon('lock')}<div><b>اختبار نهاية المستوى</b><small>يُتاح بعد اجتياز المستوى السابق.</small></div></div></div>`;
+  } else {
+    const ready = allDone && d.testCounts[view] > 0;
+    test = `<div class="test-card"><div class="tc-head">${icon('target')}<div><b>اختبار نهاية المستوى</b>
+      <small>${d.testCounts[view]} أسئلة · نسبة الاجتياز ${d.passPercent}%</small></div></div>
+      <button class="btn ${ready ? 'primary' : 'ghost'}" ${ready ? '' : 'disabled'} onclick="startLevelTest()">
+        ${ready ? 'بدء الاختبار' + icon('arrowLeft') : 'يُتاح بعد إكمال جميع دروس المستوى'}</button></div>`;
+  }
+
+  $('#tr-body').innerHTML = `
+    <button class="back" onclick="goHome()">${icon('arrowRight')}الصفحة الرئيسية</button>
+    <div class="track-hero">
+      <div class="th-row"><div class="t-ico lg">${icon(TRACK_ICONS[k] || 'book')}</div>
+        <div><span class="eyebrow">${t.en} Track</span><h2>مسار ${esc(t.ar)}</h2></div></div>
+      <div class="bar"><div style="width:${d.percent}%"></div></div>
+      <div class="th-meta"><span>${p.completed ? 'مسار مكتمل' : 'المستوى الحالي: ' + esc(S.config.levels[p.level].ar)}</span><span>نسبة الإنجاز <b>${d.percent}%</b></span></div>
+    </div>
+    <div class="lv-tabs">${tabs}</div>
+    <div class="lv-summary"><b>دروس المستوى ${ROMAN[view]}</b><span>${doneCount} من ${lessons.length} مكتملة</span></div>
+    <div class="stagger">${list}</div>
+    ${test}`;
+}
+
+
+/* =========================================================
+ * الدرس
+ * ========================================================= */
+window.openLesson = async function (id, resume) {
+  S.mode = 'lesson';
+  stopSpeech();
+  showScreen('lesson');
+  $('#ls-body').innerHTML = skeletonLesson();
+  try {
+    const r = await call('getLesson', S.token, id);
+    if (!r.ok) { toast(r.error, 'err'); return (S.tr && S.tr.data) ? showScreen('track') : goHome(); }
+    S.ls = { lesson: r.lesson, questions: r.questions, step: 'text', idx: 0, results: {}, busy: false };
+    if (resume && resume.lessonId === id) {
+      S.ls.step = resume.step === 'quiz' && r.questions.length ? 'quiz' : 'text';
+      S.ls.idx = Math.min(resume.idx || 0, Math.max(0, r.questions.length - 1));
+      Object.keys(resume.results || {}).forEach(k => S.ls.results[k] = { correct: resume.results[k] === 1, restored: true });
+    }
+    if (!S.tr || S.tr.track !== r.lesson.track) S.tr = { track: r.lesson.track, data: null, view: r.lesson.level };
+    renderLesson();
+    saveLessonResume();
+  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); goHome(); } }
+};
+
+function skeletonLesson() {
+  return `<div class="sk sk-line w30"></div><div class="sk" style="height:30px;margin:18px 0;border-radius:8px"></div>
+    <div class="card flat"><div class="sk sk-line w50"></div><div class="sk sk-line w30"></div>
+    <div class="sk" style="height:86px;border-radius:12px;margin:18px 0"></div>
+    ${Array(5).fill('<div class="sk sk-line w90"></div>').join('')}</div>`;
+}
+
+function renderLesson() {
+  S.texts = [];
+  const step = S.ls.step;
+  $('#ls-body').innerHTML = lessonHeader() + (step === 'text' ? lessonTextHTML() : step === 'quiz' ? lessonQuizHTML() : lessonDoneHTML());
+}
+
+function lessonHeader() {
+  const L = S.ls.lesson, t = S.config.tracks[L.track];
+  const steps = ['text', 'quiz', 'done'], names = { text: 'النص', quiz: 'الأسئلة', done: 'النتيجة' };
+  const cur = steps.indexOf(S.ls.step);
+  return `<div class="ls-top"><button class="back" onclick="backToTrack()">${icon('arrowRight')}مسار ${esc(t.ar)}</button>
+      <span class="chip">${icon(TRACK_ICONS[L.track] || 'book')}المستوى ${ROMAN[L.level]} · الدرس ${L.index} من ${L.count}</span></div>
+    <div class="stepper">${steps.map((s, i) =>
+      `<div class="st ${i < cur ? 'done' : ''} ${i === cur ? 'cur' : ''}"><i>${i < cur ? icon('check') : i + 1}</i><span>${names[s]}</span></div>`
+    ).join('<span class="st-line"></span>')}</div>`;
+}
+
+function lessonTextHTML() {
+  const L = S.ls.lesson;
+  const paras = L.text.split(/\n\s*\n/).map(pg =>
+    '<p>' + splitSentences(pg).map(s => `<span class="sent" onclick="speakSent(this)">${esc(s)}</span>`).join('') + '</p>').join('');
+  const trI = S.texts.push({ en: L.text, ar: L.textAr }) - 1;
+
+  const vocab = (L.vocab || []).length ? `
+    <div class="card">
+      <span class="eyebrow">Key Vocabulary</span><div class="card-title">مفردات الدرس</div>
+      <div class="vocab">${L.vocab.map(v => {
+        const a = S.texts.push({ en: v.word }) - 1, b = S.texts.push({ en: v.example }) - 1;
+        return `<div class="vw"><div class="vw-top">
+            <button class="vw-say" onclick="speakText(${a})" aria-label="نطق الكلمة">${icon('volume')}</button>
+            <b class="en">${esc(v.word)}</b><span class="vw-ar">${esc(v.meaning)}</span></div>
+          ${v.example ? `<div class="vw-ex en" onclick="speakText(${b})">${esc(v.example)}</div><div class="vw-exar">${esc(v.exampleAr)}</div>` : ''}
+        </div>`;
+      }).join('')}</div>
+    </div>` : '';
+
+  const hasQ = S.ls.questions.length > 0;
+  const head = `
+      <span class="eyebrow">${L.topicAr ? esc(L.topicAr) + ' · ' : ''}${L.minutes} دقائق تقريباً</span>
+      <h2 class="en-h2">${esc(L.title)}</h2>
+      <div class="ar-title">${esc(L.titleAr)}</div>
+      <div class="rule"></div>`;
+  const nextBtn = `
+    <button class="btn primary" onclick="${hasQ ? 'goQuiz()' : 'finishLesson()'}">
+      ${hasQ ? 'الانتقال إلى الأسئلة' + icon('arrowLeft') : 'إكمال الدرس' + icon('check')}</button>`;
+
+  // دروس الاستماع: الصوت أولاً، والنص المكتوب مخفي
+  if (L.track === 'listening') {
+    return `
+    <div class="card lesson-card">${head}
+      <div class="listen-hero">
+        <button class="play xl" onclick="playPassage()" aria-label="تشغيل المقطع">${icon('play')}</button>
+        <b>استمعي إلى المقطع</b>
+        <small>يُنصح بالاستماع مرتين على الأقل قبل الانتقال إلى الأسئلة. يمكنكِ عرض النص المكتوب عند الحاجة.</small>
+        <div class="tb-tools">
+          <button class="tool" onclick="playPassage(.7)">${icon('clock')}تشغيل بطيء</button>
+          <button class="tool" onclick="stopSpeech()">${icon('pause')}إيقاف</button>
+        </div>${accentPicker()}
+      </div>
+      <details class="peek"><summary>${icon('book')}عرض النص المكتوب</summary>
+        <div class="passage en">${paras}</div>
+        ${L.textAr ? `<div class="tb-tools"><button class="tool" onclick="toggleTr(${trI}, this)">${icon('globe')}<span>ترجمة</span></button></div>
+          <div class="tb-ar" id="tr-${trI}" hidden>${esc(L.textAr)}</div>` : ''}
+      </details>
+    </div>
+    ${vocab}${nextBtn}`;
+  }
+
+  return `
+    ${ruleCardHTML(L.notes, L.track)}
+    <div class="card lesson-card">${head}
+      <div class="audio-row">
+        <button class="play" onclick="playPassage()" aria-label="تشغيل النص">${icon('play')}</button>
+        <div><b>الاستماع إلى النص</b><small>اضغطي على أي جملة للاستماع إليها منفردة.</small>
+          <div class="tb-tools">
+            <button class="tool" onclick="playPassage(.7)">${icon('clock')}تشغيل بطيء</button>
+            <button class="tool" onclick="stopSpeech()">${icon('pause')}إيقاف</button>
+          </div>${accentPicker()}</div>
+      </div>
+      <div class="passage en">${paras}</div>
+      ${L.textAr ? `<div class="tb-tools"><button class="tool" onclick="toggleTr(${trI}, this)">${icon('globe')}<span>ترجمة</span></button></div>
+        <div class="tb-ar" id="tr-${trI}" hidden>${esc(L.textAr)}</div>` : ''}
+    </div>
+    ${vocab}${nextBtn}`;
+}
+
+// بطاقة القاعدة (من عمود Notes في جدول Content)
+// ✏️ الأسطر العادية = شرح بالعربي ، والأسطر التي تبدأ بـ  EX:  = أمثلة بالصيغة  EX: English sentence | الترجمة
+function ruleCardHTML(notes, track) {
+  if (!notes) return '';
+  const W = track === 'writing';
+  const text = [], ex = [];
+  String(notes).split('\n').forEach(l => {
+    const m = l.match(/^\s*EX:\s*(.*)$/i);
+    if (m) { const p = m[1].split('|'); ex.push({ en: p[0].trim(), ar: (p[1] || '').trim() }); }
+    else text.push(l);
+  });
+  return `<div class="card rule-card">
+    <span class="eyebrow">${W ? 'Writing Tips' : 'Grammar Focus'}</span><div class="card-title">${W ? 'إرشادات الكتابة' : 'القاعدة'}</div>
+    <div class="rule-body">${esc(text.join('\n').trim())}</div>
+    ${ex.length ? `<div class="ex-list">${ex.map(e => {
+      const i = S.texts.push({ en: e.en }) - 1;
+      return `<div class="ex"><button class="vw-say" onclick="speakText(${i})" aria-label="استماع">${icon('volume')}</button>
+        <div><div class="en">${esc(e.en)}</div><small>${esc(e.ar)}</small></div></div>`;
+    }).join('')}</div>` : ''}
+  </div>`;
+}
+
+function goQuiz() {
+  stopSpeech();
+  const qs = S.ls.questions;
+  const first = qs.findIndex(q => !S.ls.results[q.id]);
+  S.ls.step = 'quiz';
+  S.ls.idx = first === -1 ? qs.length - 1 : first;
+  renderLesson(); window.scrollTo(0, 0);
+  saveLessonResume();
+}
+
+function lessonQuizHTML() {
+  const L = S.ls.lesson, qs = S.ls.questions, i = S.ls.idx, q = qs[i];
+  // في الاستماع لا نعرض النص أثناء الأسئلة (الصوت متاح داخل كل سؤال)
+  const peek = L.text && L.track !== 'listening' ? `<details class="peek"><summary>${icon('book')}عرض نص الدرس</summary><div class="passage en">${esc(L.text)}</div></details>` : '';
+  return peek + quizBlock(q, i, qs.length, S.ls.results[q.id], 'lesson');
+}
+
+
+/* =========================================================
+ * محرك الأسئلة (مشترك بين الدروس والاختبارات)
+ * المراحل القادمة تضيف أنواعاً جديدة إلى QTYPES
+ * ========================================================= */
+window.QTYPES = window.QTYPES || {};
+QTYPES.mcq = function (q, res) {
+  return `<div class="opts">${q.options.map(o => {
+    let c = '';
+    if (res && !res.restored) { if (o.key === res.correctKey) c = 'correct'; else if (o.key === res.answer) c = 'wrong'; }
+    return `<button class="opt ${c}" data-k="${o.key}" ${res ? 'disabled' : ''} onclick="pickAnswer('${o.key}')">
+      <span class="opt-k">${o.key}</span><span class="en">${esc(o.text)}</span>
+      ${c === 'correct' ? icon('check') : c === 'wrong' ? icon('x') : ''}</button>`;
+  }).join('')}</div>`;
+};
+
+function quizBlock(q, i, n, res, ctx) {
+  const render = QTYPES[q.qtype] || QTYPES.mcq;
+  const last = i === n - 1;
+  return `
+    <div class="q-top" style="margin-top:16px">
+      <span class="chip">${icon('target')}${ctx === 'levelTest' ? 'اختبار المستوى' : 'أسئلة الفهم'}</span>
+      <span>السؤال <b>${i + 1}</b> من ${n}</span></div>
+    <div class="bar"><div style="width:${((i + (res ? 1 : 0)) / n) * 100}%"></div></div>
+    <div class="card">
+      ${q.audioText ? audioBlock(q.audioText) : ''}
+      ${textBlock(q.prompt, q.promptAr)}
+      ${render(q, res)}
+      ${res ? feedbackHTML(res) : ''}
+    </div>
+    ${res ? `<button class="btn primary" onclick="nextQ()">${last ? 'عرض النتيجة' + icon('check') : 'السؤال التالي' + icon('arrowLeft')}</button>` : ''}`;
+}
+
+function feedbackHTML(res) {
+  if (res.restored) return `<div class="fb ${res.correct ? 'ok' : 'bad'}"><div class="fb-head">${icon(res.correct ? 'checkCircle' : 'alert')}سبقت الإجابة عن هذا السؤال.</div></div>`;
+  if (res.skipped) return `<div class="fb neutral"><div class="fb-head">${icon('info')}تم تخطي هذا السؤال.</div>
+    <p>يمكنكِ التدرّب على النطق لاحقاً باستخدام متصفح Google Chrome.</p></div>`;
+  const speak = res.qtype === 'speak';
+  const head = speak ? (res.correct ? 'نطق واضح ودقيق. أحسنتِ.' : 'النطق يحتاج إلى مزيد من التدريب.') : res.msg;
+  return `<div class="fb ${res.correct ? 'ok' : 'bad'}">
+    <div class="fb-head">${icon(res.correct ? 'checkCircle' : 'alert')}${esc(head)}</div>
+    ${speak && res.score != null ? `<div class="fb-ans">دقة النطق: <span class="en-inline">${res.score}%</span></div>` : ''}
+    ${!speak && !res.correct && res.correctText ? `<div class="fb-ans">الإجابة الصحيحة: <span class="en-inline">${esc(res.correctText)}</span></div>` : ''}
+    ${res.explanationAr ? `<p>${esc(res.explanationAr)}</p>` : ''}
+    ${!res.correct ? '<small>أُضيف هذا السؤال إلى قسم «أخطائي» لمراجعته لاحقاً.</small>' : ''}
+  </div>`;
+}
+
+// اختيار إجابة → تصحيح فوري من الخادم
+async function pickAnswer(answer) {
+  const M = S.mode === 'test' ? S.lt : S.ls;
+  if (!M) return;
+  const q = M.questions[M.idx];
+  if (M.results[q.id] || M.busy) return;
+  if (String(answer).trim() === '') return toast('يُرجى إدخال إجابة.', 'err');
+  M.busy = true;
+  document.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (b.dataset.k === answer) b.classList.add('sel', 'checking'); });
+  try {
+    const r = await call('checkAnswer', S.token, {
+      qid: q.id, answer, context: S.mode === 'test' ? 'levelTest' : 'lesson', sessionId: S.mode === 'test' ? S.lt.sessionId : ''
+    });
+    if (!r.ok) { toast(r.error, 'err'); }
+    else M.results[q.id] = { correct: r.correct, answer: String(answer), correctKey: r.correctKey, correctText: r.correctText,
+                             explanationAr: r.explanationAr, msg: pick(r.correct ? CORRECT_MSGS : WRONG_MSGS),
+                             qtype: q.qtype, score: r.score, skipped: !!r.skipped };
+  } catch (e) { if (e.code !== 'AUTH') toast(e.error, 'err'); }
+  finally {
+    M.busy = false;
+    if (S.mode === 'test') renderTest(); else { renderLesson(); saveLessonResume(); }
+    const fb = $('.fb'); if (fb) fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function nextQ() {
+  const M = S.mode === 'test' ? S.lt : S.ls;
+  stopSpeech();
+  if (M.idx < M.questions.length - 1) {
+    M.idx++;
+    if (S.mode === 'test') renderTest(); else { renderLesson(); saveLessonResume(); }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    if (S.mode === 'test') submitTest(); else finishLesson();
+  }
+}
+
+
+/* =========================================================
+ * إنهاء الدرس
+ * ========================================================= */
+async function finishLesson() {
+  const L = S.ls.lesson, qs = S.ls.questions;
+  const unanswered = qs.filter(q => !S.ls.results[q.id]).length;
+  if (unanswered) return toast(`تبقّى ${unanswered} من الأسئلة دون إجابة.`, 'err');
+  const correct = qs.filter(q => S.ls.results[q.id] && S.ls.results[q.id].correct).length;
+  loading(true, 'جارٍ حفظ التقدم');
+  try {
+    const r = await call('completeLesson', S.token, L.id, correct);
+    if (!r.ok) return toast(r.error, 'err');
+    S.ls.step = 'done';
+    S.ls.summary = { correct, total: qs.length, allDone: r.allDone };
+    S.progress[L.track] = r.progress; S.percent[L.track] = r.percent;
+    if (S.tr && S.tr.data && S.tr.track === L.track) {
+      S.tr.data.progress = r.progress; S.tr.data.percent = r.percent;
+      (S.tr.data.levels[L.level] || []).forEach(x => { if (x.id === L.id) x.completed = true; });
+    }
+    renderLesson(); window.scrollTo(0, 0);
+    saveResume({ screen: 'track', track: L.track });
+    if (qs.length && correct === qs.length) setTimeout(goldShimmer, 300);
+  } catch (e) { if (e.code !== 'AUTH') toast(e.error, 'err'); }
+  finally { loading(false); }
+}
+
+function lessonDoneHTML() {
+  const L = S.ls.lesson, qs = S.ls.questions, sm = S.ls.summary;
+  const ratio = sm.total ? sm.correct / sm.total : 1;
+  const R = LESSON_RESULT.find(x => ratio >= x.min);
+  const shortP = p => { const lines = String(p).split('\n').filter(Boolean); const s = lines[lines.length - 1] || ''; return s.length > 90 ? s.slice(0, 88) + '…' : s; };
+  return `
+    <div class="hero-card sheen" style="margin-top:16px">
+      <span class="eyebrow">Lesson Complete</span>
+      <h2>${R.head}</h2>
+      ${sm.total ? `<div class="score">${sm.correct}<small> / ${sm.total}</small></div>` : ''}
+      <p>${R.msg}</p>
+    </div>
+    ${qs.length ? `<div class="card"><div class="card-title">ملخص الإجابات</div>
+      ${qs.map(q => { const ok = S.ls.results[q.id] && S.ls.results[q.id].correct;
+        return `<div class="sum-row ${ok ? 'ok' : 'bad'}">${icon(ok ? 'check' : 'x')}<span class="en">${esc(shortP(q.prompt))}</span></div>`; }).join('')}
+    </div>` : ''}
+    ${sm.allDone ? `<div class="note">${icon('award')}<span>أكملتِ جميع دروس هذا المستوى، وأصبح اختبار نهاية المستوى متاحاً الآن.</span></div>` : ''}
+    ${sm.allDone ? `<button class="btn primary" onclick="backToTrack()">الانتقال إلى اختبار المستوى${icon('arrowLeft')}</button>`
+      : L.nextId ? `<button class="btn primary" data-id="${esc(L.nextId)}" onclick="openLesson(this.dataset.id)">الدرس التالي${icon('arrowLeft')}</button>` : ''}
+    <button class="btn ghost" onclick="backToTrack()">العودة إلى المسار</button>`;
+}
+
+
+/* =========================================================
+ * اختبار نهاية المستوى
+ * ========================================================= */
+async function startLevelTest() {
+  const track = S.tr.track;
+  S.mode = 'test';
+  showScreen('test');
+  $('#lt-body').innerHTML = skeletonPlacement();
+  try {
+    const r = await call('startLevelTest', S.token, track);
+    if (!r.ok) { toast(r.error, 'err'); S.mode = 'lesson'; return showScreen('track'); }
+    S.lt = { sessionId: r.sessionId, track, level: r.level, questions: r.questions, idx: 0, results: {}, busy: false };
+    renderTest();
+  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); S.mode = 'lesson'; showScreen('track'); } }
+}
+
+function renderTest() {
+  S.texts = [];
+  const T = S.lt, q = T.questions[T.idx];
+  $('#lt-body').innerHTML = `
+    <div class="ls-top"><button class="back" onclick="quitTest()">${icon('x')}الخروج من الاختبار</button>
+      <span class="chip">${icon(TRACK_ICONS[T.track] || 'book')}${esc(S.config.tracks[T.track].ar)} · المستوى ${ROMAN[T.level]}</span></div>
+    <div class="test-banner"><span class="eyebrow">Level Assessment</span><h3>اختبار نهاية المستوى</h3>
+      <small>نسبة الاجتياز ${S.config.passPercent}% · تُحتسب الإجابة الأولى لكل سؤال</small></div>
+    ${quizBlock(q, T.idx, T.questions.length, T.results[q.id], 'levelTest')}`;
+}
+
+function quitTest() {
+  if (!confirm('هل ترغبين في الخروج من الاختبار؟ لن تُحتسب نتيجته.')) return;
+  S.mode = 'lesson'; S.lt = null; backToTrack();
+}
+
+async function submitTest() {
+  loading(true, 'جارٍ احتساب النتيجة');
+  try {
+    const r = await call('submitLevelTest', S.token, S.lt.sessionId);
+    if (!r.ok) return toast(r.error, 'err');
+    renderTestResult(r);
+    window.scrollTo(0, 0);
+    if (r.passed) setTimeout(goldShimmer, 350);
+    if (S.tr) S.tr.view = null;
+    refreshHome().catch(() => {});
+  } catch (e) { if (e.code !== 'AUTH') toast(e.error, 'err'); }
+  finally { loading(false); }
+}
+
+function renderTestResult(r) {
+  const T = S.lt, t = S.config.tracks[T.track], pass = S.config.passPercent;
+  let head, note;
+  if (r.passed && r.trackCompleted) {
+    head = 'أتممتِ المسار بنجاح';
+    note = `أنهيتِ جميع مستويات مسار ${t.ar}. ستُتاح شهادة الإتمام في قسم «شهاداتي».`;
+  } else if (r.passed) {
+    head = 'تهانينا، اجتزتِ المستوى';
+    note = `انتقلتِ إلى المستوى ${ROMAN[r.newLevel]} — ${S.config.levels[r.newLevel].ar}. تنتظركِ دروس جديدة في هذا المسار.`;
+  } else {
+    head = 'لم تبلغي نسبة الاجتياز هذه المرة';
+    note = `نسبة الاجتياز ${pass}%. يُنصح بمراجعة دروس المستوى والأسئلة في قسم «أخطائي»، ثم إعادة المحاولة متى شئتِ.`;
+  }
+  S.mode = 'lesson';
+  $('#lt-body').innerHTML = `
+    <div class="hero-card ${r.passed ? 'sheen' : 'neutral'}" style="margin-top:12px">
+      <span class="eyebrow">Assessment Result · Level ${ROMAN[r.level]}</span>
+      <h2>${head}</h2>
+      <div class="score">${r.percent}<small>%</small></div>
+      <p>${r.correct} إجابات صحيحة من ${r.total}</p>
+    </div>
+    <div class="note">${icon(r.passed ? 'award' : 'info')}<span>${esc(note)}</span></div>
+    ${r.passed
+      ? `<button class="btn primary" onclick="backToTrack()">متابعة المسار${icon('arrowLeft')}</button>`
+      : `<button class="btn primary" onclick="startLevelTest()">إعادة الاختبار${icon('rotate')}</button>
+         <button class="btn ghost" onclick="backToTrack()">مراجعة الدروس</button>`}
+    <button class="btn ghost" onclick="goHome()">الصفحة الرئيسية</button>`;
+}
+</script>
+
+  <!-- Practice.html — المرحلة 5: أسئلة النطق + ترتيب الكلمات + إكمال الفراغ + تصحيح الخطأ -->
+<style>
+  /* ---------- النطق ---------- */
+  .speak-box { text-align: center; padding: 22px 16px 14px; margin-top: 6px; background: var(--ivory); border: 1px solid var(--gold-l); border-radius: 14px; }
+  .speak-hint { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+  .mic {
+    width: 82px; height: 82px; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center; margin: 0 auto;
+    background: var(--navy); color: var(--gold); box-shadow: 0 0 0 5px rgba(201, 168, 106, .2); transition: transform .2s var(--ease), box-shadow .2s;
+  }
+  .mic .ic { width: 30px; height: 30px; }
+  .mic:hover { transform: scale(1.04); }
+  .mic.rec { background: var(--err); color: #fff; animation: micPulse 1.3s ease-in-out infinite; }
+  @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 5px rgba(122, 46, 58, .25); } 50% { box-shadow: 0 0 0 14px rgba(122, 46, 58, .08); } }
+  .mic-status { margin-top: 12px; font-size: 14px; color: var(--navy); min-height: 24px; }
+  .mic-status.live { font-family: var(--f-en); direction: ltr; color: var(--muted); font-style: italic; }
+  .say-diff { margin: 18px 0 6px; font-size: 19px; line-height: 1.9; text-align: center; }
+  .say-diff .w { padding: 1px 3px; border-radius: 4px; }
+  .say-diff .w.ok { color: var(--ok); background: var(--ok-l); }
+  .say-diff .w.miss { color: var(--err); background: var(--err-l); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  .heard { font-size: 13px; color: var(--muted); }
+  .heard .en { display: block; text-align: center; font-style: italic; font-size: 14.5px; color: #3A3A42; margin-top: 2px; }
+  .sp-score { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 12px auto 4px; font-size: 13px; color: var(--muted); }
+  .sp-score b { font-family: var(--f-en-h); font-size: 24px; color: var(--navy); font-weight: 600; }
+  .sp-legend { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+  .link-btn { background: none; border: 0; color: var(--muted); font-family: var(--f-ar); font-size: 12.5px; cursor: pointer; margin-top: 14px; text-decoration: underline; text-underline-offset: 3px; }
+  .speak-box .nav { margin-top: 10px; }
+
+  /* ---------- ترتيب الكلمات ---------- */
+  .ord-line { min-height: 64px; border: 1px dashed var(--field); border-radius: 12px; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px;
+              align-items: center; direction: ltr; background: var(--ivory); margin-top: 6px; transition: border-color .2s; }
+  .ord-line.filled { border-style: solid; border-color: var(--gold-l); background: #fff; }
+  .ord-line.ok { border-color: var(--ok); background: var(--ok-l); }
+  .ord-line.bad { border-color: var(--err); background: var(--err-l); }
+  .ord-line .ph { color: var(--muted-2); font-size: 13px; font-family: var(--f-ar); direction: rtl; width: 100%; text-align: center; }
+  .ord-pool { display: flex; flex-wrap: wrap; gap: 8px; direction: ltr; margin: 14px 0 6px; justify-content: center; }
+  .chip-w { border: 1px solid var(--field); background: #fff; border-radius: 10px; padding: 8px 14px; font-family: var(--f-en); font-size: 16px; color: var(--text);
+            cursor: pointer; box-shadow: var(--sh-1); transition: all .18s var(--ease); animation: enter .3s var(--ease); }
+  .chip-w:hover { border-color: var(--gold); transform: translateY(-1px); }
+  .ord-line .chip-w { background: var(--navy); color: #fff; border-color: var(--navy); box-shadow: none; }
+  .ord-line.ok .chip-w { background: var(--ok); border-color: var(--ok); }
+  .ord-line.bad .chip-w { background: var(--err); border-color: var(--err); }
+  .ord-actions { display: flex; gap: 10px; }
+  .ord-actions .btn { flex: 1; }
+
+  /* ---------- الكتابة ---------- */
+  .type-row { display: flex; gap: 10px; align-items: stretch; margin-top: 8px; }
+  .type-row input { direction: ltr; text-align: left; font-family: var(--f-en); flex: 1; }
+  .type-row .btn { width: auto; margin: 0; padding: 0 22px; }
+  textarea.en-area { width: 100%; min-height: 84px; padding: 13px 15px; border-radius: 12px; border: 1px solid var(--field); resize: vertical;
+                     font-family: var(--f-en); font-size: 16px; direction: ltr; text-align: left; color: var(--text); outline: none; margin-top: 8px; }
+  textarea.en-area:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(201, 168, 106, .16); }
+  .typed { margin-top: 8px; padding: 13px 15px; border-radius: 12px; border: 1px solid; font-family: var(--f-en); direction: ltr; text-align: left; font-size: 16px; }
+  .typed.ok { border-color: var(--ok); background: var(--ok-l); color: var(--ok); }
+  .typed.bad { border-color: var(--err); background: var(--err-l); color: var(--err); }
+  .typed small { display: block; font-family: var(--f-ar); direction: rtl; text-align: right; color: var(--muted); font-size: 12px; margin-bottom: 2px; }
+  @media (max-width: 380px) { .type-row { flex-direction: column; } .type-row .btn { padding: 13px; } }
+</style>
+
+<script>
+/* =========================================================
+ * أدوات مشتركة
+ * ========================================================= */
+function rerenderQ() { if (S.mode === 'test') renderTest(); else renderLesson(); }
+function currentQ() { const M = S.mode === 'test' ? S.lt : S.ls; return M ? M.questions[M.idx] : null; }
+
+// نفس منطق التصحيح في الخادم (لعرض النتيجة قبل الاعتماد)
+const CONTRACTIONS_JS = {
+  "i'm": 'i am', "you're": 'you are', "we're": 'we are', "they're": 'they are', "he's": 'he is', "she's": 'she is',
+  "it's": 'it is', "that's": 'that is', "what's": 'what is', "there's": 'there is', "here's": 'here is', "let's": 'let us',
+  "i'd": 'i would', "you'd": 'you would', "i'll": 'i will', "you'll": 'you will', "we'll": 'we will', "i've": 'i have',
+  "don't": 'do not', "doesn't": 'does not', "didn't": 'did not', "isn't": 'is not', "aren't": 'are not',
+  "wasn't": 'was not', "weren't": 'were not', "can't": 'can not', "cannot": 'can not', "won't": 'will not',
+  "shouldn't": 'should not', "couldn't": 'could not', "wouldn't": 'would not', "haven't": 'have not', "hasn't": 'has not'
+};
+function speechTokensJS(s) {
+  return String(s || '').toLowerCase().replace(/[’‘`]/g, "'").replace(/[^a-z0-9'\s-]/g, ' ').replace(/-/g, ' ')
+    .split(/\s+/).filter(Boolean)
+    .reduce((acc, w) => acc.concat((CONTRACTIONS_JS[w] || w).split(' ')), [])
+    .map(w => w.replace(/'/g, '')).filter(Boolean);
+}
+// تحديد الكلمات المتطابقة بالترتيب
+function lcsMatch(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+    dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+  const matched = new Array(m).fill(false);
+  let i = m, j = n;
+  while (i > 0 && j > 0) {
+    if (a[i - 1] === b[j - 1]) { matched[i - 1] = true; i--; j--; }
+    else if (dp[i - 1][j] >= dp[i][j - 1]) i--; else j--;
+  }
+  return matched;
+}
+function speechDiff(target, spoken) {
+  const words = String(target).split(/\s+/).filter(Boolean);
+  const toks = [], owner = [];
+  words.forEach((w, i) => speechTokensJS(w).forEach(t => { toks.push(t); owner.push(i); }));
+  const matched = lcsMatch(toks, speechTokensJS(spoken));
+  const okWord = words.map((w, i) => owner.every((o, k) => o !== i || matched[k]));
+  const score = toks.length ? Math.round(matched.filter(Boolean).length / toks.length * 100) : 0;
+  const html = `<div class="say-diff en">${words.map((w, i) => `<span class="w ${okWord[i] ? 'ok' : 'miss'}">${esc(w)}</span>`).join(' ')}</div>
+    <div class="heard"><small>ما التقطه الميكروفون:</small><span class="en">${esc(spoken)}</span></div>`;
+  return { html, score };
+}
+
+
+/* =========================================================
+ * 🗣️ سؤال النطق (speak)
+ * ========================================================= */
+let REC = null;
+S.recording = false;
+S.sp = null;
+
+QTYPES.speak = function (q, res) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (res && !res.restored) {
+    if (res.skipped) return '';
+    const d = speechDiff(q.prompt, String(res.answer).split('\n')[0]);
+    return `<div class="speak-box">${d.html}</div>`;
+  }
+  if (res) return '';
+  if (!SR) {
+    return `<div class="note">${icon('info')}<span>خاصية التعرّف على الصوت غير مدعومة في هذا المتصفح، وتعمل بأفضل شكل على Google Chrome في الحاسوب أو أجهزة أندرويد. يمكنكِ الاستماع إلى الجملة وتكرارها بصوتكِ، ثم المتابعة.</span></div>
+      <button class="btn ghost" onclick="skipSpeech()">المتابعة دون تسجيل</button>`;
+  }
+  const st = (S.sp && S.sp.qid === q.id) ? S.sp : null;
+  const d = st ? speechDiff(q.prompt, st.transcript) : null;
+  return `<div class="speak-box">
+    <p class="speak-hint">استمعي إلى النطق الصحيح أولاً، ثم اضغطي على الميكروفون واقرئي الجملة بصوت واضح.</p>
+    <button class="mic ${S.recording ? 'rec' : ''}" onclick="toggleRec('${q.id}')" aria-label="تسجيل">${icon('mic')}</button>
+    <div class="mic-status" id="mic-status">${S.recording ? 'جارٍ الاستماع… تحدّثي الآن' : st ? '' : 'اضغطي على الميكروفون للبدء'}</div>
+    ${d ? `${d.html}
+      <div class="sp-score"><b class="en-inline">${d.score}%</b><span>دقة النطق التقديرية</span></div>
+      <div class="sp-legend">الكلمات المظلّلة باللون الأحمر لم تُلتقط بوضوح.</div>
+      <div class="nav"><button class="btn ghost" onclick="toggleRec('${q.id}')">${icon('rotate')}إعادة التسجيل</button>
+        <button class="btn primary" onclick="submitSpeech()">اعتماد المحاولة${icon('check')}</button></div>` : ''}
+    ${!S.recording ? `<button class="link-btn" onclick="skipSpeech()">لا يعمل الميكروفون؟ تخطّي هذا السؤال</button>` : ''}
+  </div>`;
+};
+
+function toggleRec(qid) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  if (S.recording && REC) { REC.stop(); return; }
+  stopSpeech();
+  let transcript = '', alts = [];
+  REC = new SR();
+  REC.lang = S.accent;
+  REC.interimResults = true;
+  REC.maxAlternatives = 3;
+  REC.continuous = false;
+  REC.onstart = () => { S.recording = true; S.sp = null; rerenderQ(); };
+  REC.onresult = e => {
+    transcript = Array.from(e.results).map(r => r[0].transcript).join(' ').trim();
+    if (e.results.length === 1 && e.results[0].isFinal) alts = Array.from(e.results[0]).map(a => a.transcript.trim());
+    const st = $('#mic-status');
+    if (st) { st.textContent = transcript; st.classList.add('live'); }
+  };
+  REC.onerror = e => {
+    const inGoogleFrame = !!(window.google && google.script && google.script.run);
+    const m = (e.error === 'not-allowed' || e.error === 'service-not-allowed')
+      ? (inGoogleFrame
+          ? 'لا يعمل الميكروفون داخل رابط Google. يُرجى فتح المنصة من رابطها الرئيسي لاستخدام خاصية النطق.'
+          : 'تعذّر الوصول إلى الميكروفون. يُرجى الضغط على رمز القفل بجانب عنوان الصفحة والسماح باستخدام الميكروفون، ثم المحاولة مجدداً.')
+      : e.error === 'no-speech' ? 'لم يُلتقط أي صوت. يُرجى التحدث بوضوح وبالقرب من الميكروفون.'
+      : e.error === 'audio-capture' ? 'لم يُعثر على ميكروفون في هذا الجهاز.'
+      : 'تعذّر التعرّف على الصوت. يُرجى المحاولة مجدداً.';
+    toast(m, 'err');
+  };
+  REC.onend = () => {
+    S.recording = false;
+    if (transcript) S.sp = { qid, transcript, alts: [transcript].concat(alts.filter(a => a && a !== transcript)) };
+    rerenderQ();
+  };
+  try { REC.start(); } catch (err) { S.recording = false; toast('تعذّر تشغيل الميكروفون. يُرجى المحاولة مجدداً.', 'err'); }
+}
+
+function submitSpeech() {
+  if (!S.sp) return;
+  const answer = S.sp.alts.join('\n');
+  S.sp = null;
+  pickAnswer(answer);
+}
+
+function skipSpeech() {
+  if (S.recording && REC) REC.abort();
+  S.recording = false; S.sp = null;
+  if (S.mode === 'test' && !confirm('سيُحتسب هذا السؤال إجابةً غير صحيحة في الاختبار. هل ترغبين في المتابعة؟')) return;
+  pickAnswer('__SKIP__');
+}
+
+
+/* =========================================================
+ * 🧩 ترتيب الكلمات (order)
+ * ========================================================= */
+S.ord = null;
+QTYPES.order = function (q, res) {
+  const words = ((q.options[0] && q.options[0].text) || '').split('/').map(s => s.trim()).filter(Boolean);
+  if (res) {
+    const built = res.restored ? '' : String(res.answer);
+    return `<div class="ord-line filled ${res.restored ? '' : res.correct ? 'ok' : 'bad'}">
+      ${built.split(' ').filter(Boolean).map(w => `<span class="chip-w">${esc(w)}</span>`).join('')}</div>`;
+  }
+  if (!S.ord || S.ord.qid !== q.id) S.ord = { qid: q.id, words, picked: [] };
+  const st = S.ord;
+  const line = st.picked.map((wi, pos) => `<button class="chip-w" onclick="ordRemove(${pos})">${esc(words[wi])}</button>`).join('');
+  const pool = words.map((w, i) => st.picked.indexOf(i) === -1 ? `<button class="chip-w" onclick="ordAdd(${i})">${esc(w)}</button>` : '').join('');
+  const full = st.picked.length === words.length;
+  return `
+    <div class="ord-line ${st.picked.length ? 'filled' : ''}">${line || '<span class="ph">اضغطي على الكلمات بالترتيب الصحيح لتكوين الجملة</span>'}</div>
+    <div class="ord-pool">${pool}</div>
+    <div class="ord-actions">
+      <button class="btn ghost" ${st.picked.length ? '' : 'disabled'} onclick="ordClear()">${icon('rotate')}مسح</button>
+      <button class="btn primary" ${full ? '' : 'disabled'} onclick="ordCheck()">تحقّق${icon('check')}</button>
+    </div>`;
+};
+function ordAdd(i) { S.ord.picked.push(i); rerenderQ(); }
+function ordRemove(pos) { S.ord.picked.splice(pos, 1); rerenderQ(); }
+function ordClear() { S.ord.picked = []; rerenderQ(); }
+function ordCheck() {
+  const st = S.ord;
+  const sentence = st.picked.map(i => st.words[i]).join(' ');
+  pickAnswer(sentence);
+}
+
+
+/* =========================================================
+ * ✍️ إكمال الفراغ (complete) + تصحيح الخطأ (correct)
+ * ========================================================= */
+QTYPES.complete = function (q, res) {
+  if (res) return res.restored ? '' : `<div class="typed ${res.correct ? 'ok' : 'bad'}"><small>إجابتكِ</small>${esc(res.answer)}</div>`;
+  return `<div class="type-row">
+      <input id="ans-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type your answer"
+        onkeydown="if(event.key==='Enter')submitTyped()">
+      <button class="btn primary" onclick="submitTyped()">تحقّق</button>
+    </div>
+    <small class="hint">${icon('info')}اكتبي الكلمة أو الكلمات الناقصة فقط.</small>`;
+};
+
+QTYPES.correct = function (q, res) {
+  if (res) return res.restored ? '' : `<div class="typed ${res.correct ? 'ok' : 'bad'}"><small>إجابتكِ</small>${esc(res.answer)}</div>`;
+  const wrong = (q.options[0] && q.options[0].text) || '';
+  return `<textarea id="ans-input" class="en-area" autocomplete="off" autocapitalize="off" spellcheck="false">${esc(wrong)}</textarea>
+    <small class="hint">${icon('info')}عدّلي الجملة في المربع ثم اكتبيها كاملة بشكل صحيح، مع مراعاة الحروف الكبيرة.</small>
+    <button class="btn primary" onclick="submitTyped()">تحقّق${icon('check')}</button>`;
+};
+
+function submitTyped() {
+  const el = $('#ans-input');
+  if (!el) return;
+  const v = el.value.trim().replace(/\s+/g, ' ');
+  if (!v) return toast('يُرجى كتابة الإجابة أولاً.', 'err');
+  el.disabled = true;
+  pickAnswer(v);
+}
+</script>
+
+
+</body>
+</html>
