@@ -16,7 +16,7 @@
      * ✏️ رابط الخادم: الصقي هنا رابط Web app الخاص بكِ (ينتهي بـ /exec)
      *    بين علامتي التنصيص في السطر التالي (بدلاً من النص الإنجليزي الموجود بينهما)
      * ===================================================================== */
-    window.ELC_API_URL = 'https://script.google.com/macros/s/AKfycbx9QPEYuX-MkSsmCP3Ou_PU8Ja-86Wcl5z8NwsKVCG_3bcvLmWXb5CpSLOHTGXMUFuCzQ/exec';
+    window.ELC_API_URL = 'PASTE_YOUR_WEB_APP_URL_HERE';
   </script>
   <!--
   Styles.html — نظام التصميم الكامل للمنصة
@@ -1265,41 +1265,52 @@ function skeletonPlacement() {
  * ========================================================= */
 window.addEventListener('load', boot);
 
+// بدء التشغيل السريع:
+// - إذا كان المحتوى وبيانات الطالبة محفوظين على الجهاز تظهر الصفحة فوراً،
+//   ثم يُحدَّث كل شيء بطلب واحد في الخلفية.
+// - في أول زيارة فقط: طلب واحد يجلب الإعدادات وبيانات الطالبة والمحتوى كاملاً.
 async function boot() {
   hydrateIcons();
   S.accent = load('elc_accent') || 'en-US';
+  try { S.config = JSON.parse(load('elc_config') || 'null'); } catch (e) { S.config = null; }
+  if (S.config) initRegister();
+  loadContentLocal();
+  S.token = load('elc_token');
   try {
-    S.config = await call('getAppConfig');
-    initRegister();
-    S.token = load('elc_token');
     if (S.token) {
-      skeletonHome(); showScreen('home'); hideSplash();
-      const h = await call('getHomeData', S.token);
-      if (h.ok) {
-        applyHome(h);
-        await routeAfterLogin();
-        if (h.newDay && S.user.streak > 1) toast(`أحسنتِ، لقد واصلتِ التعلّم ${S.user.streak} أيام متتالية.`, 'ok');
+      const instant = S.config && hasContent() && loadUserLocal(S.token) && S.user.placementDone;
+      if (instant) { hideSplash(); routeAfterLogin(); }
+      else { if (S.config) { skeletonHome(); showScreen('home'); } }
+      const b = await fetchBootstrap();
+      if (b.ok) {
+        if (!S.regReady) initRegister();
+        if (!instant) await routeAfterLogin();
+        else if (S.screen === 'home') renderHome();
+        if (b.newDay && S.user.streak > 1) toast(`أحسنتِ، لقد واصلتِ التعلّم ${S.user.streak} أيام متتالية.`, 'ok');
+        flushQueue();
         return;
       }
     }
+    if (!S.config) { S.config = await call('getAppConfig'); store('elc_config', JSON.stringify(S.config)); initRegister(); }
     showScreen('welcome');
   } catch (e) {
-    showScreen('welcome');
-    if (e && e.code !== 'AUTH') toast(e.error || 'تعذّر الاتصال بالخادم.', 'err');
+    if (S.user && S.screen && S.screen !== 'splash') {
+      // لا يوجد اتصال: نكمل بالمحتوى المحفوظ، وتُرسل الإجابات عند عودة الاتصال
+      if (e && e.code !== 'AUTH') syncIndicator('offline');
+    } else {
+      showScreen('welcome');
+      if (e && e.code !== 'AUTH') toast(e.error || 'تعذّر الاتصال بالخادم.', 'err');
+    }
   } finally {
     hideSplash();
   }
 }
 
-function applyHome(h) { S.user = h.user; S.progress = h.progress || {}; S.percent = h.percent || {}; }
 function onLoggedIn(r) { S.token = r.token; store('elc_token', r.token); S.user = r.user; S.progress = r.progress || {}; }
-function clearSession() { S.token = null; S.user = null; store('elc_token', null); }
+function clearSession() { S.token = null; S.user = null; store('elc_token', null); store('elc_state', null); store('elc_state_tok', null); }
 
-async function refreshHome() {
-  const h = await call('getHomeData', S.token);
-  if (h.ok) applyHome(h);
-  return h;
-}
+// تحديث الصفحة الرئيسية محلياً (بدون انتظار الخادم)
+async function refreshHome() { if (S.config && S.user) recomputePercents(); return { ok: true }; }
 
 // توجيه المستخدمة بعد الدخول (استكمال من حيث توقفت)
 async function routeAfterLogin() {
@@ -1320,6 +1331,7 @@ async function routeAfterLogin() {
  * ========================================================= */
 function initRegister() {
   const c = S.config;
+  S.regReady = true;
   $('#reg-roles').innerHTML = Object.keys(c.roles).map(k =>
     `<button class="role" data-v="${k}">${icon(ROLE_ICONS[k] || 'dots')}<span>${esc(c.roles[k])}</span></button>`).join('');
   $('#reg-grades').innerHTML = Object.keys(c.grades).map(k =>
@@ -1375,6 +1387,7 @@ async function submitRegister() {
     });
     if (!r.ok) return toast(r.error, 'err');
     onLoggedIn(r);
+    await fetchBootstrap();
     toast(`تم إنشاء الحساب بنجاح. مرحباً بكِ، ${r.user.firstName}.`, 'ok');
     await routeAfterLogin();
   } catch (e) { if (e.code !== 'AUTH') toast(e.error, 'err'); }
@@ -1393,7 +1406,9 @@ async function submitLogin() {
     const r = await call('loginUser', name, pin);
     if (!r.ok) return toast(r.error, 'err');
     onLoggedIn(r);
-    await refreshHome();
+    loading(true, 'جارٍ تجهيز الدروس');
+    await fetchBootstrap();
+    flushQueue();
     $('#login-pin').value = '';
     toast(`مرحباً بعودتكِ، ${S.user.firstName}.`, 'ok');
     await routeAfterLogin();
@@ -1401,9 +1416,11 @@ async function submitLogin() {
   finally { loading(false); }
 }
 
-function logout() {
+async function logout() {
   if (!confirm('هل ترغبين في تسجيل الخروج؟')) return;
   const t = S.token;
+  // إرسال ما لم يُحفظ بعد قبل الخروج (وإن تعذّر يبقى محفوظاً على الجهاز لحين الدخول مجدداً)
+  if (queueGet().length) { loading(true, 'جارٍ حفظ إجاباتكِ'); await Promise.race([syncNow(), new Promise(r => setTimeout(r, 8000))]); loading(false); }
   clearSession();
   if (t) call('logoutUser', t).catch(() => {});
   showScreen('welcome');
@@ -1418,7 +1435,7 @@ async function startPlacement(resume) {
   showScreen('placement');
   $('#pl-body').innerHTML = skeletonPlacement();
   try {
-    const r = await call('getPlacementTest', S.token);
+    const r = S.placementQs ? { ok: true, questions: S.placementQs } : await call('getPlacementTest', S.token);
     if (!r.ok) { toast(r.error, 'err'); return goHome(); }
     if (!r.questions.length) {
       toast('لم تُضف أسئلة تحديد المستوى بعد. يُرجى التواصل مع مشرفة النادي.', 'err');
@@ -1476,8 +1493,9 @@ function movePl(d) {
   renderPlacementQ();
   window.scrollTo(0, 0);
   if (window.speechSynthesis) speechSynthesis.cancel();
-  // حفظ نقطة الاستكمال بصمت
-  call('saveResumeState', S.token, { screen: 'placement', idx: P.idx, answers: P.answers }).catch(() => {});
+  // حفظ نقطة الاستكمال بصمت (في الخلفية)
+  S.user.resume = { screen: 'placement', idx: P.idx, answers: P.answers };
+  enqueue({ t: 'resume', state: S.user.resume });
 }
 
 async function finishPlacement() {
@@ -1488,11 +1506,12 @@ async function finishPlacement() {
   try {
     const r = await call('submitPlacement', S.token, P.answers);
     if (!r.ok) return toast(r.error, 'err');
-    S.user.placementDone = true; S.user.resume = null;
+    S.user.placementDone = true; S.user.resume = null; S.placementQs = null;
+    store(qKey(), JSON.stringify(queueGet().filter(o => o.t !== 'resume')));
+    if (r.progress) { S.progress = r.progress; recomputePercents(); cacheUserLocal(); }
     renderPlacementResult(r);
     showScreen('placement-result');
     setTimeout(goldShimmer, 350);
-    refreshHome().catch(() => {});
   } catch (e) { if (e.code !== 'AUTH') toast(e.error, 'err'); }
   finally { loading(false); }
 }
@@ -1530,8 +1549,8 @@ function renderPlacementResult(r) {
  * 10) الصفحة الرئيسية
  * ========================================================= */
 function goHome() {
+  recomputePercents();
   renderHome(); showScreen('home');
-  refreshHome().then(() => { if (S.screen === 'home') renderHome(); }).catch(() => {});
 }
 
 function totalLevels() {
@@ -1581,6 +1600,365 @@ window.openStep         = window.openStep         || (() => toast('سيُتاح 
 window.openMistakes     = window.openMistakes     || (() => toast('سيُتاح قسم «أخطائي» قريباً.'));
 window.openLeaderboard  = window.openLeaderboard  || (() => toast('ستُتاح لوحة الشرف قريباً.'));
 window.openCertificates = window.openCertificates || (() => toast('سيُتاح قسم الشهادات قريباً.'));
+</script>
+
+  <!-- sync_ui.html — تسريع المنصة: المحتوى محفوظ على الجهاز + التصحيح الفوري + الحفظ في الخلفية -->
+<style>
+  /* مؤشر الحفظ في الخلفية (صغير وهادئ) */
+  .sync-dot { position: fixed; bottom: 14px; left: 14px; z-index: 900; display: flex; align-items: center; gap: 8px; padding: 7px 12px 7px 14px;
+              border-radius: 999px; background: rgba(11, 31, 58, .92); color: var(--ivory); font-size: 12.5px; box-shadow: var(--sh-2);
+              opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .3s, transform .3s; }
+  .sync-dot.show { opacity: 1; transform: none; }
+  .sync-dot i { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); animation: pulse 1.1s ease-in-out infinite; }
+  .sync-dot.off i { background: #E9A9B5; animation: none; }
+  .fb.neutral { background: var(--ivory); border-color: var(--gold-l); }
+  .fb.neutral .fb-head { color: var(--navy); }
+</style>
+<div class="sync-dot" id="sync-dot"><i></i><span>جارٍ الحفظ…</span></div>
+
+<script>
+/* =========================================================
+ * 1) المحتوى المحفوظ على الجهاز
+ *    يُنزَّل مرة واحدة، ولا يُعاد تنزيله إلا إذا عدّلت المعلمات الدروس في الجدول
+ * ========================================================= */
+const CONTENT_KEY = 'elc_content';
+const C = { version: '', lessons: [], questions: [], testCounts: {}, L: {}, Q: {}, byLesson: {}, extra: {} };
+
+function setContent(c, version) {
+  C.version = version || '';
+  C.lessons = c.lessons || []; C.questions = c.questions || []; C.testCounts = c.testCounts || {};
+  C.L = {}; C.Q = {}; C.byLesson = {};
+  C.lessons.forEach(l => { C.L[l.id] = l; });
+  C.questions.forEach(q => { C.Q[q.id] = q; (C.byLesson[q.lessonId] = C.byLesson[q.lessonId] || []).push(q); });
+}
+function loadContentLocal() {
+  try {
+    const raw = load(CONTENT_KEY);
+    if (!raw) return false;
+    const c = JSON.parse(raw);
+    if (!c || !c.version || !c.data) return false;
+    setContent(c.data, c.version);
+    return true;
+  } catch (e) { return false; }
+}
+function saveContentLocal(data, version) {
+  try { localStorage.setItem(CONTENT_KEY, JSON.stringify({ version, data })); } catch (e) { /* مساحة غير كافية: يبقى المحتوى في الذاكرة فقط */ }
+}
+function hasContent() { return C.lessons.length > 0; }
+function questionById(id) { return C.Q[id] || C.extra[id] || null; }
+
+// دروس مسار معيّن مرتبة
+function lessonsOf(track, level) {
+  return C.lessons.filter(l => l.track === track && (!level || l.level === level))
+    .sort((a, b) => (a.level - b.level) || (a.order - b.order));
+}
+
+// نسبة الإنجاز (نفس معادلة الخادم)
+function percentOf(track, p) {
+  p = p || { level: 1, completedLessons: [] };
+  if (p.completed) return 100;
+  const ids = lessonsOf(track, p.level).map(l => l.id);
+  const done = ids.filter(id => (p.completedLessons || []).indexOf(id) !== -1).length;
+  const frac = ids.length ? done / ids.length : 0;
+  return Math.min(99, Math.round((((p.level - 1) + frac * 0.9) / 3) * 100));
+}
+function recomputePercents() {
+  S.percent = S.percent || {};
+  Object.keys(S.config.tracks).forEach(k => { S.percent[k] = percentOf(k, S.progress[k]); });
+}
+
+// بيانات صفحة المسار (بنفس شكل ردّ الخادم السابق)
+function localTrackData(track) {
+  const p = S.progress[track] || { level: 1, completedLessons: [] };
+  const levels = { 1: [], 2: [], 3: [] };
+  lessonsOf(track).forEach(l => { if (levels[l.level]) levels[l.level].push(Object.assign({}, l, { completed: (p.completedLessons || []).indexOf(l.id) !== -1 })); });
+  return { ok: true, track, progress: p, percent: percentOf(track, p), levels,
+           testCounts: C.testCounts[track] || { 1: 0, 2: 0, 3: 0 }, passPercent: S.config.passPercent };
+}
+
+// درس كامل مع أسئلته
+function localLesson(id) {
+  const l = C.L[id];
+  if (!l) return { ok: false, error: 'الدرس غير موجود.' };
+  const p = S.progress[l.track] || { level: 1, completedLessons: [] };
+  if (!p.completed && l.level > p.level) return { ok: false, error: 'هذا المستوى غير متاح بعد. يُرجى اجتياز المستوى الحالي أولاً.' };
+  const sib = lessonsOf(l.track, l.level);
+  const i = sib.findIndex(x => x.id === id);
+  const lesson = Object.assign({}, l, { completed: (p.completedLessons || []).indexOf(id) !== -1,
+                                        index: i + 1, count: sib.length, nextId: sib[i + 1] ? sib[i + 1].id : '' });
+  return { ok: true, lesson, questions: (C.byLesson[id] || []).slice() };
+}
+
+
+/* =========================================================
+ * 2) التصحيح الفوري على الجهاز (نفس قواعد الخادم تماماً)
+ *    والخادم يعيد التصحيح بنفسه عند الحفظ، فهو المرجع في النقاط والسجل
+ * ========================================================= */
+const SPEAK_PASS_JS = 80;
+function normAns(s, keepCase) {
+  const t = keepCase ? String(s || '') : String(s || '').toLowerCase();
+  return t.replace(/[’‘`]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, ' ').replace(/\s*([,.!?])\s*/g, '$1 ')
+    .trim().replace(/[.!?]+$/, '').trim();
+}
+function lcsLen(a, b) {
+  const dp = new Array(b.length + 1).fill(0);
+  for (let i = 1; i <= a.length; i++) { let prev = 0; for (let j = 1; j <= b.length; j++) { const t = dp[j]; dp[j] = a[i - 1] === b[j - 1] ? prev + 1 : Math.max(dp[j], dp[j - 1]); prev = t; } }
+  return dp[b.length];
+}
+function speakScoreLocal(q, answer) {
+  const targets = String(q.answer || q.prompt).split('|');
+  const spoken = String(answer || '').split('\n').filter(Boolean);
+  let best = 0;
+  targets.forEach(t => { const tt = speechTokensJS(t); if (!tt.length) return;
+    spoken.forEach(s => { best = Math.max(best, Math.round(lcsLen(tt, speechTokensJS(s)) / tt.length * 100)); }); });
+  return best;
+}
+function gradeLocal(q, answer) {
+  const qtype = q.qtype || 'mcq', key = String(q.answer || '').trim();
+  let correct, score = null;
+  if (qtype === 'speak') { score = speakScoreLocal(q, answer); correct = score >= SPEAK_PASS_JS; }
+  else if (qtype === 'mcq' && /^[A-D]$/i.test(key)) correct = String(answer || '').trim().toUpperCase() === key.toUpperCase();
+  else { const kc = qtype === 'correct', ua = normAns(answer, kc); correct = key.split('|').some(k => normAns(k, kc) === ua); }
+  const reveal = (qtype === 'mcq' && /^[A-D]$/i.test(key))
+    ? { correctKey: key.toUpperCase(), correctText: (q.options.find(o => o.key === key.toUpperCase()) || {}).text || '' }
+    : { correctKey: '', correctText: key.split('|')[0].trim() };
+  return Object.assign({ correct, score, explanationAr: q.explanationAr || '' }, reveal);
+}
+
+
+/* =========================================================
+ * 3) قائمة الحفظ في الخلفية
+ *    كل عملية تُحفظ على الجهاز أولاً، ثم تُرسل للخادم على دفعات.
+ *    إذا انقطع الإنترنت تبقى محفوظة وتُرسل تلقائياً عند عودة الاتصال.
+ * ========================================================= */
+const SYNC = { inflight: null, timer: null, retry: 0, notified: false };
+function qKey() { return 'elc_q_' + (S.user ? S.user.id : 'x'); }
+function queueGet() { try { return JSON.parse(load(qKey()) || '[]'); } catch (e) { return []; } }
+function queueSet(q) { store(qKey(), q.length ? JSON.stringify(q) : null); }
+function opId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+function enqueue(op) {
+  if (!S.user) return;
+  op.id = op.id || opId();
+  let q = queueGet();
+  if (op.t === 'resume') q = q.filter(x => x.t !== 'resume');   // آخر نقطة استكمال فقط
+  q.push(op);
+  queueSet(q);
+  scheduleFlush(op.t === 'resume' ? 4000 : 1200);
+}
+// جدولة الإرسال (لا تؤخّر إرسالاً مجدولاً في وقت أقرب)
+function scheduleFlush(ms) {
+  const due = Date.now() + ms;
+  if (SYNC.timer && SYNC.due && SYNC.due <= due) return;
+  clearTimeout(SYNC.timer);
+  SYNC.due = due;
+  SYNC.timer = setTimeout(() => { SYNC.timer = null; SYNC.due = 0; flushQueue(); }, ms);
+}
+function pendingPoints() { return queueGet().reduce((s, o) => s + (Number(o.pts) || 0), 0); }
+
+function syncIndicator(state) {
+  const el = $('#sync-dot'); if (!el) return;
+  el.classList.toggle('show', !!state);
+  el.classList.toggle('off', state === 'offline');
+  el.querySelector('span').textContent = state === 'offline' ? 'غير متصل — ستُحفظ إجاباتكِ تلقائياً' : 'جارٍ الحفظ…';
+}
+
+// إرسال الدفعة. تعيد Promise (يمكن انتظارها قبل العمليات التي تحتاج بيانات محدّثة في الخادم)
+function flushQueue() {
+  clearTimeout(SYNC.timer); SYNC.timer = null; SYNC.due = 0;
+  if (SYNC.inflight) return SYNC.inflight;
+  const ops = queueGet();
+  if (!ops.length || !S.token) return Promise.resolve(true);
+  const slowTimer = setTimeout(() => syncIndicator('saving'), 1500);
+  SYNC.inflight = call('syncBatch', S.token, ops)
+    .then(r => {
+      if (!r || !r.ok) throw r || {};
+      const done = new Set(r.done || []);
+      queueSet(queueGet().filter(o => !done.has(String(o.id))));
+      SYNC.retry = 0; SYNC.notified = false;
+      applySync(r);
+      return true;
+    })
+    .catch(e => {
+      if (e && e.code === 'AUTH') return false;
+      SYNC.retry = Math.min(SYNC.retry + 1, 6);
+      if (!navigator.onLine || SYNC.retry >= 2) syncIndicator('offline');
+      scheduleFlush([3000, 6000, 12000, 20000, 30000, 45000][SYNC.retry - 1] || 45000);
+      return false;
+    })
+    .finally(() => {
+      clearTimeout(slowTimer);
+      SYNC.inflight = null;
+      if (!SYNC.retry) syncIndicator(null);
+      if (!SYNC.retry && queueGet().length) scheduleFlush(300);
+    });
+  return SYNC.inflight;
+}
+
+// طلب يحتاج بيانات محدّثة في الخادم: يُرسل ما في القائمة معه في اتصال واحد
+async function callWithSync(fn, ...args) {
+  if (SYNC.inflight) await SYNC.inflight;
+  const ops = queueGet();
+  if (!ops.length || !S.token) return call(fn, ...args);
+  clearTimeout(SYNC.timer); SYNC.timer = null; SYNC.due = 0;
+  const r = await call('syncThen', S.token, ops, fn, args);
+  if (r && r.sync && r.sync.ok) {
+    const done = new Set(r.sync.done || []);
+    queueSet(queueGet().filter(o => !done.has(String(o.id))));
+    applySync(r.sync);
+    return r.result;
+  }
+  return r;
+}
+
+// إرسال كل ما في القائمة والانتظار حتى يصل (قبل العمليات التي تعتمد على بيانات الخادم)
+async function syncNow() {
+  for (let i = 0; i < 6; i++) {
+    if (!queueGet().length) return true;
+    const ok = await flushQueue();
+    if (!ok) return false;
+  }
+  return !queueGet().length;
+}
+
+// تطبيق ردّ الخادم: النقاط الفعلية + الأوسمة + التقدم (مع إبقاء ما لم يُرسل بعد)
+function applySync(r) {
+  if (!S.user) return;
+  if (typeof r.total === 'number') S.user.points = r.total + pendingPoints();
+  if (typeof r.streak === 'number' && r.streak) S.user.streak = r.streak;
+  if (r.progress) {
+    S.progress = r.progress;
+    queueGet().forEach(o => { if (o.t === 'done') markLessonLocal(o.lessonId); });
+    recomputePercents();
+  }
+  if (r.newBadges && r.newBadges.length && typeof celebrateBadges === 'function') setTimeout(() => celebrateBadges(r.newBadges), 400);
+  cacheUserLocal();
+  if (S.screen === 'home') renderHome();
+}
+
+window.addEventListener('online', () => { SYNC.retry = 0; flushQueue(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushQueue();
+  else if (S.token && S.lastBoot && Date.now() - S.lastBoot > 10 * 60 * 1000) refreshState();   // تحديث هادئ بعد غياب طويل
+});
+
+
+/* =========================================================
+ * 4) العمليات المحلية (تظهر فوراً ثم تُحفظ في الخلفية)
+ * ========================================================= */
+function markLessonLocal(id) {
+  const l = C.L[id]; if (!l) return false;
+  const p = S.progress[l.track] = S.progress[l.track] || { level: 1, completedLessons: [] };
+  p.completedLessons = p.completedLessons || [];
+  if (p.completedLessons.indexOf(id) !== -1) return false;
+  p.completedLessons.push(id);
+  return true;
+}
+
+// تسجيل إجابة (درس أو مراجعة) — تعيد النقاط التقديرية
+function recordAnswer(q, answer, ctx, correct) {
+  let pts = 0;
+  if (answer === '__SKIP__') { enqueue({ t: 'ans', qid: q.id, a: answer, ctx }); return 0; }
+  const open = S.mistakes.items.some(m => m.qid === q.id);
+  if (correct && open) {
+    S.mistakes.items = S.mistakes.items.filter(m => m.qid !== q.id);
+    if (ctx === 'review') { pts = (S.rules && S.rules.REVIEW_FIX) || 0; S.mistakes.fixed++; }
+  } else if (!correct && !open) {
+    S.mistakes.items.unshift({ qid: q.id, addedAt: new Date().toISOString().slice(0, 10), source: ctx });
+    if (!C.Q[q.id]) C.extra[q.id] = q;
+  }
+  if (pts) S.user.points += pts;
+  enqueue({ t: 'ans', qid: q.id, a: answer, ctx, pts });
+  cacheUserLocal();
+  return pts;
+}
+
+// إكمال درس — تعيد النقاط التقديرية ونتيجة «اكتمال دروس المستوى»
+function recordLessonDone(lessonId, score, total) {
+  const first = markLessonLocal(lessonId);
+  let pts = 0;
+  if (first && S.rules) pts = S.rules.LESSON_DONE + score * S.rules.PER_CORRECT + (total && score >= total ? S.rules.PERFECT_BONUS : 0);
+  if (pts) S.user.points += pts;
+  enqueue({ t: 'done', lessonId, score, pts });
+  recomputePercents();
+  cacheUserLocal();
+  const l = C.L[lessonId], p = S.progress[l.track];
+  const ids = lessonsOf(l.track, p.level).map(x => x.id);
+  const allDone = !p.completed && ids.length > 0 && ids.every(id => p.completedLessons.indexOf(id) !== -1);
+  return { points: pts, allDone, progress: p, percent: S.percent[l.track] };
+}
+
+
+/* =========================================================
+ * 5) الدخول: طلب واحد يجلب كل شيء
+ * ========================================================= */
+S.mistakes = { items: [], fixed: 0, reviewPoints: 0 };
+S.rules = null;
+
+function cacheUserLocal() {
+  if (!S.user) return;
+  try { localStorage.setItem('elc_state', JSON.stringify({ uid: S.user.id, user: S.user, progress: S.progress, percent: S.percent,
+                                                           mistakes: S.mistakes, rules: S.rules, extra: C.extra })); } catch (e) {}
+}
+function loadUserLocal(token) {
+  try {
+    const s = JSON.parse(load('elc_state') || 'null');
+    if (!s || !s.user || load('elc_state_tok') !== token) return false;
+    S.user = s.user; S.progress = s.progress || {}; S.percent = s.percent || {};
+    S.mistakes = s.mistakes || S.mistakes; S.rules = s.rules; C.extra = s.extra || {};
+    return true;
+  } catch (e) { return false; }
+}
+
+function applyBootstrap(b) {
+  if (b.config) { S.config = b.config; store('elc_config', JSON.stringify(b.config)); }
+  if (b.content) { setContent(b.content, b.contentVersion); saveContentLocal(b.content, b.contentVersion); }
+  S.user = b.user; S.progress = b.progress || {}; S.rules = b.rules;
+  S.mistakes = b.mistakes || { items: [], fixed: 0, reviewPoints: 0 };
+  C.extra = {}; (S.mistakes.extra || []).forEach(q => { C.extra[q.id] = q; }); delete S.mistakes.extra;
+  S.placementQs = b.placement || null;
+  S.feedbackDue = !!b.feedbackDue;
+  if (S.user.placementDone && typeof checkFeedback === 'function') checkFeedback();
+  // إعادة تطبيق ما لم يُرسل بعد من هذا الجهاز
+  const q = queueGet();
+  q.forEach(o => { if (o.t === 'done') markLessonLocal(o.lessonId); });
+  q.forEach(o => { if (o.t === 'ans' && o.ctx === 'review') S.mistakes.items = S.mistakes.items.filter(m => m.qid !== o.qid); });
+  S.user.points += pendingPoints();
+  recomputePercents();
+  S.lastBoot = Date.now();
+  store('elc_state_tok', S.token);
+  cacheUserLocal();
+}
+
+async function fetchBootstrap() {
+  const b = await call('getBootstrap', S.token, hasContent() ? C.version : '');
+  if (b.ok) applyBootstrap(b);
+  return b;
+}
+
+// عرض فوري من آخر نسخة محفوظة على الجهاز، ثم تحديثها من الخادم في الخلفية
+// (للصفحات التي تحتاج بيانات الجميع مثل لوحة الشرف)
+async function cachedView(key, fn, args, skeletonEl, skeletonHTML, onData, withSync) {
+  const k = 'elc_v_' + key + '_' + (S.user ? S.user.id : '');
+  let had = false;
+  try { const c = JSON.parse(load(k) || 'null'); if (c) { had = true; onData(c, true); } } catch (e) {}
+  if (!had && skeletonEl) $(skeletonEl).innerHTML = skeletonHTML;
+  try {
+    const r = withSync ? await callWithSync(fn, ...args) : await call(fn, ...args);
+    if (!r.ok) { if (!had) { toast(r.error, 'err'); goHome(); } return; }
+    try { localStorage.setItem(k, JSON.stringify(r)); } catch (e) {}
+    onData(r, false);
+  } catch (e) { if (e.code !== 'AUTH' && !had) { toast(e.error, 'err'); goHome(); } }
+}
+
+// تحديث هادئ في الخلفية (بعد الاختبارات أو العودة بعد غياب)
+async function refreshState() {
+  try {
+    await flushQueue();
+    const b = await fetchBootstrap();
+    if (b.ok && S.screen === 'home') renderHome();
+  } catch (e) {}
+}
 </script>
 
   <!-- ملفات المراحل القادمة تُضاف تحت هذا السطر -->
@@ -1721,6 +2099,11 @@ window.openCertificates = window.openCertificates || (() => toast('سيُتاح 
   .sum-row > .ic { width: 18px; height: 18px; margin-top: 3px; }
   .sum-row.ok > .ic { color: var(--ok); }
   .sum-row.bad > .ic { color: var(--err); }
+  .rv-test > summary { list-style: none; cursor: pointer; }
+  .rv-test > summary::-webkit-details-marker { display: none; }
+  .rv-test:last-child > summary { border-bottom: 0; }
+  .rv-test-body { padding: 0 30px 12px 0; font-size: 14px; color: #3A3A42; }
+  .rv-test-body p { margin-top: 6px; }
   .sum-row .en { flex: 1; }
   .test-banner { text-align: center; padding: 16px 0 6px; }
   .test-banner h3 { font-size: 20px; }
@@ -1807,8 +2190,9 @@ S.lt = null;         // اختبار المستوى الجاري
  * حفظ نقطة الاستكمال
  * ========================================================= */
 function saveResume(state) {
-  if (S.user) S.user.resume = state;
-  if (S.token) call('saveResumeState', S.token, state).catch(() => {});
+  if (!S.user) return;
+  S.user.resume = state;
+  enqueue({ t: 'resume', state });   // تُحفظ في الخلفية مع الدفعة التالية
 }
 function saveLessonResume() {
   const L = S.ls;
@@ -1846,21 +2230,22 @@ function speakSent(el) { speakChunks([{ text: el.textContent, el: el }]); }
 /* =========================================================
  * صفحة المسار
  * ========================================================= */
+// صفحة المسار تُبنى فوراً من المحتوى المحفوظ على الجهاز
 window.openTrack = async function (track) {
   S.mode = 'lesson';
   if (!S.tr || S.tr.track !== track) S.tr = { track, data: null, view: null };
   applyTrackTheme(track);
   showScreen('track');
-  $('#tr-body').innerHTML = skeletonTrack();
   saveResume({ screen: 'track', track });
-  try {
-    const r = await call('getTrackData', S.token, track);
-    if (!r.ok) { toast(r.error, 'err'); return goHome(); }
-    S.tr.data = r;
-    if (!S.tr.view) S.tr.view = r.progress.completed ? 3 : r.progress.level;
-    S.progress[track] = r.progress; S.percent[track] = r.percent;
-    renderTrack();
-  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); goHome(); } }
+  if (!hasContent()) {
+    $('#tr-body').innerHTML = skeletonTrack();
+    try { await fetchBootstrap(); } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); return goHome(); } }
+    if (!hasContent()) return goHome();
+  }
+  const r = localTrackData(track);
+  S.tr.data = r;
+  if (!S.tr.view) S.tr.view = r.progress.completed ? 3 : r.progress.level;
+  renderTrack();
 };
 
 function backToTrack() { stopSpeech(); openTrack(S.tr ? S.tr.track : (S.ls && S.ls.lesson.track)); }
@@ -1930,11 +2315,15 @@ function renderTrack() {
 window.openLesson = async function (id, resume) {
   S.mode = 'lesson';
   stopSpeech();
-  showScreen('lesson');
-  $('#ls-body').innerHTML = skeletonLesson();
+  if (!hasContent()) {
+    showScreen('lesson');
+    $('#ls-body').innerHTML = skeletonLesson();
+    try { await fetchBootstrap(); } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); return goHome(); } }
+  }
   try {
-    const r = await call('getLesson', S.token, id);
+    const r = localLesson(id);   // فوري من المحتوى المحفوظ
     if (!r.ok) { toast(r.error, 'err'); return (S.tr && S.tr.data) ? showScreen('track') : goHome(); }
+    showScreen('lesson');
     S.ls = { lesson: r.lesson, questions: r.questions, step: 'text', idx: 0, results: {}, busy: false };
     applyTrackTheme(r.lesson.track);
     if (resume && resume.lessonId === id) {
@@ -2089,7 +2478,8 @@ window.QTYPES = window.QTYPES || {};
 QTYPES.mcq = function (q, res) {
   return `<div class="opts">${q.options.map(o => {
     let c = '';
-    if (res && !res.restored) { if (o.key === res.correctKey) c = 'correct'; else if (o.key === res.answer) c = 'wrong'; }
+    if (res && res.pending) { if (o.key === res.answer) c = 'sel'; }
+    else if (res && !res.restored) { if (o.key === res.correctKey) c = 'correct'; else if (o.key === res.answer) c = 'wrong'; }
     return `<button class="opt ${c}" data-k="${o.key}" ${res ? 'disabled' : ''} onclick="pickAnswer('${o.key}')">
       <span class="opt-k">${o.key}</span><span class="en">${esc(o.text)}</span>
       ${c === 'correct' ? icon('check') : c === 'wrong' ? icon('x') : ''}</button>`;
@@ -2114,6 +2504,8 @@ function quizBlock(q, i, n, res, ctx) {
 }
 
 function feedbackHTML(res) {
+  if (res.pending) return `<div class="fb neutral"><div class="fb-head">${icon('check')}${res.skipped ? 'تم تخطي هذا السؤال.' : 'تم تسجيل إجابتكِ.'}</div>
+    <small>تظهر النتيجة والإجابات الصحيحة بعد إنهاء الاختبار.</small></div>`;
   if (res.restored) return `<div class="fb ${res.correct ? 'ok' : 'bad'}"><div class="fb-head">${icon(res.correct ? 'checkCircle' : 'alert')}سبقت الإجابة عن هذا السؤال.</div></div>`;
   if (res.skipped) return `<div class="fb neutral"><div class="fb-head">${icon('info')}تم تخطي هذا السؤال.</div>
     <p>يمكنكِ التدرّب على النطق لاحقاً باستخدام متصفح Google Chrome.</p></div>`;
@@ -2140,32 +2532,29 @@ function renderCurrentQuiz() {
   else { renderLesson(); saveLessonResume(); }
 }
 
-// اختيار إجابة → تصحيح فوري من الخادم
-async function pickAnswer(answer) {
+// اختيار إجابة:
+// - في الدروس والمراجعة: تصحيح فوري على الجهاز، والحفظ في الخلفية
+// - في اختبار نهاية المستوى: تُسجَّل الإجابة فقط، وتُصحَّح في الخادم عند التسليم
+function pickAnswer(answer) {
   const M = quizState();
   if (!M) return;
   const q = M.questions[M.idx];
   if (M.results[q.id] || M.busy) return;
   if (String(answer).trim() === '') return toast('يُرجى إدخال إجابة.', 'err');
-  M.busy = true;
-  document.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (b.dataset.k === answer) b.classList.add('sel', 'checking'); });
-  try {
-    const r = await call('checkAnswer', S.token, {
-      qid: q.id, answer, context: quizContext(), sessionId: S.mode === 'test' ? S.lt.sessionId : ''
-    });
-    if (!r.ok) { toast(r.error, 'err'); }
-    else {
-      M.results[q.id] = { correct: r.correct, answer: String(answer), correctKey: r.correctKey, correctText: r.correctText,
-                          explanationAr: r.explanationAr, msg: pick(r.correct ? CORRECT_MSGS : WRONG_MSGS),
-                          qtype: q.qtype, score: r.score, skipped: !!r.skipped, points: r.extra ? r.extra.points : 0 };
-      if (r.extra && typeof applyReward === 'function') applyReward(r.extra, true);
-    }
-  } catch (e) { if (e.code !== 'AUTH') toast(e.error, 'err'); }
-  finally {
-    M.busy = false;
-    renderCurrentQuiz();
-    const fb = $('.fb'); if (fb) fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  answer = String(answer);
+
+  if (S.mode === 'test') {
+    M.results[q.id] = { pending: true, answer, qtype: q.qtype, skipped: answer === '__SKIP__' };
+  } else {
+    const ctx = quizContext();
+    const skipped = q.qtype === 'speak' && answer === '__SKIP__';
+    const g = skipped ? { correct: false, score: null } : gradeLocal(q, answer);
+    const pts = recordAnswer(q, answer, ctx, g.correct);
+    M.results[q.id] = Object.assign(g, { answer, msg: pick(g.correct ? CORRECT_MSGS : WRONG_MSGS),
+                                          qtype: q.qtype, skipped, points: pts });
   }
+  renderCurrentQuiz();
+  const fb = $('.fb'); if (fb) fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function nextQ() {
@@ -2191,23 +2580,14 @@ async function finishLesson() {
   const unanswered = qs.filter(q => !S.ls.results[q.id]).length;
   if (unanswered) return toast(`تبقّى ${unanswered} من الأسئلة دون إجابة.`, 'err');
   const correct = qs.filter(q => S.ls.results[q.id] && S.ls.results[q.id].correct).length;
-  loading(true, 'جارٍ حفظ التقدم');
-  try {
-    const r = await call('completeLesson', S.token, L.id, correct);
-    if (!r.ok) return toast(r.error, 'err');
-    S.ls.step = 'done';
-    S.ls.summary = { correct, total: qs.length, allDone: r.allDone, points: r.extra ? r.extra.points : 0 };
-    if (r.extra && typeof applyReward === 'function') applyReward(r.extra);
-    S.progress[L.track] = r.progress; S.percent[L.track] = r.percent;
-    if (S.tr && S.tr.data && S.tr.track === L.track) {
-      S.tr.data.progress = r.progress; S.tr.data.percent = r.percent;
-      (S.tr.data.levels[L.level] || []).forEach(x => { if (x.id === L.id) x.completed = true; });
-    }
-    renderLesson(); window.scrollTo(0, 0);
-    saveResume({ screen: 'track', track: L.track });
-    if (qs.length && correct === qs.length) setTimeout(goldShimmer, 300);
-  } catch (e) { if (e.code !== 'AUTH') toast(e.error, 'err'); }
-  finally { loading(false); }
+  // يُحفظ الإكمال فوراً على الجهاز، ويُرسل للخادم في الخلفية
+  const r = recordLessonDone(L.id, correct, qs.length);
+  S.ls.step = 'done';
+  S.ls.summary = { correct, total: qs.length, allDone: r.allDone, points: r.points };
+  if (S.tr && S.tr.track === L.track) S.tr.data = localTrackData(L.track);
+  renderLesson(); window.scrollTo(0, 0);
+  saveResume({ screen: 'track', track: L.track });
+  if (qs.length && correct === qs.length) setTimeout(goldShimmer, 300);
 }
 
 function lessonDoneHTML() {
@@ -2244,7 +2624,8 @@ async function startLevelTest() {
   showScreen('test');
   $('#lt-body').innerHTML = skeletonPlacement();
   try {
-    const r = await call('startLevelTest', S.token, track);
+    // يُرسل إكمال الدروس المحفوظ على الجهاز مع طلب بدء الاختبار في اتصال واحد
+    const r = await callWithSync('startLevelTest', S.token, track);
     if (!r.ok) { toast(r.error, 'err'); S.mode = 'lesson'; return showScreen('track'); }
     S.lt = { sessionId: r.sessionId, track, level: r.level, questions: r.questions, idx: 0, results: {}, busy: false };
     renderTest();
@@ -2258,7 +2639,7 @@ function renderTest() {
     <div class="ls-top"><button class="back" onclick="quitTest()">${icon('x')}الخروج من الاختبار</button>
       <span class="chip">${icon(TRACK_ICONS[T.track] || 'book')}${esc(S.config.tracks[T.track].ar)} · المستوى ${ROMAN[T.level]}</span></div>
     <div class="test-banner"><span class="eyebrow">Level Assessment</span><h3>اختبار نهاية المستوى</h3>
-      <small>نسبة الاجتياز ${S.config.passPercent}% · تُحتسب الإجابة الأولى لكل سؤال</small></div>
+      <small>نسبة الاجتياز ${S.config.passPercent}% · تظهر النتيجة والتصحيح بعد إنهاء الاختبار</small></div>
     ${quizBlock(q, T.idx, T.questions.length, T.results[q.id], 'levelTest')}`;
 }
 
@@ -2270,14 +2651,17 @@ function quitTest() {
 async function submitTest() {
   loading(true, 'جارٍ احتساب النتيجة');
   try {
-    const r = await call('submitLevelTest', S.token, S.lt.sessionId);
+    const answers = {};
+    Object.keys(S.lt.results).forEach(k => { answers[k] = S.lt.results[k].answer; });
+    const r = await call('submitLevelTest', S.token, S.lt.sessionId, answers);
     if (!r.ok) return toast(r.error, 'err');
+    if (r.progress) { S.progress = r.progress; queueGet().forEach(o => { if (o.t === 'done') markLessonLocal(o.lessonId); }); recomputePercents(); cacheUserLocal(); }
     renderTestResult(r);
     if (r.extra && typeof applyReward === 'function') applyReward(r.extra);
     window.scrollTo(0, 0);
     if (r.passed) setTimeout(goldShimmer, 350);
     if (S.tr) S.tr.view = null;
-    refreshHome().catch(() => {});
+    refreshState();   // تحديث «أخطائي» بالأسئلة التي أخطأت فيها في الاختبار
   } catch (e) { if (e.code !== 'AUTH') toast(e.error, 'err'); }
   finally { loading(false); }
 }
@@ -2305,6 +2689,11 @@ function renderTestResult(r) {
       ${r.extra && r.extra.points ? `<div class="pts-pill">${icon('star')}+${r.extra.points} نقطة</div>` : ''}
     </div>
     <div class="note">${icon(r.passed ? 'award' : 'info')}<span>${esc(note)}</span></div>
+    ${(r.review || []).length ? `<div class="card"><div class="card-title">مراجعة الإجابات</div>
+      ${r.review.map(x => `<details class="rv-test ${x.correct ? 'ok' : 'bad'}"><summary class="sum-row ${x.correct ? 'ok' : 'bad'}">${icon(x.correct ? 'check' : 'x')}<span class="en">${esc(shortPrompt(x.prompt))}</span></summary>
+        <div class="rv-test-body">${!x.correct && x.correctText ? `<div class="fb-ans">الإجابة الصحيحة: <span class="en-inline">${esc(x.correctText)}</span></div>` : ''}
+          ${x.explanationAr ? `<p>${esc(x.explanationAr)}</p>` : ''}</div></details>`).join('')}
+    </div>` : ''}
     ${r.extra && r.extra.certificate
       ? `<button class="btn navy" onclick="showCertificate(${esc(JSON.stringify(r.extra.certificate))})">${icon('award')}عرض شهادة الإتمام</button>` : ''}
     ${r.passed
@@ -2517,7 +2906,7 @@ QTYPES.order = function (q, res) {
   const words = ((q.options[0] && q.options[0].text) || '').split('/').map(s => s.trim()).filter(Boolean);
   if (res) {
     const built = res.restored ? '' : String(res.answer);
-    return `<div class="ord-line filled ${res.restored ? '' : res.correct ? 'ok' : 'bad'}">
+    return `<div class="ord-line filled ${res.restored || res.pending ? '' : res.correct ? 'ok' : 'bad'}">
       ${built.split(' ').filter(Boolean).map(w => `<span class="chip-w">${esc(w)}</span>`).join('')}</div>`;
   }
   if (!S.ord || S.ord.qid !== q.id) S.ord = { qid: q.id, words, picked: [] };
@@ -2547,7 +2936,7 @@ function ordCheck() {
  * ✍️ إكمال الفراغ (complete) + تصحيح الخطأ (correct)
  * ========================================================= */
 QTYPES.complete = function (q, res) {
-  if (res) return res.restored ? '' : `<div class="typed ${res.correct ? 'ok' : 'bad'}"><small>إجابتكِ</small>${esc(res.answer)}</div>`;
+  if (res) return res.restored ? '' : `<div class="typed ${res.pending ? '' : res.correct ? 'ok' : 'bad'}"><small>إجابتكِ</small>${esc(res.answer)}</div>`;
   return `<div class="type-row">
       <input id="ans-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type your answer"
         onkeydown="if(event.key==='Enter')submitTyped()">
@@ -2557,7 +2946,7 @@ QTYPES.complete = function (q, res) {
 };
 
 QTYPES.correct = function (q, res) {
-  if (res) return res.restored ? '' : `<div class="typed ${res.correct ? 'ok' : 'bad'}"><small>إجابتكِ</small>${esc(res.answer)}</div>`;
+  if (res) return res.restored ? '' : `<div class="typed ${res.pending ? '' : res.correct ? 'ok' : 'bad'}"><small>إجابتكِ</small>${esc(res.answer)}</div>`;
   const wrong = (q.options[0] && q.options[0].text) || '';
   return `<textarea id="ans-input" class="en-area" autocomplete="off" autocapitalize="off" spellcheck="false">${esc(wrong)}</textarea>
     <small class="hint">${icon('info')}عدّلي الجملة في المربع ثم اكتبيها كاملة بشكل صحيح، مع مراعاة الحروف الكبيرة.</small>
@@ -2759,7 +3148,7 @@ function shortPrompt(p) { const l = String(p).split('\n').filter(Boolean); const
 const BADGE_QUEUE = [];
 function applyReward(x) {
   if (!x) return;
-  if (S.user && typeof x.total === 'number') S.user.points = x.total;
+  if (S.user && typeof x.total === 'number') { S.user.points = x.total + (typeof pendingPoints === 'function' ? pendingPoints() : 0); if (typeof cacheUserLocal === 'function') cacheUserLocal(); }
   if (x.newBadges && x.newBadges.length) setTimeout(() => celebrateBadges(x.newBadges), 600);
 }
 
@@ -2800,16 +3189,21 @@ function closeModal(after) {
 /* =========================================================
  * 📝 أخطائي
  * ========================================================= */
-window.openMistakes = async function () {
+// «أخطائي» تُبنى فوراً من البيانات المحفوظة على الجهاز
+window.openMistakes = function () {
   S.mode = 'lesson';
   showScreen('mistakes');
-  $('#mk-body').innerHTML = skeletonList(5);
-  try {
-    const r = await call('getMistakes', S.token);
-    if (!r.ok) { toast(r.error, 'err'); return goHome(); }
-    S.mk = { items: r.items, fixed: r.fixed, pts: r.reviewPoints, filter: (S.mk && S.mk.filter) || 'all' };
-    renderMistakes();
-  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); goHome(); } }
+  const items = S.mistakes.items.map(m => {
+    const q = questionById(m.qid);
+    if (!q) return null;
+    const les = C.L[q.lessonId];
+    const t = S.config.tracks[q.track] || {};
+    return Object.assign({}, q, { trackAr: t.ar || '', addedAt: m.addedAt, source: m.source,
+      lessonTitle: les ? les.title : '', passage: les && les.text && les.track !== 'listening' ? les.text : '' });
+  }).filter(Boolean).slice(0, 150);
+  S.mk = { items, fixed: S.mistakes.fixed || 0, pts: (S.rules && S.rules.REVIEW_FIX) || S.mistakes.reviewPoints || 0,
+           filter: (S.mk && S.mk.filter) || 'all' };
+  renderMistakes();
 };
 
 function mkFiltered() { const f = S.mk.filter; return S.mk.items.filter(q => f === 'all' || q.track === f); }
@@ -2890,15 +3284,12 @@ function finishReview() {
 /* =========================================================
  * 🏆 لوحة الشرف
  * ========================================================= */
-window.openLeaderboard = async function () {
+window.openLeaderboard = function () {
   showScreen('board');
-  $('#lb-body').innerHTML = skeletonList(6);
-  try {
-    const r = await call('getLeaderboard', S.token);
-    if (!r.ok) { toast(r.error, 'err'); return goHome(); }
+  cachedView('board', 'getLeaderboard', [S.token], '#lb-body', skeletonList(6), r => {
     S.lb = { d: r, tab: (S.lb && S.lb.tab) || 'students' };
-    renderBoard();
-  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); goHome(); } }
+    if (S.screen === 'board') renderBoard();
+  }, true);
 };
 function setLbTab(t) { S.lb.tab = t; renderBoard(); }
 
@@ -2953,15 +3344,14 @@ function renderBoard() {
  * ========================================================= */
 window.openCertificates = async function () {
   showScreen('achieve');
-  $('#ac-body').innerHTML = skeletonList(4);
-  try {
-    const r = await call('getAchievements', S.token);
-    if (!r.ok) { toast(r.error, 'err'); return goHome(); }
+  // يُرسل ما لم يُحفظ بعد مع الطلب نفسه حتى تكون النقاط والأوسمة محدّثة
+  cachedView('achieve', 'getAchievements', [S.token], '#ac-body', skeletonList(4), (r, fromCache) => {
     S.ac = r;
-    if (S.user) { S.user.points = r.points; S.user.streak = r.streak; }
-    renderAchieve();
-    if (r.newBadges && r.newBadges.length) setTimeout(() => celebrateBadges(r.newBadges), 500);
-  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); goHome(); } }
+    if (S.user && !fromCache) { S.user.points = r.points + pendingPoints(); S.user.streak = r.streak; }
+    if (S.user) { S.ac.points = S.user.points; S.ac.streak = S.user.streak; }
+    if (S.screen === 'achieve') renderAchieve();
+    if (!fromCache && r.newBadges && r.newBadges.length) setTimeout(() => celebrateBadges(r.newBadges), 500);
+  }, true);
 };
 
 function renderAchieve() {
@@ -3078,12 +3468,10 @@ routeAfterLogin = async function () {
 };
 
 async function checkFeedback() {
-  if (FB_CHECKED || !S.token) return;
+  if (FB_CHECKED || !S.token || S.feedbackDue === undefined) return;
   FB_CHECKED = true;
-  try {
-    const r = await call('getFeedbackStatus', S.token);
-    if (r.ok && r.show) setTimeout(showFeedback, 1800);
-  } catch (e) {}
+  // الحالة تصل مع طلب الدخول الواحد (بدون طلب إضافي)
+  if (S.feedbackDue) setTimeout(showFeedback, 1800);
 }
 
 function showFeedback() {
@@ -3433,15 +3821,13 @@ function secChip(k) { const u = STEP_UI[k]; return `<span class="st-sec" style="
  * ========================================================= */
 window.openStep = async function () {
   stopMockTimer();
-  S.mode = 'lesson';
+  S.mode = 'lesson'; S.sp = null; S.sr = null;
   showScreen('step');
-  $('#st-body').innerHTML = skeletonList(4);
-  try {
-    const r = await call('getStepHome', S.token);
-    if (!r.ok) { toast(r.error, 'err'); return goHome(); }
+  // عرض فوري لآخر نسخة محفوظة، ثم التحديث في الخلفية
+  cachedView('stephome', 'getStepHome', [S.token], '#st-body', skeletonList(4), r => {
     S.st = r;
-    renderStepHome();
-  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); goHome(); } }
+    if (S.screen === 'step' && S.mode === 'lesson' && !S.sp && !S.sr) renderStepHome();
+  });
 };
 
 function savedMock() {
@@ -3584,21 +3970,14 @@ function stepStem(q, mode, sameGroup) {
   return `${top}<div class="st-q">${stQ(q.question)}</div>`;
 }
 
-async function pickStepAnswer(key) {
-  const P = S.sp; if (!P || P.busy) return;
+// التصحيح فوري على الجهاز، وتُحفظ الإجابات كلها مع نهاية المجموعة
+function pickStepAnswer(key) {
+  const P = S.sp; if (!P) return;
   const q = P.questions[P.idx];
   if (P.results[q.id]) return;
-  P.busy = true;
-  const btn = document.querySelector(`#st-body .opt:nth-child(${'ABCD'.indexOf(key) + 1})`);
-  if (btn) btn.classList.add('sel', 'checking');
-  document.querySelectorAll('#st-body .opt').forEach(b => b.disabled = true);
-  try {
-    const r = await call('checkStepAnswer', S.token, { sessionId: P.id, qid: q.id, answer: key });
-    P.busy = false;
-    if (!r.ok) { toast(r.error, 'err'); return renderPractice(); }
-    P.results[q.id] = { correct: r.correct, answer: r.answer, mine: key, explanationAr: r.explanationAr, transcript: r.transcript };
-    renderPractice();
-  } catch (e) { P.busy = false; if (e.code !== 'AUTH') { toast(e.error, 'err'); renderPractice(); } }
+  P.results[q.id] = { correct: key === q.answer, answer: q.answer, mine: key, explanationAr: q.explanationAr, transcript: q.transcript };
+  renderPractice();
+  const fb = $('#st-body .fb'); if (fb) fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function nextPractice() {
@@ -3618,14 +3997,15 @@ function quitPractice() {
     <button class="btn ghost" onclick="closeModal()">متابعة الحل</button></div>`);
 }
 
-async function finishPractice() {
+// النتيجة تظهر فوراً، والحفظ في الخادم يتم في الخلفية
+function finishPractice() {
   const P = S.sp;
-  loading(true, 'جارٍ حفظ النتيجة...');
-  try {
-    const r = await call('finishStepPractice', S.token, P.id);
-    loading(false);
-    if (!r.ok) { toast(r.error, 'err'); return openStep(); }
-    applyReward(r.extra);
+  const answers = {};
+  Object.keys(P.results).forEach(k => { answers[k] = P.results[k].mine; });
+  const correct = P.questions.filter(q => P.results[q.id] && P.results[q.id].correct).length;
+  const r = { correct, total: P.questions.length, percent: Math.round(correct / P.questions.length * 100), section: P.section };
+  savePracticeInBackground(P.id, answers, 0);
+  {
     const u = STEP_UI[r.section];
     $('#st-body').innerHTML = `
       <div class="hero-card ${r.percent >= 70 ? 'sheen' : 'neutral'}" style="margin-top:12px">
@@ -3633,14 +4013,29 @@ async function finishPractice() {
         <h2>${r.percent >= 90 ? 'أداء متميز' : r.percent >= 70 ? 'أحسنتِ' : 'استمري في التدريب'}</h2>
         <div class="score">${r.correct}<small> / ${r.total}</small></div>
         <p>نتيجتكِ في تدريب ${u.ar}: <span class="en-inline">${r.percent}%</span>. ${r.percent >= 70 ? 'واصلي بالمستوى نفسه.' : 'راجعي الشروح المرفقة مع الأسئلة، ثم جرّبي مجموعة جديدة.'}</p>
-        ${r.extra && r.extra.points ? `<div class="pts-pill">${icon('star')}+${r.extra.points} نقطة</div>` : ''}
       </div>
       <button class="btn primary" onclick="startStepPractice('${r.section}')">${icon('rotate')}مجموعة جديدة في ${u.ar}</button>
       <button class="btn ghost" onclick="openStep()">العودة إلى قسم STEP</button>`;
     window.scrollTo(0, 0);
     if (r.percent >= 90) setTimeout(goldShimmer, 300);
     S.sp = null;
-  } catch (e) { loading(false); if (e.code !== 'AUTH') { toast(e.error, 'err'); openStep(); } }
+  }
+}
+
+function savePracticeInBackground(sessionId, answers, attempt) {
+  call('finishStepPractice', S.token, sessionId, answers).then(res => {
+    if (!res.ok) throw res;
+    applyReward(res.extra);
+    if (res.extra && res.extra.points) {
+      const hero = $('#st-body .hero-card');
+      if (hero && !hero.querySelector('.pts-pill')) hero.insertAdjacentHTML('beforeend', `<div class="pts-pill">${icon('star')}+${res.extra.points} نقطة</div>`);
+      if (S.screen === 'home') renderHome();
+    }
+  }).catch(e => {
+    if (e && e.code === 'AUTH') return;
+    if (attempt < 3 && !(e && e.error && /انتهت مدة/.test(e.error))) setTimeout(() => savePracticeInBackground(sessionId, answers, attempt + 1), 5000 * (attempt + 1));
+    else toast('تعذّر حفظ نتيجة مجموعة التدريب. تحققي من الاتصال بالإنترنت.', 'err');
+  });
 }
 
 
