@@ -16,7 +16,7 @@
      * ✏️ رابط الخادم: الصقي هنا رابط Web app الخاص بكِ (ينتهي بـ /exec)
      *    بين علامتي التنصيص، بدلاً من النص PASTE_YOUR_WEB_APP_URL_HERE
      * ===================================================================== */
-    window.ELC_API_URL = 'https://script.google.com/macros/s/AKfycbx9QPEYuX-MkSsmCP3Ou_PU8Ja-86Wcl5z8NwsKVCG_3bcvLmWXb5CpSLOHTGXMUFuCzQ/exec';
+    window.ELC_API_URL = 'PASTE_YOUR_WEB_APP_URL_HERE';
   </script>
   <!--
   Styles.html — نظام التصميم الكامل للمنصة
@@ -261,6 +261,10 @@
   .home-head .seg { background: transparent; border-color: rgba(201, 168, 106, .4); }
   .home-head .seg button { color: rgba(250, 247, 240, .7); }
   .home-head .seg button.active { background: var(--gold); color: var(--navy); }
+  /* زر اختبار الصوت */
+  .accent .vtest { margin: 0; }
+  .home-head .accent .vtest { background: transparent; border-color: rgba(201, 168, 106, .4); color: rgba(250, 247, 240, .8); }
+  .home-head .accent .vtest:hover { border-color: var(--gold); color: var(--gold); }
 
   /* =========================================================
    * 8) النص الإنجليزي + أدوات الاستماع والترجمة
@@ -328,7 +332,7 @@
     display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--gold-l); background: #fff;
     color: var(--navy); border-radius: 999px; padding: 4px 13px; font-size: 13px;
   }
-  .chip .ic { width: 14px; height: 14px; color: var(--gold-d); }
+  .chip .ic { width: 14px; height: 14px; color: var(--tc, var(--gold-d)); }
   .nav { display: flex; gap: 10px; margin-top: 4px; }
   .nav .btn { flex: 1; }
 
@@ -375,7 +379,7 @@
   .res-row { display: flex; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
   .res-row:first-child { padding-top: 2px; }
   .res-row:last-child { border-bottom: 0; padding-bottom: 2px; }
-  .res-ico { width: 44px; height: 44px; border-radius: 12px; background: var(--navy); color: var(--gold); display: grid; place-items: center; flex-shrink: 0; }
+  .res-ico { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(145deg, var(--tc, var(--navy)), var(--tc-d, var(--navy))); color: var(--gold-l); display: grid; place-items: center; flex-shrink: 0; }
   .res-ico .ic { width: 21px; height: 21px; }
   .res-txt { flex: 1; min-width: 0; }
   .res-txt .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -427,15 +431,16 @@
   .track {
     display: flex; flex-direction: column; gap: 1px; padding: 18px 16px 15px; text-align: right; cursor: pointer;
     background: #fff; border: 1px solid var(--line); border-radius: var(--r); color: var(--text); font-family: var(--f-ar);
-    box-shadow: var(--sh-1), inset 0 2px 0 var(--gold); transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+    box-shadow: var(--sh-1), inset 0 3px 0 var(--tc, var(--gold)); transition: transform .3s var(--ease), box-shadow .3s var(--ease);
   }
-  .track:hover { transform: translateY(-3px); box-shadow: var(--sh-2), inset 0 2px 0 var(--gold); }
+  .track:hover { transform: translateY(-3px); box-shadow: var(--sh-2), inset 0 3px 0 var(--tc, var(--gold)); }
   .track:active { transform: translateY(-1px) scale(.99); }
-  .t-ico { width: 44px; height: 44px; border-radius: 12px; background: var(--navy); color: var(--gold); display: grid; place-items: center; margin-bottom: 14px; }
+  .t-ico { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(145deg, var(--tc, var(--navy)), var(--tc-d, var(--navy))); color: var(--gold-l); display: grid; place-items: center; margin-bottom: 14px; }
   .t-ico .ic { width: 21px; height: 21px; }
   .track b { font-family: var(--f-ar-h); font-size: 18px; font-weight: 600; color: var(--navy); }
   .track .en-sub { font-family: var(--f-en-h); font-style: italic; font-size: 13px; color: var(--muted); }
-  .track .bar { margin: 14px 0 8px; }
+  .track .bar { margin: 14px 0 8px; background: var(--tc-l, #ECE5D6); }
+  .track .bar > div { background: linear-gradient(90deg, var(--tc-d, var(--gold-d)), var(--tc, var(--gold))); }
   .t-foot { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); }
   .t-foot b { font-family: var(--f-en); font-size: 12px; font-weight: 600; color: var(--navy); }
 
@@ -505,6 +510,60 @@
 
   .shimmer-fx { position: fixed; inset: 0; pointer-events: none; z-index: 999; }
 
+  /* =========================================================
+   * 15) شعار النادي + الترويسة الرسمية + التذييل
+   * ========================================================= */
+  /* الشعار داخل قرص عاجي بإطار ذهبي، والشعار الذهبي الاحتياطي يظهر فقط إذا تعذّر تحميل الصورة */
+  .logo-wrap .logo-fb { display: none !important; }
+  .logo-wrap.nologo .logo-fb { display: block !important; }
+  .logo-wrap.nologo .logo-disc { display: none !important; }
+  .logo-disc {
+    display: grid; place-items: center; width: 152px; height: 152px; margin: 0 auto 22px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 35%, #FFFFFF, var(--ivory) 75%);
+    box-shadow: 0 0 0 1px var(--gold), 0 0 0 7px rgba(201, 168, 106, .14), 0 0 0 8px rgba(201, 168, 106, .5), 0 16px 34px rgba(0, 0, 0, .35);
+  }
+  .logo-disc img { width: 78%; height: 78%; object-fit: contain; display: block; }
+  .splash .logo-disc { width: 128px; height: 128px; margin: 0; animation: breathe 2.6s ease-in-out infinite; }
+  .logo-wrap.mini { display: inline-flex; }
+  .logo-disc.sm { width: 38px; height: 38px; margin: 0; box-shadow: 0 0 0 1px var(--gold), 0 0 0 3px rgba(201, 168, 106, .25); }
+
+  /* الترويسة الرسمية أعلى شاشة الترحيب */
+  .gov-band {
+    margin: -16px -18px 0; padding: 14px 18px 12px; background: #FFFFFF; text-align: center;
+    border-bottom: 1px solid var(--gold-l); box-shadow: inset 0 -3px 0 var(--ivory);
+  }
+  .gov-band img { display: block; margin: 0 auto; max-width: 100%; max-height: 62px; object-fit: contain; }
+  .gov-band + .hero { margin-top: 0; }
+  @media (min-width: 676px) {
+    .gov-band { margin: 10px 0 0; border-radius: var(--r-lg) var(--r-lg) 0 0; border: 1px solid var(--gold-l); border-bottom: 0; }
+    .gov-band + .hero { border-radius: 0 0 var(--r-lg) var(--r-lg); }
+    .gov-band img { max-height: 74px; }
+  }
+
+  /* بطاقة الاقتراحات في الرئيسية */
+  .suggest-card {
+    display: flex; align-items: center; gap: 14px; margin-top: 14px; padding: 16px 18px; cursor: pointer;
+    background: #fff; border: 1px solid var(--gold-l); border-radius: var(--r); box-shadow: var(--sh-1), inset 0 2px 0 var(--gold);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .suggest-card:hover { transform: translateY(-2px); box-shadow: var(--sh-2), inset 0 2px 0 var(--gold); }
+  .suggest-card .sg-ico { width: 44px; height: 44px; border-radius: 12px; background: var(--gold-xl); color: var(--gold-d); display: grid; place-items: center; flex-shrink: 0; }
+  .suggest-card .sg-ico .ic { width: 21px; height: 21px; }
+  .suggest-card div { flex: 1; }
+  .suggest-card b { display: block; font-family: var(--f-ar-h); color: var(--navy); font-weight: 600; font-size: 16px; }
+  .suggest-card small { color: var(--muted); font-size: 13px; }
+  .suggest-card > .ic { color: var(--gold-d); width: 18px; height: 18px; }
+
+  /* التذييل وحقوق النشر (يظهر أسفل كل الشاشات) */
+  .site-foot { margin-top: 40px; padding-top: 6px; text-align: center; color: var(--muted); font-size: 12.5px; line-height: 1.9; }
+  .site-foot .ornament { margin: 0 auto 14px; max-width: 200px; }
+  .site-foot .foot-links { margin-bottom: 8px; display: flex; justify-content: center; gap: 18px; }
+  .site-foot .foot-links .link { font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+  .site-foot .foot-links .ic { width: 14px; height: 14px; color: var(--gold-d); }
+  .site-foot .copy { color: #57555C; }
+  .site-foot .school { color: var(--muted-2); font-size: 11.5px; letter-spacing: .02em; }
+  .site-foot .school .en-inline { letter-spacing: .12em; font-size: 10px; text-transform: uppercase; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   }
@@ -515,7 +574,9 @@
 
   <!-- ============ الشاشة الافتتاحية ============ -->
   <div id="splash" class="splash">
-    <svg class="emblem" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" direction="ltr" aria-hidden="true">
+    <div class="logo-wrap">
+    <span class="logo-disc"><img src="logo.png" alt="شعار النادي" onerror="this.closest('.logo-wrap').classList.add('nologo');window.LOGO_FAIL=1"></span>
+    <svg class="emblem logo-fb" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" direction="ltr" aria-hidden="true">
       <defs>
         <linearGradient id="eg1" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#E8D6A8"/><stop offset=".5" stop-color="#C9A86A"/><stop offset="1" stop-color="#A88A4E"/>
@@ -534,6 +595,7 @@
       <path d="M100 115.5 l3 3.5 -3 3.5 -3 -3.5z" fill="#C9A86A"/>
       <text x="100" y="134" text-anchor="middle" font-family="Inter, sans-serif" font-size="6.5" letter-spacing="2.4" fill="#C9A86A" direction="ltr">MMXXVI</text>
     </svg>
+    </div>
     <div class="splash-line"></div>
   </div>
 
@@ -546,8 +608,12 @@
 
     <!-- ================= الترحيب ================= -->
     <section class="screen" id="scr-welcome">
+      <!-- الترويسة الرسمية (header.png في مستودع GitHub) — تختفي تلقائياً إذا لم تُحمَّل -->
+      <div class="gov-band"><img src="header.png" alt="وزارة التعليم — رؤية 2030 — مدرستي — العمل التطوعي" onerror="this.parentNode.remove()"></div>
       <div class="hero">
-        <svg class="emblem" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" direction="ltr" aria-hidden="true">
+        <div class="logo-wrap">
+        <span class="logo-disc"><img src="logo.png" alt="شعار نادي اللغة الإنجليزية" onerror="this.closest('.logo-wrap').classList.add('nologo');window.LOGO_FAIL=1"></span>
+        <svg class="emblem logo-fb" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" direction="ltr" aria-hidden="true">
           <defs>
             <linearGradient id="eg2" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stop-color="#E8D6A8"/><stop offset=".5" stop-color="#C9A86A"/><stop offset="1" stop-color="#A88A4E"/>
@@ -566,6 +632,7 @@
           <path d="M100 115.5 l3 3.5 -3 3.5 -3 -3.5z" fill="#C9A86A"/>
           <text x="100" y="134" text-anchor="middle" font-family="Inter, sans-serif" font-size="6.5" letter-spacing="2.4" fill="#C9A86A" direction="ltr">MMXXVI</text>
         </svg>
+        </div>
         <h1>منصة اللغة الإنجليزية للتعلم الذاتي</h1>
         <div class="en-title" dir="ltr">English Language Club</div>
         <div class="ornament"><span></span><svg viewBox="0 0 10 10"><path d="M5 0 L10 5 L5 10 L0 5Z" fill="currentColor"/></svg><span></span></div>
@@ -588,7 +655,6 @@
       <button class="btn primary" onclick="showScreen('register')">إنشاء حساب جديد</button>
       <button class="btn ghost" onclick="showScreen('login')">تسجيل الدخول</button>
 
-      <div class="foot">الثانوية التاسعة عشر<br><span class="en-inline">English Language Club · Est. 2026</span></div>
     </section>
 
     <!-- ================= تسجيل جديد ================= -->
@@ -695,11 +761,24 @@
       <div class="tracks stagger" id="home-tracks"></div>
       <div class="sec-title"><h3>الأقسام</h3><span class="eyebrow">Resources</span></div>
       <div class="more-grid stagger" id="home-more"></div>
-      <div class="foot">English Language Club · الثانوية التاسعة عشر</div>
+      <!-- بطاقة الاقتراحات -->
+      <div class="suggest-card" onclick="openSuggest()">
+        <div class="sg-ico"><span data-i="message"></span></div>
+        <div><b>شاركينا اقتراحاتكِ</b><small>ما تحتاجين إضافته للمنصة من أجل تحسين أدائك؟</small></div>
+        <span data-i="arrowLeft"></span>
+      </div>
     </section>
 
     <!-- شاشات المراحل القادمة تُضاف هنا تلقائياً -->
     <div id="extra-screens"></div>
+
+    <!-- ✏️ التذييل وحقوق النشر (يظهر أسفل جميع الشاشات) -->
+    <footer class="site-foot">
+      <div class="ornament"><span></span><svg viewBox="0 0 10 10"><path d="M5 0 L10 5 L5 10 L0 5Z" fill="currentColor"/></svg><span></span></div>
+      <div class="foot-links"><a class="link" onclick="openSuggest()"><span data-i="message"></span>الاقتراحات</a></div>
+      <div class="copy">جميع الحقوق محفوظة © 2026 — معلمات اللغة الإنجليزية: أ. حنان جرادان الحارثي، أ. شيماء سامي الحازمي</div>
+      <div class="school">الثانوية التاسعة عشر · <span class="en-inline">English Language Club</span></div>
+    </footer>
   </main>
 
   <!-- App.html — المنطق الأساسي للواجهة -->
@@ -722,6 +801,22 @@ const ROLE_ICONS  = { student: 'cap', teacher: 'board', staff: 'briefcase', pare
 const TRACK_ICONS = { reading: 'book', writing: 'feather', listening: 'headphones',
                       speaking: 'mic', grammar: 'layers', vocabulary: 'type' };
 const ROMAN = { 1: 'I', 2: 'II', 3: 'III' };
+
+// ✏️ ألوان المسارات — درجات جواهر هادئة (c = اللون، d = الأغمق، l = الخلفية الفاتحة)
+// الذهبي يبقى اللون المميِّز العام للمنصة
+const TRACK_COLORS = {
+  reading:    { c: '#2B4C7E', d: '#1B3359', l: '#E9EEF6' },  // أزرق ياقوتي
+  writing:    { c: '#5B3768', d: '#3D2347', l: '#F0EAF2' },  // برقوقي
+  listening:  { c: '#1D5E66', d: '#123F45', l: '#E5EFEF' },  // فيروزي داكن
+  speaking:   { c: '#7B2D42', d: '#541D2C', l: '#F5E9EC' },  // عنابي
+  grammar:    { c: '#2A6B4F', d: '#1A4834', l: '#E7F1EC' },  // زمردي
+  vocabulary: { c: '#8C6A2F', d: '#62491E', l: '#F4EDDF' }   // برونزي
+};
+function trackVars(k) { const t = TRACK_COLORS[k]; return t ? `--tc:${t.c};--tc-d:${t.d};--tc-l:${t.l}` : ''; }
+// تلوين شاشات المسار والدرس والاختبار بلون المسار الحالي
+function applyTrackTheme(k) {
+  ['scr-track', 'scr-lesson', 'scr-test'].forEach(id => { const el = document.getElementById(id); if (el) el.setAttribute('style', trackVars(k)); });
+}
 
 // أقسام "الأقسام" في الصفحة الرئيسية — تُفعَّل في المراحل القادمة
 const MORE = [
@@ -768,7 +863,8 @@ const ICONS = {
   board:       '<line x1="2" y1="3" x2="22" y2="3"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><polyline points="7 21 12 16 17 21"/>',
   briefcase:   '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
   users:       '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
-  dots:        '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>'
+  dots:        '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+  message:     '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'
 };
 
 function icon(name) {
@@ -778,9 +874,14 @@ function icon(name) {
 function hydrateIcons(root) {
   (root || document).querySelectorAll('[data-i]').forEach(el => { el.outerHTML = icon(el.dataset.i); });
 }
-// شعار مصغّر للرأس
-function miniMark() {
-  return `<svg class="mini-mark" viewBox="0 0 40 40" aria-hidden="true">
+// شعار النادي المصغّر (logo.png) مع الشعار الذهبي احتياطياً إذا لم تُحمَّل الصورة
+function clubLogoMini() {
+  if (window.LOGO_FAIL) return miniMark();
+  return `<span class="logo-wrap mini"><span class="logo-disc sm"><img src="logo.png" alt="" onerror="this.closest('.logo-wrap').classList.add('nologo');window.LOGO_FAIL=1"></span>${miniMark('logo-fb')}</span>`;
+}
+// شعار مصغّر ذهبي
+function miniMark(extra) {
+  return `<svg class="mini-mark ${extra || ''}" viewBox="0 0 40 40" aria-hidden="true">
     <circle cx="20" cy="20" r="19" fill="none" stroke="#C9A86A" stroke-width=".8"/>
     <circle cx="20" cy="20" r="16" fill="none" stroke="#C9A86A" stroke-width=".4"/>
     <text x="20" y="24.5" text-anchor="middle" direction="ltr" font-family="Playfair Display, Georgia, serif"
@@ -907,18 +1008,187 @@ const confetti = goldShimmer;
 /* =========================================================
  * 4) النطق والترجمة (تُستخدم في كل المنصة)
  * ========================================================= */
-function speak(text, accent, rate) {
-  if (!('speechSynthesis' in window)) { toast('المتصفح الحالي لا يدعم خاصية النطق. يُنصح باستخدام Google Chrome.', 'err'); return; }
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = accent || S.accent;
-  u.rate = rate || 0.9;
-  const voices = speechSynthesis.getVoices();
-  const v = voices.find(x => x.lang === u.lang) || voices.find(x => x.lang.replace('_', '-').indexOf(u.lang) === 0);
-  if (v) u.voice = v;
-  speechSynthesis.speak(u);
+/* ---------------------------------------------------------
+ * محرّك النطق المركزي — أصوات نسائية بأعلى جودة متاحة
+ * كل أجزاء المنصة (القراءة، الاستماع، المفردات، المحادثة، الاختبارات)
+ * تمرّ عبر الدوال: speak / speakChunks / stopSpeech فقط.
+ * --------------------------------------------------------- */
+// إعدادات الصوت: سرعة عادية، سرعة بطيئة، طبقة الصوت، مستوى الصوت
+const TTS = { rate: 0.92, slow: 0.7, pitch: 1, volume: 1, maxChunk: 180, waitMs: 1500 };
+
+// الأصوات النسائية المفضّلة لكل نطق، مرتبة من الأفضل إلى الأقل
+const VOICE_PREFS = {
+  'en-US': ['Google US English', 'Microsoft Aria Online (Natural)', 'Microsoft Jenny Online (Natural)',
+            'Microsoft Ava Online (Natural)', 'Samantha', 'Microsoft Zira', 'Allison', 'Ava'],
+  'en-GB': ['Google UK English Female', 'Microsoft Sonia Online (Natural)', 'Microsoft Libby Online (Natural)',
+            'Serena', 'Kate', 'Stephanie', 'Microsoft Hazel', 'Martha']
+};
+// أسماء أصوات رجالية يجب تجنّبها (كلمة male مستقلة حتى لا تُطابق Female)
+const MALE_RX = /\bmale\b|\b(daniel|alex|fred|david|mark|george|guy|ryan|arthur|oliver|james|thomas|tom|aaron|rishi|eddy|reed|rocko|grandpa|ralph|albert|bruce|junior|brian|christopher|eric|roger|steffan|andrew|brandon|davis|jason|tony|william|noah|elliot|thomas|alfie|ethan)\b/i;
+// أسماء أصوات نسائية معروفة
+const FEMALE_RX = /female|woman|\b(aria|jenny|ava|samantha|zira|allison|susan|victoria|karen|moira|tessa|fiona|veena|serena|kate|stephanie|hazel|martha|sonia|libby|maisie|emma|michelle|ana|amber|ashley|cora|elizabeth|jane|nancy|sara|joanna|kendra|kimberly|salli|ivy|amy|olivia|natasha|clara|catherine|nicky|shelley|sandy|flo|grandma|mia|abbie|bella|hollie|heather|evelyn|emily|libby|lily|isla|aoife|molly)\b/i;
+// كلمات تدل على الأصوات عالية الجودة
+const QUALITY_RX = /(natural|online|premium|enhanced|neural)/i;
+
+let VOICE_CACHE = {};
+let _voicesPromise = null;
+let _speechGen = 0;          // رقم التشغيل الحالي (لإيقاف أي تشغيل قديم)
+let _utterKeep = [];         // الاحتفاظ بالمقاطع في الذاكرة (يمنع توقف Chrome المفاجئ)
+
+function ttsSupported() { return 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window; }
+function langOf(v) { return String(v.lang || '').replace('_', '-').toLowerCase(); }
+function otherAccent(a) { return a === 'en-GB' ? 'en-US' : 'en-GB'; }
+
+// انتظار تحميل قائمة الأصوات (بعض المتصفحات تحمّلها متأخرة)
+function voicesReady() {
+  if (!ttsSupported()) return Promise.resolve([]);
+  const now = speechSynthesis.getVoices();
+  if (now && now.length) return Promise.resolve(now);
+  if (_voicesPromise) return _voicesPromise;
+  _voicesPromise = new Promise(resolve => {
+    let done = false;
+    const finish = () => { if (done) return; done = true; _voicesPromise = null; resolve(speechSynthesis.getVoices() || []); };
+    speechSynthesis.addEventListener('voiceschanged', function h() {
+      if ((speechSynthesis.getVoices() || []).length) { speechSynthesis.removeEventListener('voiceschanged', h); finish(); }
+    });
+    setTimeout(finish, TTS.waitMs);
+  });
+  return _voicesPromise;
 }
-if ('speechSynthesis' in window) { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); }
+
+// درجة جودة الصوت (للمفاضلة بين أصوات متقاربة)
+function voiceQuality(v) {
+  let s = 0;
+  if (QUALITY_RX.test(v.name)) s += 10;
+  if (/google/i.test(v.name)) s += 4;
+  if (!v.localService) s += 1;
+  return s;
+}
+function isMale(v) { return MALE_RX.test(v.name); }
+function isFemale(v) { return !isMale(v) && FEMALE_RX.test(v.name); }
+
+// أفضل صوت من الأسماء المفضّلة لنطق معيّن
+function fromPrefs(voices, accent) {
+  const prefs = VOICE_PREFS[accent] || [];
+  for (const name of prefs) {
+    const n = name.toLowerCase();
+    // مطابقة تامة أولاً ثم مطابقة جزئية (مثل "Samantha (Enhanced)")، مع تفضيل الأعلى جودة
+    const exact = voices.filter(v => v.name.toLowerCase() === n && !isMale(v));
+    const loose = voices.filter(v => v.name.toLowerCase().indexOf(n) !== -1 && !isMale(v));
+    const hits = (exact.length ? exact : loose).filter(v => langOf(v).indexOf(accent.toLowerCase()) === 0 || exact.length);
+    if (hits.length) return hits.sort((a, b) => voiceQuality(b) - voiceQuality(a))[0];
+  }
+  return null;
+}
+function best(list) { return list.length ? list.slice().sort((a, b) => voiceQuality(b) - voiceQuality(a))[0] : null; }
+
+// اختيار الصوت: نسائي بنفس النطق ← نسائي بالنطق الآخر ← أي صوت غير رجالي ← الافتراضي
+function pickVoice(accent) {
+  accent = accent || S.accent || 'en-US';
+  if (VOICE_CACHE[accent] !== undefined) return VOICE_CACHE[accent];
+  const all = ttsSupported() ? (speechSynthesis.getVoices() || []) : [];
+  if (!all.length) return null;           // لا نخزّن النتيجة قبل تحميل الأصوات
+  const inLang = a => all.filter(v => langOf(v).indexOf(a.toLowerCase()) === 0);
+  const other = otherAccent(accent);
+  const v =
+    fromPrefs(all, accent) ||
+    best(inLang(accent).filter(isFemale)) ||
+    fromPrefs(all, other) ||
+    best(inLang(other).filter(isFemale)) ||
+    best(all.filter(x => langOf(x).indexOf('en') === 0 && isFemale(x))) ||
+    best(inLang(accent).filter(x => !isMale(x))) ||
+    best(inLang(other).filter(x => !isMale(x))) ||
+    null;
+  VOICE_CACHE[accent] = v;
+  return v;
+}
+if (ttsSupported()) {
+  speechSynthesis.addEventListener('voiceschanged', () => { VOICE_CACHE = {}; });
+  voicesReady();                          // تحميل مسبق عند فتح المنصة
+}
+
+// إنشاء مقطع نطق بالإعدادات الموحّدة
+function ttsUtterance(text, opts) {
+  opts = opts || {};
+  const accent = opts.accent || S.accent || 'en-US';
+  const u = new SpeechSynthesisUtterance(text);
+  const v = pickVoice(accent);
+  if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = accent; }
+  u.rate = opts.rate === 'slow' ? TTS.slow : (typeof opts.rate === 'number' ? opts.rate : TTS.rate);
+  u.pitch = TTS.pitch; u.volume = TTS.volume;
+  return u;
+}
+
+// تقسيم الفقرة إلى جمل (مع حماية الاختصارات مثل Ms. و a.m.)
+function splitSentences(pg) {
+  const D = '․';
+  const safe = String(pg || '').replace(/\b(?:Mr|Mrs|Ms|Dr|St)\.|\b[ap]\.m\./gi, m => m.replace(/\./g, D));
+  const parts = safe.match(/[^.!?]+[.!?]+["'”’)]*\s*|[^.!?]+$/g) || [safe];
+  return parts.map(s => s.split(D).join('.')).filter(s => s.trim());
+}
+// تقسيم الجملة الطويلة جداً عند الفواصل (يحمي من انقطاع الصوت في Chrome)
+function splitLong(s) {
+  if (s.length <= TTS.maxChunk) return [s];
+  const out = []; let cur = '';
+  s.split(/(?<=[,;:])\s+/).forEach(p => {
+    if ((cur + ' ' + p).trim().length > TTS.maxChunk && cur) { out.push(cur.trim()); cur = p; }
+    else cur = (cur + ' ' + p).trim();
+  });
+  if (cur) out.push(cur.trim());
+  return out;
+}
+
+// إيقاف النطق وإزالة التظليل
+function stopSpeech() {
+  _speechGen++;
+  if (ttsSupported()) speechSynthesis.cancel();
+  _utterKeep = [];
+  document.querySelectorAll('.sent.speaking').forEach(e => e.classList.remove('speaking'));
+}
+
+// نطق مجموعة نصوص بالتتابع: items = [{ text, el }] — el (اختياري) هو العنصر الذي يُظلَّل أثناء قراءته
+async function speakChunks(items, opts) {
+  if (!ttsSupported()) { toast('المتصفح الحالي لا يدعم خاصية النطق. يُنصح باستخدام Google Chrome.', 'err'); return; }
+  stopSpeech();
+  const gen = _speechGen;
+  await voicesReady();
+  if (gen !== _speechGen) return;          // تم إيقاف التشغيل أو بدء تشغيل آخر أثناء الانتظار
+  const queue = [];
+  (items || []).forEach(it => {
+    const pieces = [];
+    splitSentences(it.text).forEach(s => splitLong(s.trim()).forEach(p => p && pieces.push(p)));
+    pieces.forEach((p, k) => queue.push({ text: p, el: it.el, last: k === pieces.length - 1 }));
+  });
+  queue.forEach(q => {
+    const u = ttsUtterance(q.text, opts);
+    if (q.el) {
+      u.onstart = () => {
+        if (gen !== _speechGen) return;
+        document.querySelectorAll('.sent.speaking').forEach(e => { if (e !== q.el) e.classList.remove('speaking'); });
+        q.el.classList.add('speaking');
+      };
+      if (q.last) u.onend = u.onerror = () => q.el.classList.remove('speaking');
+    }
+    _utterKeep.push(u);
+    speechSynthesis.speak(u);
+  });
+}
+
+// النطق العام لأي نص — rate: رقم أو 'slow'
+function speak(text, accent, rate) {
+  return speakChunks([{ text: text }], { accent: accent || S.accent, rate: rate });
+}
+
+// زر «اختبار الصوت»: ينطق جملة قصيرة ويعرض اسم الصوت المستخدم
+async function testVoice() {
+  if (!ttsSupported()) { toast('المتصفح الحالي لا يدعم خاصية النطق. يُنصح باستخدام Google Chrome.', 'err'); return; }
+  await voicesReady();
+  const v = pickVoice(S.accent);
+  speak(S.accent === 'en-GB'
+    ? 'Hello, and welcome to the English Language Club. This is the British accent.'
+    : 'Hello, and welcome to the English Language Club. This is the American accent.');
+  toast(v ? 'الصوت المستخدم: ' + v.name : 'الصوت المستخدم: الصوت الافتراضي للجهاز', 'ok');
+}
 
 // نص إنجليزي مع زر استماع وزر ترجمة
 function textBlock(en, ar) {
@@ -938,7 +1208,7 @@ function audioBlock(text) {
   return `<div class="audio-box">
     <button class="play" onclick="speakText(${i})" aria-label="تشغيل">${icon('play')}</button>
     <div><b>مقطع استماع</b><small>استمعي إلى المقطع ثم اختاري الإجابة الصحيحة.</small>
-      <button class="tool" onclick="speakText(${i}, .65)">${icon('clock')}تشغيل بطيء</button>
+      <button class="tool" onclick="speakText(${i}, 'slow')">${icon('clock')}تشغيل بطيء</button>
       ${accentPicker()}</div></div>`;
 }
 function speakText(i, rate) { if (S.texts[i]) speak(S.texts[i].en, null, rate); }
@@ -954,11 +1224,12 @@ function accentPicker() {
   return `<div class="accent"><span>النطق</span><div class="seg">
     <button class="${S.accent === 'en-US' ? 'active' : ''}" onclick="setAccent('en-US')">الأمريكي <small>US</small></button>
     <button class="${S.accent === 'en-GB' ? 'active' : ''}" onclick="setAccent('en-GB')">البريطاني <small>UK</small></button>
-  </div></div>`;
+  </div><button class="tool vtest" onclick="testVoice()">${icon('volume')}اختبار الصوت</button></div>`;
 }
 function setAccent(a) {
   S.accent = a; store('elc_accent', a);
   document.querySelectorAll('.accent').forEach(el => el.outerHTML = accentPicker());
+  VOICE_CACHE = {};
   speak(a === 'en-US' ? 'This is the American accent.' : 'This is the British accent.', a);
 }
 
@@ -1172,7 +1443,7 @@ function renderPlacementQ() {
   const last = P.idx === n - 1;
   $('#pl-body').innerHTML = `
     <div class="q-top">
-      <span class="chip">${icon(TRACK_ICONS[q.track] || 'book')}${esc(t.ar || '')}</span>
+      <span class="chip" style="${trackVars(q.track)}">${icon(TRACK_ICONS[q.track] || 'book')}${esc(t.ar || '')}</span>
       <span>السؤال <b>${P.idx + 1}</b> من ${n}</span>
     </div>
     <div class="bar"><div style="width:${(P.idx / n) * 100}%"></div></div>
@@ -1241,7 +1512,7 @@ function renderPlacementResult(r) {
         const t = tracks[k], x = r.results[k];
         const dots = Array.from({ length: x.total }, (_, i) => `<i class="${i < x.correct ? 'f' : ''}"></i>`).join('');
         return `<div class="res-row">
-          <div class="res-ico">${icon(TRACK_ICONS[k] || 'book')}</div>
+          <div class="res-ico" style="${trackVars(k)}">${icon(TRACK_ICONS[k] || 'book')}</div>
           <div class="res-txt">
             <div class="top"><div><b>${esc(t.ar)}</b> <span class="en-sub">${t.en}</span></div><div class="dots">${dots}</div></div>
             ${lvlChip(x.level)}
@@ -1273,7 +1544,7 @@ function renderHome() {
             : (u.role === 'other' ? u.roleOther : u.roleAr);
   $('#home-head').innerHTML = `<div class="home-head">
     <div class="hello">
-      <div class="brand">${miniMark()}<span class="en-h">English Language Club</span></div>
+      <div class="brand">${clubLogoMini()}<span class="en-h">English Language Club</span></div>
       <button class="icon-btn" onclick="logout()" title="تسجيل الخروج" aria-label="تسجيل الخروج">${icon('logout')}</button>
     </div>
     <h2>مرحباً، ${esc(u.firstName)}</h2>
@@ -1291,7 +1562,7 @@ function renderHome() {
 
   $('#home-tracks').innerHTML = Object.keys(c.tracks).map(k => {
     const t = c.tracks[k], p = S.progress[k] || { level: 1 }, pc = S.percent[k] || 0;
-    return `<button class="track" onclick="openTrack('${k}')">
+    return `<button class="track" style="${trackVars(k)}" onclick="openTrack('${k}')">
       <div class="t-ico">${icon(TRACK_ICONS[k] || 'book')}</div>
       <b>${esc(t.ar)}</b><span class="en-sub">${t.en}</span>
       ${lvlChip(p.level, p.completed)}
@@ -1318,14 +1589,17 @@ window.openCertificates = window.openCertificates || (() => toast('سيُتاح 
   .track-hero {
     position: relative; overflow: hidden; color: var(--ivory); border-radius: var(--r-lg); padding: 22px 20px 18px; margin-top: 8px;
     border: 1px solid rgba(201, 168, 106, .45); box-shadow: var(--sh-2);
-    background: radial-gradient(130% 110% at 100% 0%, #193761, var(--navy) 60%);
+    background: radial-gradient(130% 110% at 100% 0%, var(--tc, #193761), var(--tc-d, var(--navy)) 75%);
   }
+  .track-hero::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(11, 31, 58, 0) 40%, rgba(11, 31, 58, .35)); }
+  .track-hero > * { position: relative; z-index: 1; }
   .th-row { display: flex; gap: 16px; align-items: center; }
   .t-ico.lg { width: 58px; height: 58px; border-radius: 14px; margin: 0; border: 1px solid rgba(201, 168, 106, .5); background: rgba(255, 255, 255, .03); }
   .t-ico.lg .ic { width: 26px; height: 26px; }
   .track-hero .eyebrow { color: var(--gold); margin-bottom: 2px; }
   .track-hero h2 { color: #fff; font-size: 24px; }
-  .track-hero .bar { background: rgba(255, 255, 255, .12); margin: 18px 0 8px; }
+  .track-hero .bar { background: rgba(255, 255, 255, .14); margin: 18px 0 8px; }
+  .track-hero .bar > div { background: linear-gradient(90deg, var(--gold-d), var(--gold)); }
   .th-meta { display: flex; justify-content: space-between; font-size: 13px; color: rgba(250, 247, 240, .65); }
   .th-meta b { font-family: var(--f-en); color: #fff; font-weight: 600; }
 
@@ -1340,7 +1614,7 @@ window.openCertificates = window.openCertificates || (() => toast('سيُتاح 
   .lv-tab .st-ic { position: absolute; top: 8px; left: 8px; color: var(--gold-d); }
   .lv-tab .st-ic .ic { width: 13px; height: 13px; }
   .lv-tab:hover { border-color: var(--gold); }
-  .lv-tab.active { background: var(--navy); border-color: var(--navy); color: rgba(250, 247, 240, .75); box-shadow: inset 0 -2px 0 var(--gold); }
+  .lv-tab.active { background: var(--tc, var(--navy)); border-color: var(--tc, var(--navy)); color: rgba(250, 247, 240, .75); box-shadow: inset 0 -2px 0 var(--gold); }
   .lv-tab.active .rn { color: var(--gold); }
   .lv-tab.locked { opacity: .6; }
 
@@ -1357,7 +1631,8 @@ window.openCertificates = window.openCertificates || (() => toast('سيُتاح 
   .lesson-row:disabled { cursor: default; opacity: .55; box-shadow: none; }
   .ln { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--gold-l); display: grid; place-items: center; flex-shrink: 0;
         font-family: var(--f-en-h); font-weight: 600; color: var(--gold-d); font-size: 15px; }
-  .lesson-row.done .ln { background: var(--navy); border-color: var(--navy); color: var(--gold); }
+  .lesson-row.done .ln { background: var(--tc, var(--navy)); border-color: var(--tc, var(--navy)); color: var(--gold-l); }
+  .lesson-row:hover:not(:disabled) .ln { border-color: var(--tc, var(--gold)); }
   .lt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .lt .en { font-family: var(--f-en-h); font-size: 16.5px; font-weight: 600; color: var(--navy); line-height: 1.4; }
   .lt span { font-size: 14px; color: var(--text); }
@@ -1383,7 +1658,7 @@ window.openCertificates = window.openCertificates || (() => toast('سيُتاح 
           font-style: normal; font-family: var(--f-en-h); font-size: 13px; color: var(--muted-2); background: #fff; }
   .st i .ic { width: 13px; height: 13px; }
   .st.cur { color: var(--navy); font-weight: 500; }
-  .st.cur i { background: var(--navy); border-color: var(--navy); color: var(--gold); }
+  .st.cur i { background: var(--tc, var(--navy)); border-color: var(--tc, var(--navy)); color: var(--gold-l); }
   .st.done { color: var(--gold-d); }
   .st.done i { border-color: var(--gold); color: var(--gold-d); }
   .st-line { flex: 1; height: 1px; background: var(--line); min-width: 12px; }
@@ -1473,6 +1748,19 @@ window.openCertificates = window.openCertificates || (() => toast('سيُتاح 
   .passage p { white-space: pre-line; }
   .fb.neutral { background: var(--ivory); border-color: var(--line); }
   .fb.neutral .fb-head { color: var(--navy); }
+  /* ---------- لون المسار داخل صفحات الدرس والاختبار ---------- */
+  #scr-lesson .lesson-card, #scr-lesson .rule-card, #scr-test .card { box-shadow: var(--sh-1), inset 0 3px 0 var(--tc, var(--gold)); }
+  #scr-lesson .play, #scr-test .play { background: var(--tc, var(--navy)); }
+  #scr-lesson .bar, #scr-test .bar { background: var(--tc-l, #ECE5D6); }
+  #scr-lesson .bar > div, #scr-test .bar > div { background: linear-gradient(90deg, var(--tc-d, var(--gold-d)), var(--tc, var(--gold))); }
+  #scr-lesson .audio-row, #scr-lesson .listen-hero { border-color: var(--tc-l, var(--gold-l)); }
+  #scr-lesson .vw-say:hover, #scr-lesson .ex .vw-say:hover { background: var(--tc, var(--navy)); border-color: var(--tc, var(--navy)); }
+  #scr-track .lesson-row.done .ls-ic { color: var(--tc, var(--ok)); }
+  #scr-test .test-banner h3 { color: var(--tc, var(--navy)); }
+  .pts-pill { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; padding: 5px 14px; border-radius: 999px;
+              border: 1px solid rgba(201, 168, 106, .55); color: var(--gold); font-size: 14px; }
+  .pts-pill .ic { width: 15px; height: 15px; }
+  .hero-card.neutral .pts-pill { color: var(--gold-d); }
 </style>
 
 <script>
@@ -1544,43 +1832,14 @@ goHome = function () { S.mode = 'lesson'; stopSpeech(); saveResume({ screen: 'ho
 /* =========================================================
  * النطق مع تظليل الجملة الجاري قراءتها
  * ========================================================= */
-function utter(text, rate) {
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = S.accent; u.rate = rate || 0.9;
-  const vs = speechSynthesis.getVoices();
-  const v = vs.find(x => x.lang === u.lang) || vs.find(x => x.lang.replace('_', '-').indexOf(u.lang) === 0);
-  if (v) u.voice = v;
-  return u;
-}
-function stopSpeech() {
-  if (window.speechSynthesis) speechSynthesis.cancel();
-  document.querySelectorAll('.sent.speaking').forEach(e => e.classList.remove('speaking'));
-}
+// (دوال النطق المركزية speakChunks / stopSpeech / splitSentences موجودة في App.html)
+// قراءة النص كاملاً جملةً جملة مع التظليل — rate: رقم أو 'slow'
 function playPassage(rate) {
-  if (!('speechSynthesis' in window)) return speak('');
-  stopSpeech();
-  document.querySelectorAll('#ls-body .passage .sent').forEach(el => {
-    const u = utter(el.textContent, rate);
-    u.onstart = () => { document.querySelectorAll('.sent.speaking').forEach(e => e.classList.remove('speaking')); el.classList.add('speaking'); };
-    u.onend = () => el.classList.remove('speaking');
-    speechSynthesis.speak(u);
-  });
+  const els = Array.from(document.querySelectorAll('#ls-body .passage .sent'));
+  speakChunks(els.map(el => ({ text: el.textContent, el: el })), { rate: rate });
 }
-function speakSent(el) {
-  if (!('speechSynthesis' in window)) return speak('');
-  stopSpeech();
-  const u = utter(el.textContent);
-  u.onstart = () => el.classList.add('speaking');
-  u.onend = () => el.classList.remove('speaking');
-  speechSynthesis.speak(u);
-}
-// تقسيم الفقرة إلى جمل (مع حماية الاختصارات مثل Ms. و a.m.)
-function splitSentences(pg) {
-  const D = '\u2024';
-  const safe = pg.replace(/\b(?:Mr|Mrs|Ms|Dr|St)\.|\b[ap]\.m\./gi, m => m.replace(/\./g, D));
-  const parts = safe.match(/[^.!?]+[.!?]+["'”’)]*\s*|[^.!?]+$/g) || [safe];
-  return parts.map(s => s.split(D).join('.'));
-}
+// قراءة جملة واحدة عند الضغط عليها
+function speakSent(el) { speakChunks([{ text: el.textContent, el: el }]); }
 
 
 /* =========================================================
@@ -1589,6 +1848,7 @@ function splitSentences(pg) {
 window.openTrack = async function (track) {
   S.mode = 'lesson';
   if (!S.tr || S.tr.track !== track) S.tr = { track, data: null, view: null };
+  applyTrackTheme(track);
   showScreen('track');
   $('#tr-body').innerHTML = skeletonTrack();
   saveResume({ screen: 'track', track });
@@ -1675,6 +1935,7 @@ window.openLesson = async function (id, resume) {
     const r = await call('getLesson', S.token, id);
     if (!r.ok) { toast(r.error, 'err'); return (S.tr && S.tr.data) ? showScreen('track') : goHome(); }
     S.ls = { lesson: r.lesson, questions: r.questions, step: 'text', idx: 0, results: {}, busy: false };
+    applyTrackTheme(r.lesson.track);
     if (resume && resume.lessonId === id) {
       S.ls.step = resume.step === 'quiz' && r.questions.length ? 'quiz' : 'text';
       S.ls.idx = Math.min(resume.idx || 0, Math.max(0, r.questions.length - 1));
@@ -1748,7 +2009,7 @@ function lessonTextHTML() {
         <b>استمعي إلى المقطع</b>
         <small>يُنصح بالاستماع مرتين على الأقل قبل الانتقال إلى الأسئلة. يمكنكِ عرض النص المكتوب عند الحاجة.</small>
         <div class="tb-tools">
-          <button class="tool" onclick="playPassage(.7)">${icon('clock')}تشغيل بطيء</button>
+          <button class="tool" onclick="playPassage('slow')">${icon('clock')}تشغيل بطيء</button>
           <button class="tool" onclick="stopSpeech()">${icon('pause')}إيقاف</button>
         </div>${accentPicker()}
       </div>
@@ -1768,7 +2029,7 @@ function lessonTextHTML() {
         <button class="play" onclick="playPassage()" aria-label="تشغيل النص">${icon('play')}</button>
         <div><b>الاستماع إلى النص</b><small>اضغطي على أي جملة للاستماع إليها منفردة.</small>
           <div class="tb-tools">
-            <button class="tool" onclick="playPassage(.7)">${icon('clock')}تشغيل بطيء</button>
+            <button class="tool" onclick="playPassage('slow')">${icon('clock')}تشغيل بطيء</button>
             <button class="tool" onclick="stopSpeech()">${icon('pause')}إيقاف</button>
           </div>${accentPicker()}</div>
       </div>
@@ -1839,7 +2100,7 @@ function quizBlock(q, i, n, res, ctx) {
   const last = i === n - 1;
   return `
     <div class="q-top" style="margin-top:16px">
-      <span class="chip">${icon('target')}${ctx === 'levelTest' ? 'اختبار المستوى' : 'أسئلة الفهم'}</span>
+      <span class="chip">${icon(ctx === 'review' ? 'rotate' : 'target')}${ctx === 'levelTest' ? 'اختبار المستوى' : ctx === 'review' ? 'مراجعة الأخطاء' : 'أسئلة الفهم'}</span>
       <span>السؤال <b>${i + 1}</b> من ${n}</span></div>
     <div class="bar"><div style="width:${((i + (res ? 1 : 0)) / n) * 100}%"></div></div>
     <div class="card">
@@ -1862,13 +2123,25 @@ function feedbackHTML(res) {
     ${speak && res.score != null ? `<div class="fb-ans">دقة النطق: <span class="en-inline">${res.score}%</span></div>` : ''}
     ${!speak && !res.correct && res.correctText ? `<div class="fb-ans">الإجابة الصحيحة: <span class="en-inline">${esc(res.correctText)}</span></div>` : ''}
     ${res.explanationAr ? `<p>${esc(res.explanationAr)}</p>` : ''}
-    ${!res.correct ? '<small>أُضيف هذا السؤال إلى قسم «أخطائي» لمراجعته لاحقاً.</small>' : ''}
+    ${S.mode === 'review'
+      ? (res.correct ? `<small>أُزيل هذا السؤال من قسم «أخطائي»${res.points ? ' · +' + res.points + ' نقاط' : ''}.</small>`
+                     : '<small>سيبقى هذا السؤال في قسم «أخطائي» حتى تجيبي عنه بشكل صحيح.</small>')
+      : (!res.correct ? '<small>أُضيف هذا السؤال إلى قسم «أخطائي» لمراجعته لاحقاً.</small>' : '')}
   </div>`;
+}
+
+// الحالة الحالية للأسئلة حسب الوضع: درس / اختبار مستوى / مراجعة الأخطاء
+function quizState() { return S.mode === 'test' ? S.lt : S.mode === 'review' ? S.rv : S.ls; }
+function quizContext() { return S.mode === 'test' ? 'levelTest' : S.mode === 'review' ? 'review' : 'lesson'; }
+function renderCurrentQuiz() {
+  if (S.mode === 'test') renderTest();
+  else if (S.mode === 'review') renderReview();
+  else { renderLesson(); saveLessonResume(); }
 }
 
 // اختيار إجابة → تصحيح فوري من الخادم
 async function pickAnswer(answer) {
-  const M = S.mode === 'test' ? S.lt : S.ls;
+  const M = quizState();
   if (!M) return;
   const q = M.questions[M.idx];
   if (M.results[q.id] || M.busy) return;
@@ -1877,29 +2150,34 @@ async function pickAnswer(answer) {
   document.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (b.dataset.k === answer) b.classList.add('sel', 'checking'); });
   try {
     const r = await call('checkAnswer', S.token, {
-      qid: q.id, answer, context: S.mode === 'test' ? 'levelTest' : 'lesson', sessionId: S.mode === 'test' ? S.lt.sessionId : ''
+      qid: q.id, answer, context: quizContext(), sessionId: S.mode === 'test' ? S.lt.sessionId : ''
     });
     if (!r.ok) { toast(r.error, 'err'); }
-    else M.results[q.id] = { correct: r.correct, answer: String(answer), correctKey: r.correctKey, correctText: r.correctText,
-                             explanationAr: r.explanationAr, msg: pick(r.correct ? CORRECT_MSGS : WRONG_MSGS),
-                             qtype: q.qtype, score: r.score, skipped: !!r.skipped };
+    else {
+      M.results[q.id] = { correct: r.correct, answer: String(answer), correctKey: r.correctKey, correctText: r.correctText,
+                          explanationAr: r.explanationAr, msg: pick(r.correct ? CORRECT_MSGS : WRONG_MSGS),
+                          qtype: q.qtype, score: r.score, skipped: !!r.skipped, points: r.extra ? r.extra.points : 0 };
+      if (r.extra && typeof applyReward === 'function') applyReward(r.extra, true);
+    }
   } catch (e) { if (e.code !== 'AUTH') toast(e.error, 'err'); }
   finally {
     M.busy = false;
-    if (S.mode === 'test') renderTest(); else { renderLesson(); saveLessonResume(); }
+    renderCurrentQuiz();
     const fb = $('.fb'); if (fb) fb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }
 
 function nextQ() {
-  const M = S.mode === 'test' ? S.lt : S.ls;
+  const M = quizState();
   stopSpeech();
   if (M.idx < M.questions.length - 1) {
     M.idx++;
-    if (S.mode === 'test') renderTest(); else { renderLesson(); saveLessonResume(); }
+    renderCurrentQuiz();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
-    if (S.mode === 'test') submitTest(); else finishLesson();
+    if (S.mode === 'test') submitTest();
+    else if (S.mode === 'review') finishReview();
+    else finishLesson();
   }
 }
 
@@ -1917,7 +2195,8 @@ async function finishLesson() {
     const r = await call('completeLesson', S.token, L.id, correct);
     if (!r.ok) return toast(r.error, 'err');
     S.ls.step = 'done';
-    S.ls.summary = { correct, total: qs.length, allDone: r.allDone };
+    S.ls.summary = { correct, total: qs.length, allDone: r.allDone, points: r.extra ? r.extra.points : 0 };
+    if (r.extra && typeof applyReward === 'function') applyReward(r.extra);
     S.progress[L.track] = r.progress; S.percent[L.track] = r.percent;
     if (S.tr && S.tr.data && S.tr.track === L.track) {
       S.tr.data.progress = r.progress; S.tr.data.percent = r.percent;
@@ -1941,6 +2220,7 @@ function lessonDoneHTML() {
       <h2>${R.head}</h2>
       ${sm.total ? `<div class="score">${sm.correct}<small> / ${sm.total}</small></div>` : ''}
       <p>${R.msg}</p>
+      ${sm.points ? `<div class="pts-pill">${icon('star')}+${sm.points} نقطة</div>` : ''}
     </div>
     ${qs.length ? `<div class="card"><div class="card-title">ملخص الإجابات</div>
       ${qs.map(q => { const ok = S.ls.results[q.id] && S.ls.results[q.id].correct;
@@ -1959,6 +2239,7 @@ function lessonDoneHTML() {
 async function startLevelTest() {
   const track = S.tr.track;
   S.mode = 'test';
+  applyTrackTheme(track);
   showScreen('test');
   $('#lt-body').innerHTML = skeletonPlacement();
   try {
@@ -1991,6 +2272,7 @@ async function submitTest() {
     const r = await call('submitLevelTest', S.token, S.lt.sessionId);
     if (!r.ok) return toast(r.error, 'err');
     renderTestResult(r);
+    if (r.extra && typeof applyReward === 'function') applyReward(r.extra);
     window.scrollTo(0, 0);
     if (r.passed) setTimeout(goldShimmer, 350);
     if (S.tr) S.tr.view = null;
@@ -2019,8 +2301,11 @@ function renderTestResult(r) {
       <h2>${head}</h2>
       <div class="score">${r.percent}<small>%</small></div>
       <p>${r.correct} إجابات صحيحة من ${r.total}</p>
+      ${r.extra && r.extra.points ? `<div class="pts-pill">${icon('star')}+${r.extra.points} نقطة</div>` : ''}
     </div>
     <div class="note">${icon(r.passed ? 'award' : 'info')}<span>${esc(note)}</span></div>
+    ${r.extra && r.extra.certificate
+      ? `<button class="btn navy" onclick="showCertificate(${esc(JSON.stringify(r.extra.certificate))})">${icon('award')}عرض شهادة الإتمام</button>` : ''}
     ${r.passed
       ? `<button class="btn primary" onclick="backToTrack()">متابعة المسار${icon('arrowLeft')}</button>`
       : `<button class="btn primary" onclick="startLevelTest()">إعادة الاختبار${icon('rotate')}</button>
@@ -2091,8 +2376,9 @@ function renderTestResult(r) {
 /* =========================================================
  * أدوات مشتركة
  * ========================================================= */
-function rerenderQ() { if (S.mode === 'test') renderTest(); else renderLesson(); }
-function currentQ() { const M = S.mode === 'test' ? S.lt : S.ls; return M ? M.questions[M.idx] : null; }
+// إعادة رسم السؤال الحالي (بدون حفظ نقطة الاستكمال عند كل ضغطة)
+function rerenderQ() { if (S.mode === 'test') renderTest(); else if (S.mode === 'review') renderReview(); else renderLesson(); }
+function currentQ() { const M = quizState(); return M ? M.questions[M.idx] : null; }
 
 // نفس منطق التصحيح في الخادم (لعرض النتيجة قبل الاعتماد)
 const CONTRACTIONS_JS = {
@@ -2284,6 +2570,700 @@ function submitTyped() {
   if (!v) return toast('يُرجى كتابة الإجابة أولاً.', 'err');
   el.disabled = true;
   pickAnswer(v);
+}
+</script>
+
+  <!-- Motivation.html — المرحلة 6: أخطائي + لوحة الشرف + الإنجازات والأوسمة + الشهادات -->
+<style>
+  /* ---------- رأس الأقسام (كحلي) ---------- */
+  .sec-hero {
+    position: relative; overflow: hidden; color: var(--ivory); border-radius: var(--r-lg); padding: 24px 20px 20px; margin-top: 8px;
+    border: 1px solid rgba(201, 168, 106, .45); box-shadow: var(--sh-2);
+    background: radial-gradient(130% 110% at 100% 0%, #193761, var(--navy) 60%);
+  }
+  .sec-hero .eyebrow { color: var(--gold); }
+  .sec-hero h2 { color: #fff; }
+  .sec-hero p { color: rgba(250, 247, 240, .72); font-size: 14.5px; margin-top: 6px; }
+  .stats.four { grid-template-columns: repeat(4, 1fr); }
+  .stats.four .stat b { font-size: 22px; }
+  .home-head .stats { cursor: pointer; }
+  .home-head .stats:hover .stat b { color: var(--gold-l); }
+
+  /* ---------- مرشّحات ---------- */
+  .filters { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 8px; margin: 16px 0 4px; scrollbar-width: none; }
+  .filters::-webkit-scrollbar { display: none; }
+  .filters .pill { white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; padding: 7px 14px; font-size: 14px; }
+  .filters .pill .ic { width: 15px; height: 15px; color: var(--gold-d); }
+  .filters .pill.active .ic { color: var(--gold); }
+  .filters .pill small { font-family: var(--f-en); opacity: .7; }
+
+  /* ---------- قائمة الأخطاء ---------- */
+  .mk-row { display: flex; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .mk-row:last-child { border-bottom: 0; }
+  .mk-ico { width: 38px; height: 38px; border-radius: 10px; background: var(--ivory); border: 1px solid var(--gold-l); color: var(--gold-d);
+            display: grid; place-items: center; flex-shrink: 0; }
+  .mk-ico .ic { width: 18px; height: 18px; }
+  .mk-txt { flex: 1; min-width: 0; }
+  .mk-txt .en { font-size: 15px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mk-txt small { color: var(--muted); font-size: 12px; }
+  .more-note { text-align: center; color: var(--muted); font-size: 13px; padding-top: 10px; }
+
+  /* ---------- لوحة الشرف ---------- */
+  .my-rank { display: flex; align-items: center; gap: 16px; margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(201, 168, 106, .25); }
+  .my-rank .rk { font-family: var(--f-en-h); font-size: 40px; color: var(--gold); line-height: 1; }
+  .my-rank small { display: block; color: rgba(250, 247, 240, .65); font-size: 13px; }
+  .my-rank b { color: #fff; font-weight: 500; }
+  .tabs2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: #fff; border: 1px solid var(--line); border-radius: 12px; margin: 18px 0 6px; }
+  .tabs2 button { border: 0; background: transparent; padding: 10px; border-radius: 9px; font-family: var(--f-ar); font-size: 15px; color: var(--muted); cursor: pointer; transition: all .2s; }
+  .tabs2 button.active { background: var(--navy); color: #fff; box-shadow: inset 0 -2px 0 var(--gold); }
+
+  .podium { display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 10px; align-items: end; direction: ltr; margin: 18px 0 8px; }
+  .pod { direction: rtl; text-align: center; background: #fff; border: 1px solid var(--line); border-radius: var(--r); padding: 16px 8px 14px;
+         box-shadow: var(--sh-1), inset 0 2px 0 var(--gold); }
+  .pod.p1 { padding-top: 22px; padding-bottom: 20px; box-shadow: var(--sh-2), inset 0 3px 0 var(--gold); }
+  .pod .medal { width: 46px; height: 46px; border-radius: 50%; margin: 0 auto 10px; display: grid; place-items: center;
+                font-family: var(--f-en-h); font-weight: 600; font-size: 20px; border: 1px solid var(--gold); color: var(--gold-d); background: var(--gold-xl); }
+  .pod.p1 .medal { width: 56px; height: 56px; font-size: 24px; background: var(--navy); color: var(--gold); box-shadow: 0 0 0 5px var(--gold-xl); }
+  .pod b { display: block; font-family: var(--f-ar-h); color: var(--navy); font-size: 16px; font-weight: 600; }
+  .pod small { display: block; color: var(--muted); font-size: 12px; }
+  .pod .lv { font-family: var(--f-en-h); color: var(--navy); font-size: 22px; margin-top: 6px; }
+  .pod .lv span { font-family: var(--f-ar); font-size: 12px; color: var(--muted); }
+  .pod.me, .lb-row.me { border-color: var(--gold); background: var(--gold-xl); }
+
+  .lb-row { display: flex; align-items: center; gap: 14px; padding: 13px 14px; margin-bottom: 8px; background: #fff; border: 1px solid var(--line); border-radius: 12px; }
+  .lb-row .rk { width: 34px; text-align: center; font-family: var(--f-en-h); font-size: 18px; color: var(--gold-d); font-weight: 600; flex-shrink: 0; }
+  .lb-row .who { flex: 1; min-width: 0; }
+  .lb-row .who b { font-family: var(--f-ar-h); color: var(--navy); font-weight: 600; }
+  .lb-row .who small { display: block; color: var(--muted); font-size: 12px; }
+  .lb-row .val { text-align: center; min-width: 54px; }
+  .lb-row .val b { display: block; font-family: var(--f-en-h); color: var(--navy); font-size: 18px; font-weight: 600; line-height: 1.2; }
+  .lb-row .val small { color: var(--muted); font-size: 11px; }
+  .lb-row .bar { flex: 1; margin: 6px 0 0; }
+  .lb-foot { text-align: center; color: var(--muted-2); font-size: 12px; margin-top: 16px; line-height: 1.8; }
+
+  /* ---------- الأوسمة ---------- */
+  .badges { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 560px) { .badges { grid-template-columns: repeat(3, 1fr); } }
+  .bdg { text-align: center; padding: 18px 10px 14px; background: #fff; border: 1px solid var(--line); border-radius: var(--r); transition: transform .25s var(--ease); }
+  .bdg:hover { transform: translateY(-2px); }
+  .bdg .bi { width: 58px; height: 58px; border-radius: 50%; margin: 0 auto 10px; display: grid; place-items: center; position: relative; }
+  .bdg .bi .ic { width: 25px; height: 25px; }
+  .bdg.on .bi { background: var(--navy); color: var(--gold); box-shadow: 0 0 0 4px var(--gold-xl), 0 0 0 5px var(--gold-l); }
+  .bdg.off { background: var(--ivory); }
+  .bdg.off .bi { border: 1px dashed var(--field); color: var(--muted-2); }
+  .bdg b { display: block; font-family: var(--f-ar-h); font-size: 14.5px; font-weight: 600; color: var(--navy); }
+  .bdg.off b { color: var(--muted); }
+  .bdg small { display: block; color: var(--muted); font-size: 12px; line-height: 1.6; margin-top: 2px; }
+
+  /* ---------- الشهادات + قواعد النقاط ---------- */
+  .cert-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .cert-row:last-child { border-bottom: 0; }
+  .cert-row .ci { width: 46px; height: 46px; border-radius: 12px; background: var(--navy); color: var(--gold); display: grid; place-items: center; flex-shrink: 0; }
+  .cert-row .ci .ic { width: 22px; height: 22px; }
+  .cert-row div { flex: 1; }
+  .cert-row b { display: block; font-family: var(--f-ar-h); color: var(--navy); font-weight: 600; }
+  .cert-row small { color: var(--muted); font-size: 12.5px; }
+  .cert-row .btn { width: auto; margin: 0; padding: 9px 16px; font-size: 14px; }
+  .rules { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .rules td { padding: 10px 4px; border-bottom: 1px solid var(--line); }
+  .rules tr:last-child td { border-bottom: 0; }
+  .rules td:last-child { text-align: left; font-family: var(--f-en-h); color: var(--gold-d); font-weight: 600; white-space: nowrap; }
+
+  /* ---------- النوافذ المنبثقة ---------- */
+  .modal-back { position: fixed; inset: 0; z-index: 960; background: rgba(11, 31, 58, .55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+                display: flex; align-items: center; justify-content: center; padding: 18px; opacity: 0; transition: opacity .3s var(--ease); }
+  .modal-back.show { opacity: 1; }
+  .modal { width: 100%; max-width: 380px; background: var(--ivory); border-radius: 18px; padding: 30px 22px 18px; text-align: center;
+           border: 1px solid var(--gold-l); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .45), inset 0 3px 0 var(--gold);
+           transform: translateY(16px) scale(.98); transition: transform .4s var(--ease); }
+  .modal-back.show .modal { transform: none; }
+  .modal.wide { max-width: 760px; padding: 20px 18px 14px; }
+  .modal .big-badge { width: 92px; height: 92px; border-radius: 50%; margin: 0 auto 18px; display: grid; place-items: center;
+                      background: var(--navy); color: var(--gold); box-shadow: 0 0 0 6px var(--gold-xl), 0 0 0 7px var(--gold-l); }
+  .modal .big-badge .ic { width: 40px; height: 40px; }
+  .modal h3 { font-size: 22px; margin-top: 2px; }
+  .modal p { color: var(--muted); margin-top: 6px; font-size: 15px; }
+  .cert-preview { width: 100%; border-radius: 8px; box-shadow: var(--sh-2); display: block; background: #fff; }
+  .cert-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .cert-actions .btn { margin: 0; }
+  .cert-loading { padding: 70px 0; color: var(--muted); }
+
+  /* ---------- لون المسار في القوائم ---------- */
+  .mk-ico[style] { background: var(--tc-l); border-color: transparent; color: var(--tc); }
+  .cert-row .ci[style] { background: linear-gradient(145deg, var(--tc), var(--tc-d)); color: var(--gold-l); }
+
+  /* ---------- الاقتراحات ---------- */
+  textarea.ar-area { width: 100%; padding: 13px 15px; border-radius: 12px; border: 1px solid var(--field); resize: vertical; background: #fff;
+                     font-family: var(--f-ar); font-size: 16px; line-height: 1.8; color: var(--text); outline: none; transition: border-color .2s, box-shadow .2s; }
+  textarea.ar-area:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(201, 168, 106, .16); }
+  textarea.ar-area::placeholder { color: #B5AFA3; }
+  .sg-count { display: block; text-align: left; direction: ltr; color: var(--muted-2); font-size: 12px; margin-top: 6px; font-family: var(--f-en); }
+  .sec-hero h2.q { font-size: 21px; line-height: 1.6; }
+  .thanks-ico { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 14px; display: grid; place-items: center;
+                border: 1px solid var(--gold); color: var(--gold); box-shadow: 0 0 0 6px rgba(201, 168, 106, .14); }
+  .thanks-ico .ic { width: 32px; height: 32px; }
+
+  /* ---------- نافذة تقييم التجربة ---------- */
+  .fb-modal { padding-top: 26px; }
+  .fb-modal .logo-wrap { margin-bottom: 12px; }
+  .fb-modal .logo-disc { width: 72px; height: 72px; margin: 0 auto; }
+  .fb-modal .logo-fb { width: 72px; height: 72px; margin: 0 auto; }
+  .fb-modal h3 { font-size: 19px; line-height: 1.7; }
+  .stars { display: flex; justify-content: center; gap: 6px; margin: 18px 0 4px; direction: ltr; }
+  .stars button { background: none; border: 0; padding: 4px; cursor: pointer; color: var(--gold); transition: transform .15s; }
+  .stars button:hover { transform: scale(1.12); }
+  .stars svg { width: 38px; height: 38px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; transition: fill .2s; }
+  .stars button.on svg { fill: var(--gold); }
+  .stars-label { color: var(--muted); font-size: 14px; min-height: 24px; margin-bottom: 12px; }
+</style>
+
+<script>
+/* =========================================================
+ * أيقونات إضافية + إضافة الشاشات
+ * ========================================================= */
+Object.assign(ICONS, {
+  trophy:   '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.7V17c0 .6-.5 1-1 1.2C7.9 18.8 7 20.2 7 22"/><path d="M14 14.7V17c0 .6.5 1 1 1.2 1.1.6 2 2 2 3.8"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>',
+  shield:   '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  crown:    '<path d="M2 6l4 11h12l4-11-6 5-4-7-4 7-6-5z"/><line x1="6" y1="21" x2="18" y2="21"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  image:    '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+  file:     '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'
+});
+
+document.getElementById('extra-screens').insertAdjacentHTML('beforeend', `
+  <section class="screen" id="scr-mistakes"><div id="mk-body"></div></section>
+  <section class="screen" id="scr-board"><div id="lb-body"></div></section>
+  <section class="screen" id="scr-achieve"><div id="ac-body"></div></section>
+  <section class="screen" id="scr-suggest"><div id="sg-body"></div></section>
+`);
+
+// ✏️ تسمية القسم الرابع في الصفحة الرئيسية
+MORE[3].ar = 'إنجازاتي';
+MORE[3].sub = 'الأوسمة والشهادات';
+
+// الضغط على شريط الإحصائيات في الرئيسية يفتح «إنجازاتي»
+document.addEventListener('click', e => { if (e.target.closest('.home-head .stats')) openCertificates(); });
+
+function skeletonList(n) {
+  return `<div class="sk sk-line w30"></div><div class="sk sk-head" style="height:170px"></div>
+    ${Array(n || 4).fill('<div class="sk" style="height:64px;border-radius:12px;margin-top:10px"></div>').join('')}`;
+}
+function backHome() { return `<button class="back" onclick="goHome()">${icon('arrowRight')}الصفحة الرئيسية</button>`; }
+function shortPrompt(p) { const l = String(p).split('\n').filter(Boolean); const s = l[l.length - 1] || ''; return s.length > 80 ? s.slice(0, 78) + '…' : s; }
+
+
+/* =========================================================
+ * 🏅 النقاط والأوسمة الجديدة
+ * ========================================================= */
+const BADGE_QUEUE = [];
+function applyReward(x) {
+  if (!x) return;
+  if (S.user && typeof x.total === 'number') S.user.points = x.total;
+  if (x.newBadges && x.newBadges.length) setTimeout(() => celebrateBadges(x.newBadges), 600);
+}
+
+function celebrateBadges(list) {
+  BADGE_QUEUE.push(...list);
+  if (!document.querySelector('.modal-back')) showNextBadge();
+}
+function showNextBadge() {
+  const b = BADGE_QUEUE.shift();
+  if (!b) return;
+  openModal(`<div class="modal">
+      <div class="big-badge">${icon(b.icon)}</div>
+      <span class="eyebrow">New Badge</span>
+      <h3>${esc(b.ar)}</h3>
+      <p>${esc(b.desc)}</p>
+      <button class="btn primary" style="margin-top:20px" onclick="closeModal(showNextBadge)">متابعة</button>
+    </div>`);
+  goldShimmer();
+}
+
+function openModal(html) {
+  closeModal();
+  const m = document.createElement('div');
+  m.className = 'modal-back';
+  m.innerHTML = html;
+  m.addEventListener('click', e => { if (e.target === m) closeModal(); });
+  document.body.appendChild(m);
+  requestAnimationFrame(() => m.classList.add('show'));
+}
+function closeModal(after) {
+  const m = document.querySelector('.modal-back');
+  if (!m) { if (typeof after === 'function') after(); return; }
+  m.classList.remove('show');
+  setTimeout(() => { m.remove(); if (typeof after === 'function') after(); }, 260);
+}
+
+
+/* =========================================================
+ * 📝 أخطائي
+ * ========================================================= */
+window.openMistakes = async function () {
+  S.mode = 'lesson';
+  showScreen('mistakes');
+  $('#mk-body').innerHTML = skeletonList(5);
+  try {
+    const r = await call('getMistakes', S.token);
+    if (!r.ok) { toast(r.error, 'err'); return goHome(); }
+    S.mk = { items: r.items, fixed: r.fixed, pts: r.reviewPoints, filter: (S.mk && S.mk.filter) || 'all' };
+    renderMistakes();
+  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); goHome(); } }
+};
+
+function mkFiltered() { const f = S.mk.filter; return S.mk.items.filter(q => f === 'all' || q.track === f); }
+function setMkFilter(f) { S.mk.filter = f; renderMistakes(); }
+
+function renderMistakes() {
+  const M = S.mk, list = mkFiltered(), total = M.items.length;
+  const counts = {};
+  M.items.forEach(q => counts[q.track] = (counts[q.track] || 0) + 1);
+  const chips = total ? `<div class="filters">
+      <button class="pill ${M.filter === 'all' ? 'active' : ''}" onclick="setMkFilter('all')">الكل <small>${total}</small></button>
+      ${Object.keys(S.config.tracks).filter(k => counts[k]).map(k =>
+        `<button class="pill ${M.filter === k ? 'active' : ''}" onclick="setMkFilter('${k}')">${icon(TRACK_ICONS[k])}${esc(S.config.tracks[k].ar)} <small>${counts[k]}</small></button>`).join('')}
+    </div>` : '';
+  const body = !total
+    ? `<div class="empty" style="margin-top:18px">${icon('checkCircle')}<p><b>لا توجد أخطاء للمراجعة حالياً</b></p>
+        <p class="small">ستظهر هنا الأسئلة التي تخطئين فيها في الدروس والاختبارات.</p></div>`
+    : `<div class="card flat stagger">${list.slice(0, 20).map(q => `
+        <div class="mk-row"><div class="mk-ico" style="${trackVars(q.track)}">${icon(TRACK_ICONS[q.track] || 'book')}</div>
+          <div class="mk-txt"><div class="en">${esc(shortPrompt(q.prompt))}</div>
+          <small>${esc(q.trackAr)} · ${q.lessonTitle ? '<span class="en-inline">' + esc(q.lessonTitle) + '</span> · ' : ''}<span class="en-inline">${q.addedAt}</span></small></div></div>`).join('')}
+        ${list.length > 20 ? `<div class="more-note">و${list.length - 20} أسئلة أخرى</div>` : ''}
+      </div>
+      <button class="btn primary" onclick="startReview()">${icon('rotate')}بدء المراجعة (${Math.min(10, list.length)} أسئلة)</button>`;
+
+  $('#mk-body').innerHTML = `${backHome()}
+    <div class="sec-hero">
+      <span class="eyebrow">My Mistakes</span><h2>أخطائي</h2>
+      <p>راجعي الأسئلة التي أخطأتِ فيها. كل إجابة صحيحة تُزيل السؤال من القائمة وتمنحكِ ${M.pts} نقاط.</p>
+      <div class="stats"><div class="stat">${icon('rotate')}<b>${total}</b><small>بانتظار المراجعة</small></div>
+        <div class="stat">${icon('checkCircle')}<b>${M.fixed}</b><small>تم تصحيحها</small></div>
+        <div class="stat">${icon('star')}<b>${S.user ? S.user.points : 0}</b><small>نقطة</small></div></div>
+    </div>${chips}${body}`;
+}
+
+function startReview() {
+  const qs = mkFiltered().slice(0, 10);
+  if (!qs.length) return;
+  S.mode = 'review';
+  S.rv = { questions: qs, idx: 0, results: {}, busy: false };
+  renderReview();
+  window.scrollTo(0, 0);
+}
+
+function renderReview() {
+  S.texts = [];
+  const R = S.rv, q = R.questions[R.idx];
+  const peek = q.passage ? `<details class="peek"><summary>${icon('book')}عرض نص الدرس <span class="en-inline muted small">${esc(q.lessonTitle)}</span></summary>
+      <div class="passage en">${esc(q.passage)}</div></details>` : '';
+  $('#mk-body').innerHTML = `
+    <div class="ls-top"><button class="back" onclick="quitReview()">${icon('x')}إنهاء المراجعة</button>
+      <span class="chip" style="${trackVars(q.track)}">${icon(TRACK_ICONS[q.track] || 'book')}${esc(q.trackAr)}</span></div>
+    ${peek}${quizBlock(q, R.idx, R.questions.length, R.results[q.id], 'review')}`;
+}
+
+function quitReview() { S.mode = 'lesson'; S.rv = null; stopSpeech(); openMistakes(); }
+
+function finishReview() {
+  const R = S.rv, qs = R.questions;
+  const fixed = qs.filter(q => R.results[q.id] && R.results[q.id].correct).length;
+  const pts = qs.reduce((n, q) => n + ((R.results[q.id] && R.results[q.id].points) || 0), 0);
+  S.mode = 'lesson';
+  $('#mk-body').innerHTML = `
+    <div class="hero-card ${fixed ? 'sheen' : 'neutral'}" style="margin-top:12px">
+      <span class="eyebrow">Review Complete</span>
+      <h2>${fixed === qs.length ? 'أحسنتِ، صحّحتِ جميع الأخطاء' : fixed ? 'تقدّم ملحوظ' : 'استمري في المراجعة'}</h2>
+      <div class="score">${fixed}<small> / ${qs.length}</small></div>
+      <p>${fixed ? 'أُزيلت الأسئلة التي أجبتِ عنها بشكل صحيح من قسم «أخطائي».' : 'راجعي الشرح المرفق مع كل سؤال، ثم حاولي مرة أخرى.'}</p>
+      ${pts ? `<div class="pts-pill">${icon('star')}+${pts} نقطة</div>` : ''}
+    </div>
+    <button class="btn primary" onclick="openMistakes()">${icon('rotate')}العودة إلى «أخطائي»</button>
+    <button class="btn ghost" onclick="goHome()">الصفحة الرئيسية</button>`;
+  window.scrollTo(0, 0);
+  if (fixed === qs.length && qs.length) setTimeout(goldShimmer, 300);
+}
+
+
+/* =========================================================
+ * 🏆 لوحة الشرف
+ * ========================================================= */
+window.openLeaderboard = async function () {
+  showScreen('board');
+  $('#lb-body').innerHTML = skeletonList(6);
+  try {
+    const r = await call('getLeaderboard', S.token);
+    if (!r.ok) { toast(r.error, 'err'); return goHome(); }
+    S.lb = { d: r, tab: (S.lb && S.lb.tab) || 'students' };
+    renderBoard();
+  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); goHome(); } }
+};
+function setLbTab(t) { S.lb.tab = t; renderBoard(); }
+
+function whereOf(s) { return `${esc(s.gradeAr || '—')}${s.section ? ' · الشعبة ' + esc(s.section) : ''}`; }
+
+function renderBoard() {
+  const d = S.lb.d, tab = S.lb.tab;
+  const meCard = d.me
+    ? `<div class="my-rank"><div class="rk">#${d.me.rank}</div><div><small>ترتيبكِ من بين ${d.total} طالبة</small>
+        <b>${d.me.levels} مستويات مُجتازة · ${d.me.points} نقطة</b></div></div>`
+    : `<div class="my-rank"><div><small>تُعرض الطالبات فقط في لوحة الشرف.</small></div></div>`;
+
+  let body;
+  if (tab === 'students') {
+    const top = d.top;
+    if (!top.length) body = `<div class="empty">${icon('chart')}<p>لم تُسجَّل نتائج بعد. كوني أول المتميزات!</p></div>`;
+    else {
+      const pod = [top[1], top[0], top[2]].map((s, i) => !s ? '<div></div>' : `
+        <div class="pod ${s.rank === 1 && i === 1 ? 'p1' : ''} ${s.me ? 'me' : ''}">
+          <div class="medal">${s.rank}</div><b>${esc(s.firstName)}</b><small>${whereOf(s)}</small>
+          <div class="lv">${s.levels} <span>مستويات</span></div><small>${s.points} نقطة</small></div>`).join('');
+      body = `<div class="podium">${pod}</div>
+        <div class="stagger">${top.slice(3).map(s => `
+          <div class="lb-row ${s.me ? 'me' : ''}"><div class="rk">${s.rank}</div>
+            <div class="who"><b>${esc(s.firstName)}</b><small>${whereOf(s)}</small></div>
+            <div class="val"><b>${s.levels}</b><small>مستويات</small></div>
+            <div class="val"><b>${s.points}</b><small>نقطة</small></div></div>`).join('')}</div>`;
+    }
+  } else {
+    body = !d.sections.length
+      ? `<div class="empty">${icon('users')}<p>لا توجد بيانات كافية لترتيب الشعب بعد.</p></div>`
+      : `<p class="muted small" style="margin:12px 2px">الترتيب حسب متوسط نسبة إنجاز طالبات كل شعبة في المسارات الستة.</p>
+         <div class="stagger">${d.sections.map(s => `
+          <div class="lb-row ${s.key === d.mySection ? 'me' : ''}"><div class="rk">${s.rank}</div>
+            <div class="who"><b>${esc(s.gradeAr)} · الشعبة ${esc(s.section)}</b><small>${s.count} طالبة</small>
+              <div class="bar"><div style="width:${s.avg}%"></div></div></div>
+            <div class="val"><b>${s.avg}%</b><small>متوسط الإنجاز</small></div></div>`).join('')}</div>`;
+  }
+
+  $('#lb-body').innerHTML = `${backHome()}
+    <div class="sec-hero"><span class="eyebrow">Honor Board</span><h2>لوحة الشرف</h2>
+      <p>الترتيب حسب عدد المستويات المُجتازة في جميع المسارات، وعند التساوي حسب النقاط.</p>${meCard}</div>
+    <div class="tabs2"><button class="${tab === 'students' ? 'active' : ''}" onclick="setLbTab('students')">المتميزات</button>
+      <button class="${tab === 'sections' ? 'active' : ''}" onclick="setLbTab('sections')">ترتيب الشعب</button></div>
+    ${body}
+    <div class="lb-foot">حفاظاً على الخصوصية تُعرض الأسماء الأولى فقط.<br>آخر تحديث: <span class="en-inline">${esc(d.updatedAt.slice(11, 16))}</span></div>`;
+}
+
+
+/* =========================================================
+ * 🎖️ إنجازاتي (النقاط + الأوسمة + الشهادات)
+ * ========================================================= */
+window.openCertificates = async function () {
+  showScreen('achieve');
+  $('#ac-body').innerHTML = skeletonList(4);
+  try {
+    const r = await call('getAchievements', S.token);
+    if (!r.ok) { toast(r.error, 'err'); return goHome(); }
+    S.ac = r;
+    if (S.user) { S.user.points = r.points; S.user.streak = r.streak; }
+    renderAchieve();
+    if (r.newBadges && r.newBadges.length) setTimeout(() => celebrateBadges(r.newBadges), 500);
+  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); goHome(); } }
+};
+
+function renderAchieve() {
+  const a = S.ac, earned = a.badges.filter(b => b.earned).length, P = a.rules;
+  $('#ac-body').innerHTML = `${backHome()}
+    <div class="sec-hero"><span class="eyebrow">Achievements</span><h2>إنجازاتي</h2>
+      <p>واصلي التعلّم يومياً للحفاظ على سلسلتكِ وجمع المزيد من النقاط والأوسمة.</p>
+      <div class="stats four">
+        <div class="stat">${icon('star')}<b>${a.points}</b><small>نقطة</small></div>
+        <div class="stat">${icon('flame')}<b>${a.streak}</b><small>أيام متتالية</small></div>
+        <div class="stat">${icon('crown')}<b>${a.bestStreak}</b><small>أطول سلسلة</small></div>
+        <div class="stat">${icon('trending')}<b>${a.stats.levels}</b><small>مستويات</small></div>
+      </div></div>
+
+    <div class="sec-title"><h3>الأوسمة</h3><span class="eyebrow">${earned} / ${a.badges.length}</span></div>
+    <div class="badges stagger">${a.badges.map(b => `
+      <div class="bdg ${b.earned ? 'on' : 'off'}"><div class="bi">${icon(b.earned ? b.icon : 'lock')}</div>
+        <b>${esc(b.ar)}</b><small>${esc(b.desc)}</small></div>`).join('')}</div>
+
+    <div class="sec-title"><h3>شهادات الإتمام</h3><span class="eyebrow">Certificates</span></div>
+    <div class="card flat">${a.certificates.length ? a.certificates.map(c => `
+      <div class="cert-row"><div class="ci" style="${trackVars(c.track)}">${icon('award')}</div>
+        <div><b>شهادة إتمام مسار ${esc(c.trackAr)}</b><small><span class="en-inline">${esc(c.trackEn)} Track</span> · <span class="en-inline">${c.issuedAt}</span></small></div>
+        <button class="btn navy" onclick='showCertificate(${esc(JSON.stringify(c))})'>عرض</button></div>`).join('')
+      : `<div class="center muted" style="padding:10px 0">${icon('award')}<p style="margin-top:6px">تُمنح شهادة الإتمام عند اجتياز المستويات الثلاثة في أي مسار.</p></div>`}
+    </div>
+
+    <div class="sec-title"><h3>كيف أجمع النقاط؟</h3><span class="eyebrow">Points</span></div>
+    <div class="card flat"><table class="rules">
+      <tr><td>إكمال درس لأول مرة</td><td>+${P.LESSON_DONE}</td></tr>
+      <tr><td>كل إجابة صحيحة في الدرس</td><td>+${P.PER_CORRECT}</td></tr>
+      <tr><td>الدرجة الكاملة في الدرس</td><td>+${P.PERFECT_BONUS}</td></tr>
+      <tr><td>تصحيح سؤال في «أخطائي»</td><td>+${P.REVIEW_FIX}</td></tr>
+      <tr><td>اجتياز اختبار نهاية المستوى</td><td>+${P.LEVEL_PASSED}</td></tr>
+      <tr><td>إتمام مسار كامل</td><td>+${P.TRACK_DONE}</td></tr>
+    </table></div>`;
+}
+
+
+/* =========================================================
+ * 💬 الاقتراحات
+ * ========================================================= */
+// ✏️ تصنيفات الاقتراحات (يجب أن تطابق القائمة في Stage6.gs)
+const SUGGESTION_CATS = ['محتوى', 'تصميم', 'مشكلة تقنية', 'أخرى'];
+
+window.openSuggest = function () {
+  if (!S.token) { toast('يُرجى تسجيل الدخول أولاً لإرسال اقتراح.', 'err'); return showScreen('login'); }
+  S.sg = { cat: '' };
+  S.mode = 'lesson';
+  showScreen('suggest');
+  renderSuggest();
+};
+
+function renderSuggest() {
+  $('#sg-body').innerHTML = `${backHome()}
+    <div class="sec-hero"><span class="eyebrow">Suggestions</span>
+      <h2 class="q">ما تحتاجين إضافته للمنصة من أجل تحسين أدائك؟</h2>
+      <p>يسعدنا استقبال اقتراحاتك لتحسين جودة المنصة</p></div>
+    <div class="card form">
+      <label>التصنيف <small class="muted">(اختياري)</small></label>
+      <div class="pills" id="sg-cats">${SUGGESTION_CATS.map(c =>
+        `<button class="pill ${S.sg.cat === c ? 'active' : ''}" onclick="pickSgCat(this.dataset.v)" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+      <label for="sg-text">اقتراحكِ</label>
+      <textarea id="sg-text" class="ar-area" rows="6" maxlength="1000" placeholder="اكتبي اقتراحكِ هنا…" oninput="$('#sg-count').textContent = this.value.length"></textarea>
+      <span class="sg-count"><span id="sg-count">0</span> / 1000</span>
+      <button class="btn primary" style="margin-top:18px" onclick="sendSuggestion(this)">${icon('message')}إرسال الاقتراح</button>
+    </div>`;
+}
+
+function pickSgCat(c) {
+  S.sg.cat = S.sg.cat === c ? '' : c;   // الضغط مرة أخرى يلغي الاختيار
+  document.querySelectorAll('#sg-cats .pill').forEach(b => b.classList.toggle('active', b.dataset.v === S.sg.cat));
+}
+
+async function sendSuggestion(btn) {
+  const text = $('#sg-text').value.trim();
+  if (text.length < 5) return toast('يُرجى كتابة اقتراحكِ (خمسة أحرف على الأقل).', 'err');
+  btn.disabled = true;
+  loading(true, 'جارٍ إرسال الاقتراح');
+  try {
+    const r = await call('submitSuggestion', S.token, { text, category: S.sg.cat });
+    if (!r.ok) { btn.disabled = false; return toast(r.error, 'err'); }
+    $('#sg-body').innerHTML = `
+      <div class="hero-card sheen" style="margin-top:12px">
+        <div class="thanks-ico">${icon('checkCircle')}</div>
+        <span class="eyebrow">Thank You</span>
+        <h2>شكراً لكِ</h2>
+        <p>تم استلام اقتراحكِ بنجاح. نقدّر مشاركتكِ القيّمة، وستطّلع عليه مشرفات النادي للعمل على تطوير المنصة وتحسين جودتها.</p>
+      </div>
+      <button class="btn primary" onclick="openSuggest()">${icon('message')}إرسال اقتراح آخر</button>
+      <button class="btn ghost" onclick="goHome()">الصفحة الرئيسية</button>`;
+    window.scrollTo(0, 0);
+  } catch (e) { btn.disabled = false; if (e.code !== 'AUTH') toast(e.error, 'err'); }
+  finally { loading(false); }
+}
+
+
+/* =========================================================
+ * ⭐ نافذة تقييم التجربة (بعد يومين من التسجيل)
+ * ========================================================= */
+const STAR_LABELS = ['', 'غير مرضية', 'مقبولة', 'جيدة', 'جيدة جداً', 'ممتازة'];
+const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/></svg>';
+let FB_CHECKED = false;
+
+// تُستدعى مرة واحدة في كل زيارة بعد الدخول
+const _routeAfterLoginBase = routeAfterLogin;
+routeAfterLogin = async function () {
+  await _routeAfterLoginBase();
+  if (S.user && S.user.placementDone) checkFeedback();
+};
+
+async function checkFeedback() {
+  if (FB_CHECKED || !S.token) return;
+  FB_CHECKED = true;
+  try {
+    const r = await call('getFeedbackStatus', S.token);
+    if (r.ok && r.show) setTimeout(showFeedback, 1800);
+  } catch (e) {}
+}
+
+function showFeedback() {
+  if (!S.token) return;
+  if (document.querySelector('.modal-back')) return setTimeout(showFeedback, 4000);   // ننتظر إغلاق أي نافذة أخرى
+  call('markFeedbackShown', S.token).catch(() => {});
+  S.fbStars = 0;
+  const logo = window.LOGO_FAIL ? miniMark() :
+    `<div class="logo-wrap"><span class="logo-disc"><img src="logo.png" alt="" onerror="this.closest('.logo-wrap').classList.add('nologo');window.LOGO_FAIL=1"></span>${miniMark('logo-fb')}</div>`;
+  openModal(`<div class="modal fb-modal">
+      ${logo}
+      <span class="eyebrow">Your Experience</span>
+      <h3>بشّرينا، كيف كانت تجربتك في منصة نادي اللغة الإنجليزية للتعلم الذاتي؟</h3>
+      <div class="stars" id="fb-stars">${[1, 2, 3, 4, 5].map(n =>
+        `<button data-n="${n}" onclick="setStars(${n})" aria-label="${n} من 5">${STAR_SVG}</button>`).join('')}</div>
+      <div class="stars-label" id="fb-label">اختاري عدد النجوم</div>
+      <textarea id="fb-comment" class="ar-area" rows="3" maxlength="1000" placeholder="أضيفي تعليقاً (اختياري)"></textarea>
+      <div class="cert-actions">
+        <button class="btn primary" id="fb-send" disabled onclick="sendFeedback()">إرسال</button>
+        <button class="btn ghost" onclick="closeModal()">لاحقاً</button>
+      </div>
+    </div>`);
+}
+
+function setStars(n) {
+  S.fbStars = n;
+  document.querySelectorAll('#fb-stars button').forEach(b => b.classList.toggle('on', Number(b.dataset.n) <= n));
+  $('#fb-label').textContent = STAR_LABELS[n];
+  $('#fb-send').disabled = false;
+}
+
+async function sendFeedback() {
+  if (!S.fbStars) return;
+  const btn = $('#fb-send'); btn.disabled = true;
+  try {
+    const r = await call('submitFeedback', S.token, { stars: S.fbStars, comment: $('#fb-comment').value.trim() });
+    if (!r.ok) { btn.disabled = false; return toast(r.error, 'err'); }
+    const m = document.querySelector('.modal-back .modal');
+    if (m) m.innerHTML = `<div class="thanks-ico">${icon('checkCircle')}</div><span class="eyebrow">Thank You</span>
+      <h3>شكراً لكِ على تقييمكِ</h3><p>رأيكِ يساعدنا على تطوير المنصة وتحسين تجربة جميع الطالبات.</p>
+      <button class="btn primary" style="margin-top:18px" onclick="closeModal()">إغلاق</button>`;
+    if (S.fbStars >= 4) goldShimmer();
+  } catch (e) { btn.disabled = false; if (e.code !== 'AUTH') toast(e.error, 'err'); }
+}
+
+
+/* =========================================================
+ * 📜 شهادة الإتمام (صورة أو PDF)
+ * ========================================================= */
+async function showCertificate(c) {
+  openModal(`<div class="modal wide"><div id="cert-holder" class="cert-loading">جارٍ إعداد الشهادة…</div>
+    <div class="cert-actions">
+      <button class="btn primary" onclick="downloadCert('png')">${icon('image')}تنزيل صورة</button>
+      <button class="btn navy" onclick="downloadCert('pdf')">${icon('file')}تنزيل PDF</button>
+    </div>
+    <button class="btn ghost" style="margin-top:8px" onclick="closeModal()">إغلاق</button></div>`);
+  try {
+    const cv = await drawCertificate(c);
+    S.cert = { canvas: cv, name: 'ELC-Certificate-' + c.trackEn };
+    const h = $('#cert-holder');
+    if (h) { h.className = ''; h.innerHTML = `<img class="cert-preview" src="${cv.toDataURL('image/png')}" alt="شهادة الإتمام">`; }
+  } catch (e) { toast('تعذّر إعداد الشهادة. يُرجى المحاولة مجدداً.', 'err'); }
+}
+
+function loadScript(src) {
+  return new Promise((ok, fail) => {
+    if (document.querySelector(`script[src="${src}"]`)) return ok();
+    const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = fail; document.head.appendChild(s);
+  });
+}
+
+async function downloadCert(fmt) {
+  if (!S.cert) return;
+  const cv = S.cert.canvas, name = S.cert.name;
+  try {
+    if (fmt === 'png') {
+      const a = document.createElement('a');
+      a.href = cv.toDataURL('image/png'); a.download = name + '.png';
+      document.body.appendChild(a); a.click(); a.remove();
+    } else {
+      loading(true, 'جارٍ إعداد ملف PDF');
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+      const pdf = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      pdf.addImage(cv.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 297, 210);
+      pdf.save(name + '.pdf');
+    }
+  } catch (e) { toast('تعذّر التنزيل. يمكنكِ الضغط مطوّلاً على صورة الشهادة لحفظها.', 'err'); }
+  finally { loading(false); }
+}
+
+// تحميل صورة (ترجع null إذا تعذّر التحميل، فيُستخدم الشعار الذهبي بدلاً منها)
+function loadImg(src) {
+  return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+}
+
+// رسم الشهادة على لوحة بحجم A4 أفقي
+async function drawCertificate(c) {
+  try {
+    await Promise.all([
+      document.fonts.load('600 84px "El Messiri"'), document.fonts.load('700 92px "El Messiri"'),
+      document.fonts.load('italic 500 44px "Playfair Display"'), document.fonts.load('400 32px "IBM Plex Sans Arabic"'),
+      document.fonts.load('500 22px "Inter"')
+    ]);
+  } catch (e) {}
+  const imgs = await Promise.all([loadImg('logo.png'), loadImg('header.png')]);
+  const logo = imgs[0], header = imgs[1];
+
+  const W = 2000, H = 1414;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  const NAVY = '#0B1F3A', GOLD = '#C9A86A', GOLDD = '#A88A4E', IVORY = '#FAF7F0', MUTED = '#6E6C73';
+  const TC = (TRACK_COLORS[c.track] || {}).c || NAVY;                // لون المسار
+  const AR_H = '"El Messiri", serif', AR = '"IBM Plex Sans Arabic", Tahoma, sans-serif', EN_H = '"Playfair Display", Georgia, serif', EN = '"Inter", sans-serif';
+  const line = (x1, y1, x2, y2) => { x.beginPath(); x.moveTo(x1, y1); x.lineTo(x2, y2); x.stroke(); };
+  const ring = (cx, cy, r) => { x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.stroke(); };
+  const diamond = (cx, cy, s) => { x.beginPath(); x.moveTo(cx, cy - s); x.lineTo(cx + s, cy); x.lineTo(cx, cy + s); x.lineTo(cx - s, cy); x.closePath(); x.fill(); };
+  const text = (t, px, py, font, color, dir) => { x.font = font; x.fillStyle = color; x.direction = dir || 'rtl'; x.fillText(t, px, py); };
+  const fit = (img, cx, top, maxW, maxH) => {
+    const k = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight);
+    const w = img.naturalWidth * k, h = img.naturalHeight * k;
+    x.drawImage(img, cx - w / 2, top, w, h);
+  };
+
+  // الإطار
+  x.fillStyle = NAVY; x.fillRect(0, 0, W, H);
+  x.fillStyle = IVORY; x.fillRect(36, 36, W - 72, H - 72);
+  const glow = x.createRadialGradient(W / 2, H * 0.42, 60, W / 2, H * 0.42, W * 0.65);
+  glow.addColorStop(0, 'rgba(255,255,255,.95)'); glow.addColorStop(1, 'rgba(245,238,221,0)');
+  x.fillStyle = glow; x.fillRect(36, 36, W - 72, H - 72);
+  x.strokeStyle = GOLD; x.lineWidth = 4; x.strokeRect(64, 64, W - 128, H - 128);
+  x.lineWidth = 1.5; x.strokeRect(80, 80, W - 160, H - 160);
+  x.fillStyle = GOLD; [[80, 80], [W - 80, 80], [80, H - 80], [W - 80, H - 80]].forEach(p => diamond(p[0], p[1], 13));
+  // شريطا لون المسار على الجانبين
+  x.fillStyle = TC; x.fillRect(80, 300, 8, H - 600); x.fillRect(W - 88, 300, 8, H - 600);
+
+  // الترويسة الرسمية
+  if (header) fit(header, W / 2, 102, 1150, 98);
+  x.strokeStyle = GOLD; x.lineWidth = 1.5; line(560, 222, W / 2 - 18, 222); line(W / 2 + 18, 222, 1440, 222);
+  x.fillStyle = GOLD; diamond(W / 2, 222, 7);
+
+  // شعار النادي (أو الشعار الذهبي احتياطياً)
+  const ex = W / 2, ey = 332;
+  x.textAlign = 'center';
+  if (logo) {
+    x.fillStyle = '#FFFFFF'; x.beginPath(); x.arc(ex, ey, 80, 0, Math.PI * 2); x.fill();
+    x.strokeStyle = GOLD; x.lineWidth = 2.5; ring(ex, ey, 80); x.lineWidth = 1; ring(ex, ey, 90);
+    fit(logo, ex, ey - 62, 124, 124);
+  } else {
+    x.strokeStyle = GOLD; x.lineWidth = 3; ring(ex, ey, 86); x.lineWidth = 1; ring(ex, ey, 78);
+    x.fillStyle = NAVY; x.beginPath(); x.arc(ex, ey, 62, 0, Math.PI * 2); x.fill();
+    x.lineWidth = 2; ring(ex, ey, 62);
+    x.textBaseline = 'middle';
+    text('ELC', ex, ey + 3, `italic 500 46px ${EN_H}`, GOLD, 'ltr');
+  }
+  x.textBaseline = 'alphabetic';
+
+  // العناوين والنص
+  text('شهادة إتمام', W / 2, 505, `600 82px ${AR_H}`, NAVY);
+  text('Certificate of Completion', W / 2, 563, `italic 500 42px ${EN_H}`, GOLDD, 'ltr');
+  x.strokeStyle = GOLD; x.lineWidth = 1.5; line(W / 2 - 220, 600, W / 2 - 20, 600); line(W / 2 + 20, 600, W / 2 + 220, 600);
+  x.fillStyle = GOLD; diamond(W / 2, 600, 7);
+
+  text('تشهد منصة اللغة الإنجليزية للتعلم الذاتي (English Language Club) بأن', W / 2, 672, `400 31px ${AR}`, MUTED);
+  text(c.name, W / 2, 778, `700 90px ${AR_H}`, NAVY);
+  x.strokeStyle = TC; x.lineWidth = 3; line(W / 2 - 340, 812, W / 2 + 340, 812);
+  text(`قد أتمّت بنجاح جميع مستويات مسار ${c.trackAr}`, W / 2, 884, `500 38px ${AR}`, TC);
+  const cefr = (String(c.level).match(/\(([^)]+)\)/) || [])[1] || 'B2';
+  text(`${c.trackEn} Track · Completed up to Level ${cefr}`, W / 2, 936, `italic 500 33px ${EN_H}`, GOLDD, 'ltr');
+  text('مع خالص التمنيات بدوام التميّز والتقدّم', W / 2, 990, `400 29px ${AR}`, MUTED);
+
+  // التاريخ والتوقيع
+  const by = 1132;
+  const d = String(c.issuedAt).split('-').map(Number);
+  let dateAr = c.issuedAt;
+  try { dateAr = new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(d[0], d[1] - 1, d[2])); } catch (e) {}
+  x.strokeStyle = GOLD; x.lineWidth = 1.5; line(W - 760, by, W - 340, by); line(340, by, 760, by);
+  text(dateAr, W - 550, by - 20, `500 31px ${AR}`, NAVY);
+  text('English Language Club', 550, by - 20, `italic 500 35px ${EN_H}`, NAVY, 'ltr');
+  text('تاريخ الإصدار', W - 550, by + 46, `600 29px ${AR_H}`, GOLDD);
+  text('مشرفة النادي · الثانوية التاسعة عشر', 550, by + 46, `600 29px ${AR_H}`, GOLDD);
+
+  // حقوق النشر + رقم الشهادة
+  text('جميع الحقوق محفوظة © 2026 — معلمات اللغة الإنجليزية: أ. حنان جرادان الحارثي، أ. شيماء سامي الحازمي', W / 2, 1258, `400 23px ${AR}`, MUTED);
+  text('Certificate No. ' + c.id, W / 2, 1298, `500 20px ${EN}`, '#9C99A0', 'ltr');
+  return cv;
 }
 </script>
 
