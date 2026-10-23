@@ -14,9 +14,9 @@
   <script>
     /* =====================================================================
      * ✏️ رابط الخادم: الصقي هنا رابط Web app الخاص بكِ (ينتهي بـ /exec)
-     *    بين علامتي التنصيص، بدلاً من النص PASTE_YOUR_WEB_APP_URL_HERE
+     *    بين علامتي التنصيص في السطر التالي (بدلاً من النص الإنجليزي الموجود بينهما)
      * ===================================================================== */
-    window.ELC_API_URL = 'https://script.google.com/macros/s/AKfycbx9QPEYuX-MkSsmCP3Ou_PU8Ja-86Wcl5z8NwsKVCG_3bcvLmWXb5CpSLOHTGXMUFuCzQ/exec';
+    window.ELC_API_URL = 'PASTE_YOUR_WEB_APP_URL_HERE';
   </script>
   <!--
   Styles.html — نظام التصميم الكامل للمنصة
@@ -2996,6 +2996,10 @@ function renderAchieve() {
       <tr><td>تصحيح سؤال في «أخطائي»</td><td>+${P.REVIEW_FIX}</td></tr>
       <tr><td>اجتياز اختبار نهاية المستوى</td><td>+${P.LEVEL_PASSED}</td></tr>
       <tr><td>إتمام مسار كامل</td><td>+${P.TRACK_DONE}</td></tr>
+      ${a.stepRules ? `
+      <tr><td>إكمال مجموعة تدريب على STEP <small class="muted">(حتى ${a.stepRules.PRACTICE_DAILY_MAX} مجموعات يومياً)</small></td><td>+${a.stepRules.PRACTICE_DONE}</td></tr>
+      <tr><td>إكمال اختبار STEP المحاكي</td><td>+${a.stepRules.MOCK_DONE}</td></tr>
+      <tr><td>الحصول على ${a.stepRules.HIGH_PERCENT}% أو أكثر في الاختبار المحاكي</td><td>+${a.stepRules.MOCK_HIGH}</td></tr>` : ''}
     </table></div>`;
 }
 
@@ -3265,6 +3269,618 @@ async function drawCertificate(c) {
   text('Certificate No. ' + c.id, W / 2, 1298, `500 20px ${EN}`, '#9C99A0', 'ltr');
   return cv;
 }
+</script>
+
+  <!-- Step.html — المرحلة 7: مسار التدريب على اختبار STEP (تدريب حر + اختبار محاكٍ + تقرير + سجل المحاولات) -->
+<style>
+  /* ---------- بطاقة الاختبار المحاكي ---------- */
+  .mock-card {
+    position: relative; overflow: hidden; margin-top: 16px; padding: 22px 20px; border-radius: var(--r-lg); color: var(--ivory);
+    background: linear-gradient(150deg, var(--navy-2), var(--navy)); border: 1px solid rgba(201, 168, 106, .5); box-shadow: var(--sh-2);
+  }
+  .mock-card::after { content: ''; position: absolute; inset: 8px; border: 1px solid rgba(201, 168, 106, .18); border-radius: 12px; pointer-events: none; }
+  .mock-card h3 { color: #fff; font-size: 20px; }
+  .mock-card p { color: rgba(250, 247, 240, .72); font-size: 14.5px; margin-top: 6px; }
+  .mock-card .eyebrow { color: var(--gold); }
+  .mock-meta { display: flex; gap: 18px; flex-wrap: wrap; margin: 14px 0 4px; font-size: 14px; color: rgba(250, 247, 240, .85); }
+  .mock-meta span { display: inline-flex; align-items: center; gap: 6px; }
+  .mock-meta .ic { width: 16px; height: 16px; color: var(--gold); }
+  .dist { display: flex; height: 8px; border-radius: 999px; overflow: hidden; margin: 14px 0 6px; background: rgba(255, 255, 255, .08); }
+  .dist span { display: block; height: 100%; }
+  .dist-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: rgba(250, 247, 240, .7); }
+  .dist-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-inline-end: 6px; }
+  .mock-card .btn { position: relative; z-index: 1; }
+  .resume-note { display: flex; gap: 10px; align-items: center; margin-top: 14px; padding: 10px 12px; border-radius: 10px;
+                 background: rgba(201, 168, 106, .12); border: 1px solid rgba(201, 168, 106, .35); font-size: 14px; color: var(--ivory); }
+  .resume-note .ic { width: 18px; height: 18px; color: var(--gold); flex-shrink: 0; }
+
+  /* ---------- أقسام التدريب ---------- */
+  .sec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sec-card {
+    text-align: start; background: #fff; border: 1px solid var(--line); border-radius: var(--r); padding: 16px 14px 14px; cursor: pointer;
+    box-shadow: var(--sh-1), inset 0 2px 0 var(--tc); transition: transform .25s var(--ease), box-shadow .25s; font-family: var(--f-ar); color: var(--text);
+  }
+  .sec-card:hover { transform: translateY(-2px); box-shadow: var(--sh-2), inset 0 2px 0 var(--tc); }
+  .sec-card .si { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; color: var(--gold-l);
+                  background: linear-gradient(145deg, var(--tc), var(--tc-d)); margin-bottom: 10px; }
+  .sec-card .si .ic { width: 20px; height: 20px; }
+  .sec-card b { display: block; font-family: var(--f-ar-h); color: var(--navy); font-weight: 600; font-size: 15.5px; }
+  .sec-card .en-sub { display: block; font-family: var(--f-en); font-size: 11.5px; color: var(--muted); letter-spacing: .02em; }
+  .sec-card .w { float: left; font-family: var(--f-en-h); color: var(--tc); font-weight: 600; font-size: 18px; }
+  .sec-card .bar > div { background: var(--tc); }
+  .sec-card small { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+
+  /* ---------- السجل والرسم البياني ---------- */
+  .chart-box { padding: 16px 12px 8px; }
+  .chart-box svg { width: 100%; height: auto; display: block; }
+  .hist-row { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .hist-row:last-child { border-bottom: 0; }
+  .hist-row .pc { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0;
+                  font-family: var(--f-en-h); font-weight: 600; color: var(--navy); font-size: 17px; border: 1px solid var(--gold-l); background: var(--gold-xl); }
+  .hist-row .pc.hi { background: var(--navy); color: var(--gold); border-color: var(--navy); }
+  .hist-row div { flex: 1; min-width: 0; }
+  .hist-row b { display: block; font-family: var(--f-ar-h); color: var(--navy); font-weight: 600; font-size: 15px; }
+  .hist-row small { color: var(--muted); font-size: 12.5px; }
+  .mini-bars { display: flex; gap: 4px; margin-top: 6px; }
+  .mini-bars span { flex: 1; height: 4px; border-radius: 99px; background: #ECE5D6; overflow: hidden; }
+  .mini-bars span i { display: block; height: 100%; background: var(--tc); }
+
+  /* ---------- السؤال (التدريب والاختبار) ---------- */
+  .st-passage { max-height: 300px; overflow-y: auto; padding: 16px 18px; margin: 14px 0 4px; background: var(--ivory); border: 1px solid var(--line);
+                border-radius: 12px; direction: ltr; text-align: left; font-family: var(--f-en); font-size: 16px; line-height: 1.85; color: var(--text); }
+  .st-passage p { margin: 0 0 12px; }
+  .st-passage p:last-child { margin: 0; }
+  .st-passage-label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .st-passage-label .ic { width: 15px; height: 15px; color: var(--gold-d); }
+  .st-q { direction: ltr; text-align: left; font-family: var(--f-en); font-size: 17px; line-height: 1.8; color: var(--navy); margin: 14px 0 12px; font-weight: 500; }
+  .st-q u { text-decoration: none; border-bottom: 2px solid var(--gold); padding: 0 2px; background: var(--gold-xl); }
+  .st-sec { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 5px 12px; border-radius: 999px; background: var(--tc-l); color: var(--tc-d); }
+  .st-sec .ic { width: 14px; height: 14px; }
+  .transcript { margin-top: 12px; }
+  .transcript summary { cursor: pointer; color: var(--navy); font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+  .transcript summary .ic { width: 15px; height: 15px; color: var(--gold-d); }
+  .transcript .st-passage { max-height: none; font-size: 15px; }
+  .plays-left { display: block; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+
+  /* ---------- شريط الاختبار المحاكي ---------- */
+  .mock-bar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+              margin: 0 -18px; padding: 10px 18px; background: rgba(250, 247, 240, .94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+              border-bottom: 1px solid var(--line); }
+  .timer { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: var(--navy); color: #fff;
+           font-family: var(--f-en-h); font-size: 18px; font-weight: 600; letter-spacing: .04em; direction: ltr; min-width: 104px; justify-content: center; }
+  .timer .ic { width: 16px; height: 16px; color: var(--gold); }
+  .timer.warn { background: var(--err); }
+  .timer.warn .ic { color: #fff; }
+  .mock-bar .back { margin: 0; }
+  .palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(36px, 1fr)); gap: 6px; margin: 14px 0 4px; }
+  .palette button { height: 36px; border-radius: 8px; border: 1px solid var(--line); background: #fff; font-family: var(--f-en-h); font-weight: 600;
+                    font-size: 14px; color: var(--muted); cursor: pointer; position: relative; box-shadow: inset 0 -2px 0 var(--tc); transition: all .18s; }
+  .palette button.done { background: var(--tc-l); color: var(--tc-d); border-color: transparent; }
+  .palette button.cur { border-color: var(--navy); box-shadow: 0 0 0 1px var(--navy), inset 0 -2px 0 var(--tc); color: var(--navy); }
+  .palette button.flag::after { content: ''; position: absolute; top: 3px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold-d); }
+  .pal-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+  .pal-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-inline-end: 5px; vertical-align: -1px; }
+  .q-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .q-nav .btn { margin: 0; }
+  .flag-btn.on { background: var(--gold-xl); border-color: var(--gold); color: var(--gold-d); }
+
+  /* ---------- التقرير ---------- */
+  .rep-row { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .rep-row:last-child { border-bottom: 0; }
+  .rep-head { display: flex; align-items: center; gap: 10px; }
+  .rep-head .si { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; color: var(--gold-l); background: linear-gradient(145deg, var(--tc), var(--tc-d)); flex-shrink: 0; }
+  .rep-head .si .ic { width: 17px; height: 17px; }
+  .rep-head b { flex: 1; font-family: var(--f-ar-h); color: var(--navy); font-weight: 600; }
+  .rep-head .val { font-family: var(--f-en-h); color: var(--navy); font-weight: 600; font-size: 17px; direction: ltr; }
+  .rep-head .val small { color: var(--muted); font-size: 12px; font-weight: 400; }
+  .rep-row .bar > div { background: var(--tc); }
+  .tag-weak { display: inline-block; font-size: 11.5px; padding: 2px 9px; border-radius: 999px; background: var(--err-l); color: var(--err); margin-inline-start: 6px; font-family: var(--f-ar); font-weight: 500; }
+  .tip-card { display: flex; gap: 14px; align-items: flex-start; }
+  .tip-card > .ic { width: 22px; height: 22px; color: var(--gold-d); flex-shrink: 0; margin-top: 3px; }
+  .tip-card b { display: block; font-family: var(--f-ar-h); color: var(--navy); font-weight: 600; margin-bottom: 4px; }
+  .tip-card p { color: #3A3A42; font-size: 15px; line-height: 1.9; }
+  .delta { display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 14px; padding: 4px 12px; border-radius: 999px; background: rgba(255, 255, 255, .08); }
+  .delta.up { color: #9FD3B8; } .delta.down { color: #E9A9B5; }
+  .rv-item { border-bottom: 1px solid var(--line); }
+  .rv-item:last-child { border-bottom: 0; }
+  .rv-item > summary { list-style: none; display: flex; gap: 12px; align-items: center; padding: 12px 0; cursor: pointer; }
+  .rv-item > summary::-webkit-details-marker { display: none; }
+  .rv-item .n { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; font-family: var(--f-en-h); font-weight: 600; font-size: 14px; }
+  .rv-item.ok .n { background: var(--ok-l); color: var(--ok); }
+  .rv-item.bad .n { background: var(--err-l); color: var(--err); }
+  .rv-item .t { flex: 1; min-width: 0; direction: ltr; text-align: left; font-family: var(--f-en); font-size: 14.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rv-item > summary > .ic { width: 18px; height: 18px; flex-shrink: 0; }
+  .rv-item.ok > summary > .ic { color: var(--ok); } .rv-item.bad > summary > .ic { color: var(--err); }
+  .rv-body { padding: 0 0 16px; }
+  .rv-body .opt { cursor: default; padding: 10px 12px; font-size: 15px; }
+  .rv-body .opt:hover { box-shadow: none; border-color: #E3DBCB; }
+  .rv-body .opt.correct:hover { border-color: var(--ok); } .rv-body .opt.wrong:hover { border-color: var(--err); }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+</style>
+
+<script>
+/* =========================================================
+ * أيقونات إضافية + شاشة STEP
+ * ========================================================= */
+Object.assign(ICONS, {
+  flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+  grid: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+  send: '<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>'
+});
+document.getElementById('extra-screens').insertAdjacentHTML('beforeend', `<section class="screen" id="scr-step"><div id="st-body"></div></section>`);
+
+// ✏️ أقسام STEP: الأيقونة واللون (مأخوذ من ألوان المسارات)
+const STEP_UI = {
+  reading:     { icon: 'book',       color: 'reading',   ar: 'الفهم القرائي',    en: 'Reading' },
+  structure:   { icon: 'layers',     color: 'grammar',   ar: 'التراكيب النحوية', en: 'Structure' },
+  listening:   { icon: 'headphones', color: 'listening', ar: 'الاستماع',          en: 'Listening' },
+  composition: { icon: 'feather',    color: 'writing',   ar: 'التحليل الكتابي',   en: 'Composition' }
+};
+const STEP_KEYS = ['reading', 'structure', 'listening', 'composition'];
+const MOCK_STORE = 'elc_step_mock';      // حفظ الاختبار الجاري في المتصفح (للعودة إليه بعد الخروج أو تحديث الصفحة)
+function stVars(k) { return trackVars((STEP_UI[k] || {}).color); }
+function mmss(sec) { sec = Math.max(0, Math.round(sec)); return String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0'); }
+
+// نص السؤال: الجزء المسطَّر يُكتب __هكذا__ في جدول STEP_Bank
+function stQ(t) { return esc(t).replace(/__(.+?)__/g, '<u>$1</u>').replace(/\n/g, '<br>'); }
+function stPassage(t) { return String(t || '').split(/\n\s*\n/).map(p => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`).join(''); }
+function secChip(k) { const u = STEP_UI[k]; return `<span class="st-sec" style="${stVars(k)}">${icon(u.icon)}${u.ar}</span>`; }
+
+
+/* =========================================================
+ * 🏠 الصفحة الرئيسية لقسم STEP
+ * ========================================================= */
+window.openStep = async function () {
+  stopMockTimer();
+  S.mode = 'lesson';
+  showScreen('step');
+  $('#st-body').innerHTML = skeletonList(4);
+  try {
+    const r = await call('getStepHome', S.token);
+    if (!r.ok) { toast(r.error, 'err'); return goHome(); }
+    S.st = r;
+    renderStepHome();
+  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); goHome(); } }
+};
+
+function savedMock() {
+  try { const m = JSON.parse(load(MOCK_STORE) || 'null'); return m && S.user && m.uid === S.user.id ? m : null; } catch (e) { return null; }
+}
+
+function renderStepHome() {
+  const d = S.st, mocks = d.mocks || [];
+  const saved = savedMock();
+  const dist = d.mock.dist;
+  const left = saved ? Math.round((saved.endsAt - Date.now()) / 1000) : 0;
+
+  const mockCard = `<div class="mock-card">
+      <span class="eyebrow">Mock Test</span><h3>الاختبار المحاكي</h3>
+      <p>اختبار مؤقّت يحاكي اختبار STEP الحقيقي في توزيع أسئلته، تظهر نتيجته وتقريره التفصيلي بعد التسليم.</p>
+      <div class="mock-meta"><span>${icon('target')}${d.mock.size} سؤالاً</span><span>${icon('clock')}${d.mock.minutes} دقيقة</span>
+        <span>${icon('headphones')}تشغيل المقطع ${d.mock.plays === 1 ? 'مرة واحدة' : 'مرتين'}</span></div>
+      <div class="dist">${STEP_KEYS.map(k => `<span style="width:${dist[k] / d.mock.size * 100}%;background:${TRACK_COLORS[STEP_UI[k].color].c}"></span>`).join('')}</div>
+      <div class="dist-legend">${STEP_KEYS.map(k => `<span><i style="background:${TRACK_COLORS[STEP_UI[k].color].c}"></i>${STEP_UI[k].ar} ${dist[k]}</span>`).join('')}</div>
+      ${saved
+        ? `<div class="resume-note">${icon('clock')}<span>لديكِ اختبار لم يُسلَّم بعد${left > 0 ? ` — الوقت المتبقي <b class="en-inline">${mmss(left)}</b>` : ' وقد انتهى وقته'}.</span></div>
+           <button class="btn primary" style="margin-top:14px" onclick="resumeMock()">${left > 0 ? 'متابعة الاختبار' : 'تسليم الاختبار وعرض التقرير'}${icon('arrowLeft')}</button>`
+        : `<button class="btn primary" style="margin-top:16px" onclick="confirmStartMock()">ابدئي الاختبار المحاكي${icon('arrowLeft')}</button>`}
+    </div>`;
+
+  const secs = `<div class="sec-grid stagger">${d.sections.map(s => `
+      <button class="sec-card" style="${stVars(s.key)}" onclick="startStepPractice('${s.key}')">
+        <span class="w">${s.weight}%</span><div class="si">${icon(STEP_UI[s.key].icon)}</div>
+        <b>${esc(s.ar)}</b><span class="en-sub">${esc(s.en)}</span>
+        <div class="bar"><div style="width:${s.accuracy || 0}%"></div></div>
+        <small><span>${s.answered ? 'الدقة ' + s.accuracy + '%' : 'لم تبدئي بعد'}</span><span>${s.count} سؤالاً</span></small>
+      </button>`).join('')}</div>`;
+
+  const hist = mocks.length
+    ? `<div class="card flat chart-box">${stepChart(mocks)}</div>
+       <div class="card flat">${mocks.slice().reverse().slice(0, 10).map((m, i) => `
+         <div class="hist-row"><div class="pc ${m.percent >= 80 ? 'hi' : ''}">${m.percent}%</div>
+           <div><b>المحاولة ${mocks.length - i}${m.weakestAr ? ` · <span class="muted small" style="font-weight:400">الأضعف: ${esc(m.weakestAr)}</span>` : ''}</b>
+             <small><span class="en-inline">${m.date}</span> · ${m.score} من ${m.total} · ${mmss(m.durationSec)} دقيقة</small>
+             <div class="mini-bars">${STEP_KEYS.map(k => `<span style="${stVars(k)}" title="${STEP_UI[k].ar}"><i style="width:${m.sections[k] || 0}%"></i></span>`).join('')}</div>
+           </div></div>`).join('')}</div>`
+    : `<div class="empty">${icon('chart')}<p><b>لا توجد محاولات بعد</b></p><p class="small">بعد أول اختبار محاكٍ سيظهر هنا سجل نتائجكِ ومنحنى تقدّمكِ.</p></div>`;
+
+  $('#st-body').innerHTML = `${backHome()}
+    <div class="sec-hero"><span class="eyebrow">STEP Preparation</span><h2>الاستعداد لاختبار STEP</h2>
+      <p>اختبار كفايات اللغة الإنجليزية. تدرّبي على كل قسم مع شرح لكل إجابة، ثم قيسي جاهزيتكِ باختبار محاكٍ مؤقّت.</p>
+      <div class="stats four">
+        <div class="stat">${icon('target')}<b>${mocks.length}</b><small>اختبارات محاكية</small></div>
+        <div class="stat">${icon('crown')}<b>${d.best == null ? '—' : d.best + '%'}</b><small>أعلى نتيجة</small></div>
+        <div class="stat">${icon('trending')}<b>${d.avg == null ? '—' : d.avg + '%'}</b><small>المتوسط</small></div>
+        <div class="stat">${icon('layers')}<b>${d.practiceSets}</b><small>مجموعات تدريب</small></div>
+      </div></div>
+    ${mockCard}
+    <div class="sec-title"><h3>التدريب الحر حسب القسم</h3><span class="eyebrow">Practice</span></div>
+    ${secs}
+    <div class="sec-title"><h3>سجل المحاولات</h3><span class="eyebrow">History</span></div>
+    ${hist}`;
+}
+
+// منحنى نتائج الاختبارات المحاكية (آخر 10 محاولات)
+function stepChart(mocks) {
+  const list = mocks.slice(-10), W = 320, H = 150, L = 34, R = 12, T = 14, B = 26;
+  const x = i => list.length === 1 ? (L + (W - R)) / 2 : L + i * ((W - L - R) / (list.length - 1));
+  const y = v => T + (100 - v) / 100 * (H - T - B);
+  const grid = [0, 50, 80, 100].map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 80 ? '#C9A86A' : '#ECE5D6'}" stroke-width="1" ${v === 80 ? 'stroke-dasharray="4 4"' : ''}/>
+      <text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="#8A8478" font-family="Inter">${v}</text>`).join('');
+  const pts = list.map((m, i) => `${x(i)},${y(m.percent)}`).join(' ');
+  const area = list.length > 1 ? `<polygon points="${x(0)},${y(0)} ${pts} ${x(list.length - 1)},${y(0)}" fill="url(#stGrad)"/>` : '';
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="منحنى نتائج الاختبارات المحاكية">
+    <defs><linearGradient id="stGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C9A86A" stop-opacity=".28"/><stop offset="1" stop-color="#C9A86A" stop-opacity="0"/></linearGradient></defs>
+    ${grid}${area}
+    ${list.length > 1 ? `<polyline points="${pts}" fill="none" stroke="#0B1F3A" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>` : ''}
+    ${list.map((m, i) => `<circle cx="${x(i)}" cy="${y(m.percent)}" r="4.5" fill="#fff" stroke="${m.percent >= 80 ? '#C9A86A' : '#0B1F3A'}" stroke-width="2"/>
+      <text x="${x(i)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#8A8478" font-family="Inter">${mocks.length - list.length + i + 1}</text>`).join('')}
+  </svg>
+  <div class="small muted center" style="margin-top:4px">الخط المتقطع الذهبي = 80% (مستوى الجاهزية الممتاز)</div>`;
+}
+
+
+/* =========================================================
+ * 📝 التدريب الحر (شرح فوري لكل إجابة)
+ * ========================================================= */
+async function startStepPractice(section) {
+  showScreen('step');
+  $('#st-body').innerHTML = skeletonList(3);
+  try {
+    const r = await call('startStepPractice', S.token, section);
+    if (!r.ok) { toast(r.error, 'err'); return openStep(); }
+    S.sp = { id: r.sessionId, section: section, questions: r.questions, idx: 0, results: {}, busy: false };
+    renderPractice();
+  } catch (e) { if (e.code !== 'AUTH') { toast(e.error, 'err'); openStep(); } }
+}
+
+function renderPractice() {
+  S.texts = [];
+  const P = S.sp, q = P.questions[P.idx], res = P.results[q.id], n = P.questions.length, last = P.idx === n - 1;
+  const prev = P.questions[P.idx - 1];
+  const sameGroup = prev && prev.group === q.group;
+  $('#st-body').innerHTML = `
+    <div class="ls-top"><button class="back" onclick="quitPractice()">${icon('x')}إنهاء التدريب</button>${secChip(q.section)}</div>
+    <div class="q-top" style="margin-top:16px"><span class="chip">${icon('target')}تدريب حر</span><span>السؤال <b>${P.idx + 1}</b> من ${n}</span></div>
+    <div class="bar"><div style="width:${((P.idx + (res ? 1 : 0)) / n) * 100}%"></div></div>
+    <div class="card" style="${stVars(q.section)}">
+      ${stepStem(q, 'practice', sameGroup)}
+      <div class="opts">${q.options.map(o => {
+        let c = '';
+        if (res) { if (o.key === res.answer) c = 'correct'; else if (o.key === res.mine) c = 'wrong'; }
+        return `<button class="opt ${c}" ${res || P.busy ? 'disabled' : ''} onclick="pickStepAnswer('${o.key}')">
+          <span class="opt-k">${o.key}</span><span class="en">${esc(o.text)}</span>${c === 'correct' ? icon('check') : c === 'wrong' ? icon('x') : ''}</button>`;
+      }).join('')}</div>
+      ${res ? `<div class="fb ${res.correct ? 'ok' : 'bad'}">
+          <div class="fb-head">${icon(res.correct ? 'checkCircle' : 'alert')}${res.correct ? 'إجابة صحيحة.' : 'إجابة غير صحيحة.'}</div>
+          ${!res.correct ? `<div class="fb-ans">الإجابة الصحيحة: <span class="en-inline">${res.answer}</span></div>` : ''}
+          ${res.explanationAr ? `<p>${esc(res.explanationAr)}</p>` : ''}
+        </div>
+        ${res.transcript ? `<details class="transcript"><summary>${icon('file')}عرض نص المقطع الصوتي</summary><div class="st-passage">${stPassage(res.transcript)}</div></details>` : ''}` : ''}
+    </div>
+    ${res ? `<button class="btn primary" onclick="nextPractice()">${last ? 'عرض النتيجة' + icon('check') : 'السؤال التالي' + icon('arrowLeft')}</button>` : ''}`;
+}
+
+// رأس السؤال: النص أو المقطع الصوتي ثم السؤال
+function stepStem(q, mode, sameGroup) {
+  let top = '';
+  if (q.audio) {
+    const i = S.texts.push({ en: q.audio }) - 1;
+    if (mode === 'mock') {
+      const left = mockPlaysLeft(q.group);
+      top = `<div class="audio-box"><button class="play" ${left ? '' : 'disabled'} onclick="playMockAudio(${i}, '${q.group}')" aria-label="تشغيل">${icon('play')}</button>
+        <div><b>مقطع استماع</b><small>اقرئي السؤال، ثم استمعي إلى المقطع بتركيز.</small>
+          <span class="plays-left">${left ? `مرات التشغيل المتبقية: <span class="en-inline">${left}</span>` : 'استُنفدت مرات التشغيل لهذا المقطع.'}</span>${accentPicker()}</div></div>`;
+    } else {
+      top = `<div class="audio-box"><button class="play" onclick="speakText(${i})" aria-label="تشغيل">${icon('play')}</button>
+        <div><b>مقطع استماع</b><small>استمعي إلى المقطع ثم اختاري الإجابة الصحيحة.</small>
+          <button class="tool" onclick="speakText(${i}, 'slow')">${icon('clock')}تشغيل بطيء</button>${accentPicker()}</div></div>`;
+    }
+  } else if (q.passage) {
+    top = `<div class="st-passage-label">${icon('book')}${q.section === 'reading' ? 'اقرئي النص ثم أجيبي' : 'اقرئي الفقرة ثم أجيبي'}${sameGroup ? ' · <span class="muted">النص نفسه</span>' : ''}<span class="muted" style="margin-inline-start:auto">مرّري داخل النص لقراءته كاملاً</span></div>
+      <div class="st-passage">${stPassage(q.passage)}</div>`;
+  }
+  return `${top}<div class="st-q">${stQ(q.question)}</div>`;
+}
+
+async function pickStepAnswer(key) {
+  const P = S.sp; if (!P || P.busy) return;
+  const q = P.questions[P.idx];
+  if (P.results[q.id]) return;
+  P.busy = true;
+  const btn = document.querySelector(`#st-body .opt:nth-child(${'ABCD'.indexOf(key) + 1})`);
+  if (btn) btn.classList.add('sel', 'checking');
+  document.querySelectorAll('#st-body .opt').forEach(b => b.disabled = true);
+  try {
+    const r = await call('checkStepAnswer', S.token, { sessionId: P.id, qid: q.id, answer: key });
+    P.busy = false;
+    if (!r.ok) { toast(r.error, 'err'); return renderPractice(); }
+    P.results[q.id] = { correct: r.correct, answer: r.answer, mine: key, explanationAr: r.explanationAr, transcript: r.transcript };
+    renderPractice();
+  } catch (e) { P.busy = false; if (e.code !== 'AUTH') { toast(e.error, 'err'); renderPractice(); } }
+}
+
+function nextPractice() {
+  const P = S.sp;
+  stopSpeech();
+  if (P.idx < P.questions.length - 1) { P.idx++; renderPractice(); window.scrollTo(0, 0); }
+  else finishPractice();
+}
+
+function quitPractice() {
+  const P = S.sp;
+  const answered = P ? Object.keys(P.results).length : 0;
+  if (!answered) return openStep();
+  openModal(`<div class="modal"><div class="big-badge">${icon('alert')}</div><h3>إنهاء التدريب؟</h3>
+    <p>أجبتِ عن ${answered} من ${P.questions.length} أسئلة. لن تُحفظ نتيجة هذه المجموعة إلا بإكمالها.</p>
+    <button class="btn navy" style="margin-top:18px" onclick="closeModal(openStep)">إنهاء التدريب</button>
+    <button class="btn ghost" onclick="closeModal()">متابعة الحل</button></div>`);
+}
+
+async function finishPractice() {
+  const P = S.sp;
+  loading(true, 'جارٍ حفظ النتيجة...');
+  try {
+    const r = await call('finishStepPractice', S.token, P.id);
+    loading(false);
+    if (!r.ok) { toast(r.error, 'err'); return openStep(); }
+    applyReward(r.extra);
+    const u = STEP_UI[r.section];
+    $('#st-body').innerHTML = `
+      <div class="hero-card ${r.percent >= 70 ? 'sheen' : 'neutral'}" style="margin-top:12px">
+        <span class="eyebrow">Practice Complete</span>
+        <h2>${r.percent >= 90 ? 'أداء متميز' : r.percent >= 70 ? 'أحسنتِ' : 'استمري في التدريب'}</h2>
+        <div class="score">${r.correct}<small> / ${r.total}</small></div>
+        <p>نتيجتكِ في تدريب ${u.ar}: <span class="en-inline">${r.percent}%</span>. ${r.percent >= 70 ? 'واصلي بالمستوى نفسه.' : 'راجعي الشروح المرفقة مع الأسئلة، ثم جرّبي مجموعة جديدة.'}</p>
+        ${r.extra && r.extra.points ? `<div class="pts-pill">${icon('star')}+${r.extra.points} نقطة</div>` : ''}
+      </div>
+      <button class="btn primary" onclick="startStepPractice('${r.section}')">${icon('rotate')}مجموعة جديدة في ${u.ar}</button>
+      <button class="btn ghost" onclick="openStep()">العودة إلى قسم STEP</button>`;
+    window.scrollTo(0, 0);
+    if (r.percent >= 90) setTimeout(goldShimmer, 300);
+    S.sp = null;
+  } catch (e) { loading(false); if (e.code !== 'AUTH') { toast(e.error, 'err'); openStep(); } }
+}
+
+
+/* =========================================================
+ * ⏱ الاختبار المحاكي (20 سؤالاً — 30 دقيقة)
+ * ========================================================= */
+function confirmStartMock() {
+  const d = S.st.mock;
+  openModal(`<div class="modal"><div class="big-badge">${icon('clock')}</div>
+    <span class="eyebrow">Mock Test</span><h3>تعليمات الاختبار</h3>
+    <p style="text-align:start;line-height:2">
+      · عدد الأسئلة ${d.size} سؤالاً، والمدة ${d.minutes} دقيقة.<br>
+      · لا تظهر الإجابات الصحيحة إلا بعد التسليم.<br>
+      · يمكنكِ التنقل بين الأسئلة وتمييز ما تريدين مراجعته.<br>
+      · يُشغَّل كل مقطع استماع ${d.plays === 1 ? 'مرة واحدة' : 'مرتين'} فقط.<br>
+      · عند انتهاء الوقت يُسلَّم الاختبار تلقائياً.</p>
+    <button class="btn primary" style="margin-top:18px" onclick="closeModal(startMock)">ابدئي الآن${icon('arrowLeft')}</button>
+    <button class="btn ghost" onclick="closeModal()">لاحقاً</button></div>`);
+}
+
+async function startMock() {
+  loading(true, 'جارٍ تجهيز الاختبار...');
+  try {
+    const r = await call('startStepMock', S.token);
+    loading(false);
+    if (!r.ok) return toast(r.error, 'err');
+    S.sm = { id: r.sessionId, uid: S.user.id, questions: r.questions, answers: {}, flags: {}, plays: {}, maxPlays: r.plays,
+             idx: 0, endsAt: Date.now() + r.durationSec * 1000, durationSec: r.durationSec };
+    saveMockLocal();
+    S.mode = 'step-mock';
+    showScreen('step');
+    renderMock();
+    startMockTimer();
+  } catch (e) { loading(false); if (e.code !== 'AUTH') toast(e.error, 'err'); }
+}
+
+function resumeMock() {
+  const m = savedMock();
+  if (!m) return renderStepHome();
+  S.sm = m;
+  if (Date.now() >= m.endsAt) return submitMock(true);
+  S.mode = 'step-mock';
+  renderMock();
+  startMockTimer();
+}
+
+function saveMockLocal() { if (S.sm) store(MOCK_STORE, JSON.stringify(S.sm)); }
+function mockPlaysLeft(g) { return Math.max(0, S.sm.maxPlays - (S.sm.plays[g] || 0)); }
+
+function playMockAudio(i, g) {
+  if (!mockPlaysLeft(g)) return;
+  S.sm.plays[g] = (S.sm.plays[g] || 0) + 1;
+  saveMockLocal();
+  speakText(i);
+  // تحديث العداد دون إيقاف الصوت
+  const box = document.querySelector('#st-body .plays-left');
+  const left = mockPlaysLeft(g);
+  if (box) box.innerHTML = left ? `مرات التشغيل المتبقية: <span class="en-inline">${left}</span>` : 'استُنفدت مرات التشغيل لهذا المقطع.';
+  if (!left) { const b = document.querySelector('#st-body .audio-box .play'); if (b) b.disabled = true; }
+}
+
+function renderMock() {
+  S.texts = [];
+  const M = S.sm, q = M.questions[M.idx], n = M.questions.length;
+  const answered = Object.keys(M.answers).length;
+  const prev = M.questions[M.idx - 1];
+  $('#st-body').innerHTML = `
+    <div class="mock-bar"><button class="back" onclick="leaveMock()">${icon('x')}خروج</button>
+      <span class="small muted">أُجيب عن <b class="en-inline">${answered}</b> من ${n}</span>
+      <span class="timer" id="sm-timer">${icon('clock')}<span class="tm">${mmss((M.endsAt - Date.now()) / 1000)}</span></span></div>
+
+    <div class="palette">${M.questions.map((x, i) => `<button style="${stVars(x.section)}" class="${M.answers[x.id] ? 'done' : ''} ${i === M.idx ? 'cur' : ''} ${M.flags[x.id] ? 'flag' : ''}"
+        onclick="gotoMock(${i})" aria-label="السؤال ${i + 1}">${i + 1}</button>`).join('')}</div>
+    <div class="pal-legend">${STEP_KEYS.map(k => `<span><i style="background:${TRACK_COLORS[STEP_UI[k].color].c}"></i>${STEP_UI[k].ar}</span>`).join('')}
+      <span><i style="background:var(--gold-d);border-radius:50%"></i>للمراجعة</span></div>
+
+    <div class="q-top" style="margin-top:16px">${secChip(q.section)}<span>السؤال <b>${M.idx + 1}</b> من ${n}</span></div>
+    <div class="card" style="${stVars(q.section)}">
+      ${stepStem(q, 'mock', prev && prev.group === q.group)}
+      <div class="opts">${q.options.map(o => `<button class="opt ${M.answers[q.id] === o.key ? 'sel' : ''}" onclick="pickMock('${o.key}')">
+          <span class="opt-k">${o.key}</span><span class="en">${esc(o.text)}</span></button>`).join('')}</div>
+    </div>
+    <div class="q-nav">
+      <button class="btn ghost" ${M.idx === 0 ? 'disabled' : ''} onclick="gotoMock(${M.idx - 1})">${icon('arrowRight')}السابق</button>
+      ${M.idx < n - 1 ? `<button class="btn navy" onclick="gotoMock(${M.idx + 1})">التالي${icon('arrowLeft')}</button>`
+                      : `<button class="btn primary" onclick="confirmSubmitMock()">تسليم الاختبار${icon('check')}</button>`}
+    </div>
+    <button class="btn ghost flag-btn ${M.flags[q.id] ? 'on' : ''}" onclick="toggleFlag()">${icon('flag')}${M.flags[q.id] ? 'إلغاء تمييز السؤال' : 'تمييز السؤال للمراجعة'}</button>
+    ${M.idx < n - 1 ? `<button class="btn ghost" onclick="confirmSubmitMock()">${icon('check')}تسليم الاختبار</button>` : ''}`;
+  tickMock();
+}
+
+function pickMock(key) {
+  const M = S.sm, q = M.questions[M.idx];
+  M.answers[q.id] = key;
+  saveMockLocal();
+  document.querySelectorAll('#st-body .opt').forEach(b => b.classList.toggle('sel', b.querySelector('.opt-k').textContent === key));
+  const cell = document.querySelectorAll('#st-body .palette button')[M.idx];
+  if (cell) cell.classList.add('done');
+  const cnt = document.querySelector('#st-body .mock-bar .small b');
+  if (cnt) cnt.textContent = Object.keys(M.answers).length;
+}
+function gotoMock(i) {
+  const M = S.sm; if (i < 0 || i >= M.questions.length) return;
+  const sameAudio = M.questions[i].group === M.questions[M.idx].group && M.questions[i].audio;
+  if (!sameAudio) stopSpeech();
+  M.idx = i; saveMockLocal(); renderMock(); window.scrollTo(0, 0);
+}
+function toggleFlag() {
+  const M = S.sm, q = M.questions[M.idx];
+  if (M.flags[q.id]) delete M.flags[q.id]; else M.flags[q.id] = 1;
+  saveMockLocal(); renderMock();
+}
+
+// المؤقت
+let mockTimer = null;
+function startMockTimer() { stopMockTimer(); mockTimer = setInterval(tickMock, 1000); window.addEventListener('beforeunload', mockUnloadWarn); }
+function stopMockTimer() { if (mockTimer) clearInterval(mockTimer); mockTimer = null; window.removeEventListener('beforeunload', mockUnloadWarn); }
+function mockUnloadWarn(e) { e.preventDefault(); e.returnValue = ''; }
+function tickMock() {
+  const M = S.sm;
+  if (!M || S.mode !== 'step-mock') return stopMockTimer();
+  const left = Math.round((M.endsAt - Date.now()) / 1000);
+  const el = $('#sm-timer');
+  if (el) { el.querySelector('.tm').textContent = mmss(left); el.classList.toggle('warn', left <= 300); }
+  if (left === 300) toast('تبقّت خمس دقائق على انتهاء الاختبار.');
+  if (left === 60) toast('تبقّت دقيقة واحدة على انتهاء الاختبار.', 'err');
+  if (left <= 0) { stopMockTimer(); closeModal(); toast('انتهى الوقت، وسُلِّم الاختبار تلقائياً.'); submitMock(true); }
+}
+
+function leaveMock() {
+  openModal(`<div class="modal"><div class="big-badge">${icon('clock')}</div><h3>الخروج من الاختبار؟</h3>
+    <p>ستُحفظ إجاباتكِ ويمكنكِ العودة لإكمال الاختبار من قسم STEP، مع ملاحظة أن الوقت يستمر في الاحتساب.</p>
+    <button class="btn navy" style="margin-top:18px" onclick="closeModal(exitMock)">خروج مؤقت</button>
+    <button class="btn ghost" onclick="closeModal()">متابعة الاختبار</button></div>`);
+}
+function exitMock() { stopMockTimer(); stopSpeech(); S.mode = 'lesson'; openStep(); }
+
+function confirmSubmitMock() {
+  const M = S.sm, n = M.questions.length;
+  const un = n - Object.keys(M.answers).length, fl = Object.keys(M.flags).length;
+  openModal(`<div class="modal"><div class="big-badge">${icon('check')}</div><h3>تسليم الاختبار؟</h3>
+    <p>${un ? `لم تُجيبي عن <b>${un}</b> ${un === 1 ? 'سؤال' : 'أسئلة'} وستُحتسب خاطئة.` : 'أجبتِ عن جميع الأسئلة.'}
+       ${fl ? `<br>لديكِ ${fl} ${fl === 1 ? 'سؤال مميَّز' : 'أسئلة مميَّزة'} للمراجعة.` : ''}<br>الوقت المتبقي: <span class="en-inline">${mmss((M.endsAt - Date.now()) / 1000)}</span></p>
+    <button class="btn primary" style="margin-top:18px" onclick="closeModal(() => submitMock(false))">تسليم وعرض التقرير</button>
+    <button class="btn ghost" onclick="closeModal()">مراجعة الإجابات</button></div>`);
+}
+
+async function submitMock(auto) {
+  const M = S.sm; if (!M || M.submitting) return;
+  M.submitting = true;
+  stopMockTimer(); stopSpeech();
+  showScreen('step');
+  loading(true, 'جارٍ تصحيح الاختبار وإعداد التقرير...');
+  try {
+    const r = await call('submitStepMock', S.token, M.id, M.answers);
+    loading(false);
+    store(MOCK_STORE, null);
+    S.mode = 'lesson';
+    if (!r.ok) { toast(r.error, 'err'); S.sm = null; return openStep(); }
+    S.sr = { d: r, wrongOnly: false };
+    S.sm = null;
+    applyReward(r.extra);
+    renderReport();
+    if (r.percent >= 80) setTimeout(goldShimmer, 400);
+  } catch (e) {
+    loading(false); M.submitting = false;
+    if (e.code === 'AUTH') return;
+    // تعذّر الاتصال: تبقى الإجابات محفوظة للمحاولة مجدداً
+    toast(e.error, 'err');
+    openModal(`<div class="modal"><div class="big-badge">${icon('alert')}</div><h3>تعذّر تسليم الاختبار</h3>
+      <p>إجاباتكِ محفوظة على هذا الجهاز. تحققي من الاتصال بالإنترنت ثم أعيدي المحاولة.</p>
+      <button class="btn primary" style="margin-top:18px" onclick="closeModal(() => submitMock(true))">إعادة المحاولة</button></div>`);
+  }
+}
+
+
+/* =========================================================
+ * 📊 تقرير الاختبار المحاكي
+ * ========================================================= */
+function renderReport() {
+  const R = S.sr, d = R.d;
+  const title = d.percent >= 80 ? 'جاهزية ممتازة' : d.percent >= 60 ? 'أداء جيد يمكن تطويره' : 'تحتاجين إلى مزيد من التدريب';
+  const delta = d.previous == null ? '' : d.percent - d.previous;
+  const deltaHTML = d.previous == null ? '' : `<div class="delta ${delta > 0 ? 'up' : delta < 0 ? 'down' : ''}">${icon('trending')}
+      ${delta > 0 ? 'تحسّن بمقدار ' + delta + '% عن المحاولة السابقة' : delta < 0 ? 'أقل بـ ' + Math.abs(delta) + '% من المحاولة السابقة' : 'النتيجة نفسها في المحاولة السابقة'}</div>`;
+
+  const items = d.review.map((q, i) => ({ q, i })).filter(x => !R.wrongOnly || !x.q.correct);
+  $('#st-body').innerHTML = `
+    <div class="hero-card ${d.percent >= 60 ? 'sheen' : ''}" style="margin-top:12px">
+      <span class="eyebrow">Mock Test Report</span><h2>${title}</h2>
+      <div class="score">${d.percent}<small>%</small></div>
+      <p>${d.correct} إجابة صحيحة من ${d.total} · المدة <span class="en-inline">${mmss(d.durationSec)}</span> دقيقة</p>
+      ${deltaHTML}
+      ${d.extra && d.extra.points ? `<div class="pts-pill">${icon('star')}+${d.extra.points} نقطة</div>` : ''}
+    </div>
+
+    <div class="sec-title"><h3>النتيجة حسب القسم</h3><span class="eyebrow">Sections</span></div>
+    <div class="card flat">${d.sections.map(s => `
+      <div class="rep-row" style="${stVars(s.key)}">
+        <div class="rep-head"><div class="si">${icon(STEP_UI[s.key].icon)}</div>
+          <b>${esc(s.ar)}${s.key === d.weakest ? '<span class="tag-weak">القسم الأضعف</span>' : ''}</b>
+          <span class="val">${s.percent == null ? '—' : s.percent + '%'} <small>${s.correct}/${s.total}</small></span></div>
+        <div class="bar"><div style="width:${s.percent || 0}%"></div></div></div>`).join('')}</div>
+
+    ${d.tip ? `<div class="card flat" style="${stVars(d.weakest)}"><div class="tip-card">${icon('info')}<div>
+        <b>${d.weakest ? 'نصيحة لتحسين قسم ' + esc(d.weakestAr) : 'نصيحة'}</b><p>${esc(d.tip)}</p></div></div>
+        ${d.weakest ? `<button class="btn navy" style="margin-top:14px" onclick="startStepPractice('${d.weakest}')">${icon('target')}تدرّبي على ${esc(d.weakestAr)}</button>` : ''}</div>` : ''}
+
+    <div class="sec-title"><h3>مراجعة الإجابات</h3><span class="eyebrow">Review</span></div>
+    <div class="switch-row"><span class="small muted">اضغطي على أي سؤال لعرض الإجابة والشرح.</span>
+      <button class="pill ${R.wrongOnly ? 'active' : ''}" onclick="S.sr.wrongOnly=!S.sr.wrongOnly;renderReport()">${R.wrongOnly ? 'عرض الكل' : 'الأخطاء فقط'}</button></div>
+    <div class="card flat">${items.length ? items.map(({ q, i }) => `
+      <details class="rv-item ${q.correct ? 'ok' : 'bad'}"><summary><span class="n">${i + 1}</span><span class="t">${esc(shortPrompt(q.question.replace(/__(.+?)__/g, '$1')))}</span>${icon(q.correct ? 'check' : 'x')}</summary>
+        <div class="rv-body" style="${stVars(q.section)}">${secChip(q.section)}
+          ${q.passage ? `<details class="transcript"><summary>${icon('book')}عرض النص</summary><div class="st-passage">${stPassage(q.passage)}</div></details>` : ''}
+          ${q.audio ? `<details class="transcript"><summary>${icon('file')}عرض نص المقطع الصوتي</summary><div class="st-passage">${stPassage(q.audio)}</div></details>` : ''}
+          <div class="st-q">${stQ(q.question)}</div>
+          <div class="opts">${q.options.map(o => `<div class="opt ${o.key === q.answer ? 'correct' : o.key === q.your ? 'wrong' : ''}">
+            <span class="opt-k">${o.key}</span><span class="en">${esc(o.text)}</span>${o.key === q.answer ? icon('check') : o.key === q.your ? icon('x') : ''}</div>`).join('')}</div>
+          ${!q.your ? '<p class="small muted" style="margin-top:8px">لم تُجيبي عن هذا السؤال.</p>' : ''}
+          ${q.explanationAr ? `<div class="fb ${q.correct ? 'ok' : 'bad'}"><p style="margin:0">${esc(q.explanationAr)}</p></div>` : ''}
+        </div></details>`).join('')
+      : `<div class="center muted" style="padding:14px 0">${icon('checkCircle')}<p style="margin-top:6px">لا توجد إجابات خاطئة. أحسنتِ.</p></div>`}</div>
+
+    <button class="btn primary" onclick="confirmStartMock()">${icon('rotate')}اختبار محاكٍ جديد</button>
+    <button class="btn ghost" onclick="openStep()">العودة إلى قسم STEP</button>`;
+  if (!S.st) S.st = { mock: { size: 20, minutes: 30, plays: 2 } };
+  window.scrollTo(0, 0);
+}
+
+// تنبيه عند الدخول إذا كان هناك اختبار محاكٍ لم يُسلَّم
+const _routeAfterLoginStep = routeAfterLogin;
+routeAfterLogin = async function () {
+  await _routeAfterLoginStep();
+  if (S.user && savedMock()) setTimeout(() => toast('لديكِ اختبار STEP محاكٍ لم يُسلَّم بعد. افتحي قسم «التدريب على STEP» لمتابعته.'), 900);
+};
+
+// الخروج من الصفحة الرئيسية أثناء الاختبار يوقف المؤقت (يبقى محفوظاً للعودة إليه)
+const _goHomeStep = goHome;
+goHome = function () { if (S.mode === 'step-mock') { stopMockTimer(); stopSpeech(); } _goHomeStep(); };
 </script>
 
 
