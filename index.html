@@ -775,7 +775,8 @@
     <!-- ✏️ التذييل وحقوق النشر (يظهر أسفل جميع الشاشات) -->
     <footer class="site-foot">
       <div class="ornament"><span></span><svg viewBox="0 0 10 10"><path d="M5 0 L10 5 L5 10 L0 5Z" fill="currentColor"/></svg><span></span></div>
-      <div class="foot-links"><a class="link" onclick="openSuggest()"><span data-i="message"></span>الاقتراحات</a></div>
+      <div class="foot-links"><a class="link" onclick="openSuggest()"><span data-i="message"></span>الاقتراحات</a>
+        <a class="link" onclick="openAdmin()"><span data-i="lock"></span>لوحة الإدارة</a></div>
       <div class="copy">جميع الحقوق محفوظة © 2026 — معلمات اللغة الإنجليزية: أ. حنان جرادان الحارثي، أ. شيماء سامي الحازمي</div>
       <div class="school">الثانوية التاسعة عشر · <span class="en-inline">English Language Club</span></div>
     </footer>
@@ -3881,6 +3882,470 @@ routeAfterLogin = async function () {
 // الخروج من الصفحة الرئيسية أثناء الاختبار يوقف المؤقت (يبقى محفوظاً للعودة إليه)
 const _goHomeStep = goHome;
 goHome = function () { if (S.mode === 'step-mock') { stopMockTimer(); stopSpeech(); } _goHomeStep(); };
+</script>
+
+  <!-- Admin.html — المرحلة 8: لوحة إحصائيات الإدارة (محمية بكلمة مرور) -->
+<style>
+  /* ---------- الدخول ---------- */
+  .ad-login { max-width: 420px; margin: 26px auto 0; text-align: center; }
+  .ad-login .lock-disc { width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 18px; display: grid; place-items: center;
+                         background: var(--navy); color: var(--gold); box-shadow: 0 0 0 6px var(--gold-xl), 0 0 0 7px var(--gold-l); }
+  .ad-login .lock-disc .ic { width: 34px; height: 34px; }
+  .ad-login h2 { font-size: 24px; }
+  .ad-login p { color: var(--muted); margin-top: 6px; font-size: 14.5px; }
+  .ad-login .card { text-align: start; margin-top: 22px; }
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-inline-start: 46px; direction: ltr; text-align: left; }
+  .pw-eye { position: absolute; inset-inline-start: 6px; top: 50%; transform: translateY(-50%); background: none; border: 0; padding: 8px; color: var(--muted); cursor: pointer; }
+  .pw-eye .ic { width: 18px; height: 18px; }
+
+  /* ---------- الرأس والتبويبات ---------- */
+  .ad-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .ad-actions .btn { width: auto; margin: 0; padding: 9px 14px; font-size: 14px; text-decoration: none; }
+  .ad-tabs { position: sticky; top: 0; z-index: 20; display: flex; gap: 6px; overflow-x: auto; padding: 10px 18px; margin: 14px -18px 0;
+             background: rgba(250, 247, 240, .95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); scrollbar-width: none; }
+  .ad-tabs::-webkit-scrollbar { display: none; }
+  .ad-tabs .pill { white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; padding: 8px 14px; font-size: 14px; }
+  .ad-tabs .pill .ic { width: 15px; height: 15px; color: var(--gold-d); }
+  .ad-tabs .pill.active .ic { color: var(--gold); }
+  .ad-meta { color: var(--muted-2); font-size: 12px; margin-top: 10px; text-align: center; }
+
+  /* ---------- بطاقات المؤشرات ---------- */
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 14px; }
+  @media (min-width: 560px) { .kpis { grid-template-columns: repeat(3, 1fr); } }
+  .kpi { background: #fff; border: 1px solid var(--line); border-radius: var(--r); padding: 14px 14px 12px; box-shadow: var(--sh-1); }
+  .kpi .k-top { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+  .kpi .k-top .ic { width: 16px; height: 16px; color: var(--gold-d); }
+  .kpi b { display: block; font-family: var(--f-en-h); font-size: 28px; font-weight: 600; color: var(--navy); line-height: 1.2; margin-top: 6px; direction: ltr; text-align: right; }
+  .kpi small { color: var(--muted); font-size: 12px; }
+
+  /* ---------- الأشرطة الأفقية ---------- */
+  .hb-row { display: grid; grid-template-columns: minmax(88px, 34%) 1fr 48px; gap: 10px; align-items: center; padding: 7px 0; font-size: 14px; }
+  .hb-row .lb { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hb-row .tr { height: 10px; background: #F1ECE0; border-radius: 999px; overflow: hidden; }
+  .hb-row .tr i { display: block; height: 100%; border-radius: 999px; background: var(--hb, var(--navy)); transition: width .8s var(--ease); }
+  .hb-row .vl { font-family: var(--f-en-h); font-weight: 600; color: var(--navy); text-align: left; direction: ltr; }
+  .hb-row .vl small { color: var(--muted); font-weight: 400; font-size: 11px; }
+
+  .chart-card svg { width: 100%; height: auto; display: block; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+  .card-head h4 { font-family: var(--f-ar-h); color: var(--navy); font-size: 16px; font-weight: 600; }
+  .card-head .btn.small { margin: 0; }
+  .split { display: flex; height: 14px; border-radius: 999px; overflow: hidden; margin: 8px 0 10px; }
+  .split span { display: block; height: 100%; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-inline-end: 6px; vertical-align: -1px; }
+
+  /* ---------- الجداول ---------- */
+  .tbl-wrap { overflow-x: auto; margin: 0 -6px; padding: 0 6px; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 520px; }
+  .tbl th { text-align: start; font-weight: 600; color: var(--navy); font-family: var(--f-ar-h); padding: 9px 8px; border-bottom: 1px solid var(--gold-l); white-space: nowrap; background: var(--ivory); position: sticky; top: 0; }
+  .tbl td { padding: 9px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .tbl td.num, .tbl th.num { text-align: center; font-family: var(--f-en); }
+  .tbl tr:last-child td { border-bottom: 0; }
+  .tbl .wk { font-weight: 600; color: var(--err); }
+  .heat { display: inline-block; min-width: 44px; padding: 3px 6px; border-radius: 6px; font-family: var(--f-en-h); font-weight: 600; text-align: center; }
+  .h0 { background: #F3DDE2; color: #6E2433; } .h1 { background: #F6EBD3; color: #7A5A1E; }
+  .h2 { background: #E3EFE8; color: #2C5E49; } .h3 { background: #CFE4D8; color: #1F4A38; } .hn { color: var(--muted-2); }
+  .tbl-search { margin-bottom: 10px; }
+
+  /* ---------- الأسئلة الأكثر خطأً ---------- */
+  .ms-row { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .ms-row:last-child { border-bottom: 0; }
+  .ms-rank { font-family: var(--f-en-h); color: var(--gold-d); font-size: 18px; font-weight: 600; width: 22px; flex-shrink: 0; text-align: center; padding-top: 2px; }
+  .ms-body { flex: 1; min-width: 0; }
+  .ms-body .en { direction: ltr; text-align: left; font-size: 14.5px; color: var(--text); line-height: 1.7; white-space: pre-line; }
+  .ms-body small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+  .ms-body .ans { color: var(--ok); }
+  .ms-pct { text-align: center; flex-shrink: 0; width: 64px; }
+  .ms-pct b { display: block; font-family: var(--f-en-h); font-size: 22px; color: var(--err); font-weight: 600; line-height: 1.1; }
+  .ms-pct small { color: var(--muted); font-size: 11px; }
+  .note { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--gold-xl); border: 1px solid var(--gold-l); font-size: 13.5px; color: #5C4A26; margin-top: 12px; }
+  .note .ic { width: 17px; height: 17px; color: var(--gold-d); flex-shrink: 0; margin-top: 3px; }
+
+  /* ---------- التقييمات والاقتراحات ---------- */
+  .fb-big { display: flex; align-items: center; gap: 18px; }
+  .fb-big .avg { font-family: var(--f-en-h); font-size: 48px; color: var(--navy); line-height: 1; }
+  .fb-big .avg small { font-size: 18px; color: var(--muted); }
+  .stars-line { display: inline-flex; gap: 2px; direction: ltr; }
+  .stars-line svg { width: 16px; height: 16px; stroke: var(--gold); fill: none; stroke-width: 1.4; }
+  .stars-line svg.on { fill: var(--gold); }
+  .cm-row { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .cm-row:last-child { border-bottom: 0; }
+  .cm-row p { font-size: 15px; color: var(--text); line-height: 1.85; }
+  .cm-row small { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .cat-tag { display: inline-block; padding: 1px 10px; border-radius: 999px; background: var(--gold-xl); color: var(--gold-d); font-size: 12px; }
+
+  @media print {
+    .site-foot, .ad-tabs, .ad-actions, .back, .btn, #toast { display: none !important; }
+    .app { padding: 0; max-width: none; }
+    .card, .kpi { box-shadow: none !important; break-inside: avoid; }
+    .tbl-wrap { overflow: visible; }
+  }
+</style>
+
+<script>
+/* =========================================================
+ * لوحة الإدارة
+ * ========================================================= */
+Object.assign(ICONS, {
+  eye:       '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>',
+  eyeOff:    '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>',
+  activity:  '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+  help:      '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  printer:   '<polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+  table:     '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/>',
+  refresh:   '<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>'
+});
+document.getElementById('extra-screens').insertAdjacentHTML('beforeend', `<section class="screen" id="scr-admin"><div id="ad-body"></div></section>`);
+
+const ADM_KEY = 'elc_admin';
+function admGet() { try { return sessionStorage.getItem(ADM_KEY); } catch (e) { return null; } }
+function admSet(v) { try { v ? sessionStorage.setItem(ADM_KEY, v) : sessionStorage.removeItem(ADM_KEY); } catch (e) {} }
+const AD = { tab: 'overview', q: '' };
+
+// ✏️ أسماء التبويبات
+const AD_TABS = [
+  { k: 'overview',  ar: 'نظرة عامة',          icon: 'chart' },
+  { k: 'users',     ar: 'المستخدمات',          icon: 'users' },
+  { k: 'learning',  ar: 'المستويات والمهارات', icon: 'trending' },
+  { k: 'questions', ar: 'الأسئلة الأكثر خطأً', icon: 'help' },
+  { k: 'step',      ar: 'نتائج STEP',          icon: 'target' },
+  { k: 'voice',     ar: 'الآراء والاقتراحات',   icon: 'message' }
+];
+
+function admBack() { return S.user ? goHome() : showScreen('welcome'); }
+
+window.openAdmin = function () {
+  S.mode = 'admin';
+  showScreen('admin');
+  if (admGet()) loadAdmin(); else renderAdminLogin();
+};
+
+/* ---------- تسجيل الدخول ---------- */
+function renderAdminLogin(msg) {
+  $('#ad-body').innerHTML = `<button class="back" onclick="admBack()">${icon('arrowRight')}رجوع</button>
+    <div class="ad-login">
+      <div class="lock-disc">${icon('lock')}</div>
+      <span class="eyebrow">Administration</span><h2>لوحة الإدارة</h2>
+      <p>إحصائيات المنصة مخصصة لإدارة النادي فقط.</p>
+      <div class="card">
+        <label class="lbl" for="ad-pw">كلمة المرور</label>
+        <div class="pw-wrap"><input id="ad-pw" class="input" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminSignIn()">
+          <button class="pw-eye" type="button" onclick="togglePw()" aria-label="إظهار كلمة المرور">${icon('eye')}</button></div>
+        ${msg ? `<p class="small" style="color:var(--err);margin-top:10px">${esc(msg)}</p>` : ''}
+        <button class="btn primary" id="ad-go" style="margin-top:16px" onclick="adminSignIn()">${icon('lock')}دخول</button>
+      </div>
+    </div>`;
+  setTimeout(() => { const i = $('#ad-pw'); if (i) i.focus(); }, 300);
+}
+function togglePw() {
+  const i = $('#ad-pw'), b = $('.pw-eye'); if (!i) return;
+  i.type = i.type === 'password' ? 'text' : 'password';
+  b.innerHTML = icon(i.type === 'password' ? 'eye' : 'eyeOff');
+}
+async function adminSignIn() {
+  const pw = ($('#ad-pw') || {}).value || '';
+  if (!pw) return renderAdminLogin('اكتبي كلمة المرور.');
+  const b = $('#ad-go'); if (b) { b.disabled = true; b.textContent = 'جارٍ التحقق...'; }
+  try {
+    const r = await call('adminLogin', pw);
+    if (!r.ok) return renderAdminLogin(r.error);
+    admSet(r.token);
+    loadAdmin();
+  } catch (e) { renderAdminLogin(e.error || 'تعذّر الاتصال بالخادم.'); }
+}
+async function adminSignOut() {
+  const t = admGet(); admSet(null); AD.d = null;
+  try { await call('adminLogout', t); } catch (e) {}
+  toast('تم تسجيل الخروج من لوحة الإدارة.');
+  admBack();
+}
+
+/* ---------- تحميل البيانات ---------- */
+async function loadAdmin() {
+  $('#ad-body').innerHTML = skeletonList(6);
+  try {
+    const r = await call('getAdminStats', admGet());
+    if (r.code === 'ADMIN_AUTH') { admSet(null); return renderAdminLogin(r.error); }
+    if (!r.ok) { toast(r.error, 'err'); return renderAdminLogin(); }
+    AD.d = r;
+    renderAdmin();
+  } catch (e) { toast(e.error || 'تعذّر الاتصال بالخادم.', 'err'); renderAdminLogin(); }
+}
+function setAdTab(k) { AD.tab = k; renderAdmin(); window.scrollTo(0, 0); }
+
+function renderAdmin() {
+  const d = AD.d, k = d.kpis;
+  const body = { overview: adOverview, users: adUsers, learning: adLearning, questions: adQuestions, step: adStep, voice: adVoice }[AD.tab]();
+  $('#ad-body').innerHTML = `<button class="back" onclick="admBack()">${icon('arrowRight')}رجوع</button>
+    <div class="sec-hero"><span class="eyebrow">Admin Dashboard</span><h2>لوحة إحصائيات المنصة</h2>
+      <p>${esc(S.config ? S.config.school : '')} · نادي اللغة الإنجليزية</p>
+      <div class="stats four">
+        <div class="stat">${icon('users')}<b>${k.users}</b><small>مستخدمة</small></div>
+        <div class="stat">${icon('activity')}<b>${k.dau}</b><small>نشطات اليوم</small></div>
+        <div class="stat">${icon('trending')}<b>${k.wau}</b><small>نشطات الأسبوع</small></div>
+        <div class="stat">${icon('star')}<b>${k.feedbackAvg == null ? '—' : k.feedbackAvg}</b><small>متوسط التقييم</small></div>
+      </div>
+      <div class="ad-actions">
+        <button class="btn on-dark" onclick="exportExcel()">${icon('download')}تنزيل ملف Excel شامل</button>
+        <button class="btn on-dark" onclick="loadAdmin()">${icon('refresh')}تحديث</button>
+        <button class="btn on-dark" onclick="window.print()">${icon('printer')}طباعة</button>
+        ${d.sheetUrl ? `<a class="btn on-dark" href="${esc(d.sheetUrl)}" target="_blank" rel="noopener">${icon('table')}جدول البيانات</a>` : ''}
+        <button class="btn on-dark" onclick="adminSignOut()">${icon('logout')}خروج</button>
+      </div></div>
+    <div class="ad-tabs">${AD_TABS.map(t => `<button class="pill ${AD.tab === t.k ? 'active' : ''}" onclick="setAdTab('${t.k}')">${icon(t.icon)}${t.ar}</button>`).join('')}</div>
+    <div class="stagger">${body}</div>
+    <div class="ad-meta">آخر تحديث: <span class="en-inline">${esc(d.generatedAt)}</span> · حسابات الاختبار (Test Student) غير محتسبة</div>`;
+}
+
+
+/* =========================================================
+ * أدوات الرسم
+ * ========================================================= */
+const AD_COLORS = ['#0B1F3A', '#C9A86A', '#2B4C7E', '#2A6B4F', '#7B2D42', '#5B3768', '#1D5E66', '#8C6A2F'];
+function pct(n, t) { return t ? Math.round(n / t * 100) : 0; }
+function kpi(ic, label, val, sub) { return `<div class="kpi"><div class="k-top">${icon(ic)}${label}</div><b>${val}</b>${sub ? `<small>${sub}</small>` : ''}</div>`; }
+function heat(v) {
+  if (v == null) return '<span class="heat hn">—</span>';
+  const c = v < 50 ? 'h0' : v < 70 ? 'h1' : v < 85 ? 'h2' : 'h3';
+  return `<span class="heat ${c}">${v}%</span>`;
+}
+function hbars(items, opts) {
+  opts = opts || {};
+  const max = Math.max(1, ...items.map(x => x.n));
+  const total = items.reduce((s, x) => s + x.n, 0);
+  return items.map((x, i) => `<div class="hb-row"><span class="lb" title="${esc(x.label)}">${esc(x.label)}</span>
+      <span class="tr"><i style="width:${x.n / max * 100}%;--hb:${x.color || opts.color || AD_COLORS[i % AD_COLORS.length]}"></i></span>
+      <span class="vl">${opts.suffix ? x.n + opts.suffix : x.n}${opts.share && total ? ` <small>${pct(x.n, total)}%</small>` : ''}</span></div>`).join('')
+    || '<p class="muted small center">لا توجد بيانات بعد.</p>';
+}
+// رسم أعمدة (SVG)
+function columns(series, opts) {
+  opts = opts || {};
+  const W = 340, H = 170, L = 26, R = 6, T = 16, B = 30;
+  const max = Math.max(1, ...series.map(s => s.n));
+  const step = (W - L - R) / series.length, bw = Math.min(22, step * .62);
+  const y = v => T + (1 - v / max) * (H - T - B);
+  const ticks = [0, Math.ceil(max / 2), max];
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.title || '')}">
+    ${ticks.map(t => `<line x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}" stroke="#ECE5D6"/><text x="${L - 6}" y="${y(t) + 3.5}" text-anchor="end" font-size="9.5" fill="#8A8478" font-family="Inter">${t}</text>`).join('')}
+    ${series.map((s, i) => {
+      const x = L + i * step + (step - bw) / 2, h = (H - T - B) - (y(s.n) - T);
+      const last = i === series.length - 1;
+      return `<rect x="${x}" y="${y(s.n)}" width="${bw}" height="${Math.max(h, s.n ? 2 : 0)}" rx="3" fill="${last ? '#C9A86A' : '#0B1F3A'}"><title>${esc(s.title || '')}: ${s.n}</title></rect>
+        ${s.n ? `<text x="${x + bw / 2}" y="${y(s.n) - 4}" text-anchor="middle" font-size="9" fill="#0B1F3A" font-family="Inter" font-weight="600">${s.n}</text>` : ''}
+        ${s.label ? `<text x="${x + bw / 2}" y="${H - 12}" text-anchor="middle" font-size="9" fill="#8A8478" font-family="Inter">${esc(s.label)}</text>` : ''}`;
+    }).join('')}
+  </svg>`;
+}
+function starsLine(n) {
+  const p = 'M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z';
+  return `<span class="stars-line">${[1, 2, 3, 4, 5].map(i => `<svg viewBox="0 0 24 24" class="${i <= Math.round(n) ? 'on' : ''}"><path d="${p}"/></svg>`).join('')}</span>`;
+}
+function secLabel(r) { return `${esc(r.gradeAr || '—')}${r.section ? ' / ' + esc(r.section) : ''}`; }
+function cardHead(title, exportFn) { return `<div class="card-head"><h4>${title}</h4>${exportFn ? `<button class="btn ghost small" onclick="${exportFn}">${icon('download')}CSV</button>` : ''}</div>`; }
+
+
+/* =========================================================
+ * التبويبات
+ * ========================================================= */
+function adOverview() {
+  const d = AD.d, k = d.kpis;
+  return `
+    <div class="kpis">
+      ${kpi('users', 'إجمالي المسجّلات', k.users, `+${k.newWeek} خلال آخر 7 أيام`)}
+      ${kpi('cap', 'طالبات ثانوي', k.students, `${pct(k.students, k.users)}% من الإجمالي`)}
+      ${kpi('activity', 'نشطات اليوم', k.dau, `خلال 30 يوماً: ${k.mau}`)}
+      ${kpi('trending', 'نشطات الأسبوع', k.wau, 'آخر 7 أيام')}
+      ${kpi('check', 'الإجابات المسجلة', k.attempts, k.accuracy == null ? '' : `نسبة الصواب ${k.accuracy}%`)}
+      ${kpi('book', 'دروس مكتملة', k.lessonsDone, `شهادات: ${k.certificates}`)}
+      ${kpi('target', 'اختبارات STEP المحاكية', k.stepMocks, d.step.overall.percent == null ? '' : `المتوسط ${d.step.overall.percent}%`)}
+      ${kpi('star', 'متوسط التقييم', k.feedbackAvg == null ? '—' : k.feedbackAvg + ' / 5', `${k.feedbackCount} تقييماً`)}
+      ${kpi('message', 'الاقتراحات', k.suggestions, '')}
+    </div>
+    <div class="card flat chart-card">${cardHead('النشاط اليومي — آخر ' + d.daily.length + ' يوماً', 'csvActivity()')}
+      ${columns(d.daily.map((x, i) => ({ n: x.n, title: x.date, label: (i % 2 === (d.daily.length - 1) % 2) ? x.date.slice(8) : '' })), { title: 'النشاط اليومي' })}
+      <div class="legend"><span><i style="background:#0B1F3A"></i>عدد المستخدمات النشطات في اليوم</span><span><i style="background:#C9A86A"></i>اليوم</span></div></div>
+    <div class="card flat chart-card">${cardHead('النشاط الأسبوعي — آخر ' + d.weekly.length + ' أسابيع')}
+      ${columns(d.weekly.map(x => ({ n: x.n, title: x.from + ' — ' + x.to, label: x.to.slice(5).replace('-', '/') })), { title: 'النشاط الأسبوعي' })}
+      <div class="legend"><span><i style="background:#0B1F3A"></i>عدد المستخدمات المختلفات في كل أسبوع (تاريخ نهاية الأسبوع)</span></div></div>
+    <div class="card flat">${cardHead('المهارات على مستوى المنصة')}
+      ${hbars(d.skillsOverall.filter(s => s.pct != null).sort((a, b) => a.pct - b.pct)
+          .map(s => ({ label: s.ar, n: s.pct, color: TRACK_COLORS[s.track].c })), { suffix: '%' })}
+      <p class="small muted" style="margin-top:6px">نسبة الإجابات الصحيحة في كل مسار، من الأضعف إلى الأقوى.</p></div>`;
+}
+
+function adUsers() {
+  const d = AD.d, k = d.kpis;
+  const q = AD.q.trim();
+  const list = d.users.filter(u => !q || u.name.indexOf(q) !== -1);
+  return `
+    <div class="card flat">${cardHead('داخل المدرسة وخارجها')}
+      <div class="split"><span style="width:${pct(k.inSchool, k.users)}%;background:var(--navy)"></span><span style="width:${pct(k.outSchool, k.users)}%;background:var(--gold)"></span></div>
+      <div class="legend"><span><i style="background:var(--navy)"></i>من داخل المدرسة: ${k.inSchool} (${pct(k.inSchool, k.users)}%)</span>
+        <span><i style="background:var(--gold)"></i>من خارج المدرسة: ${k.outSchool} (${pct(k.outSchool, k.users)}%)</span></div></div>
+    <div class="card flat">${cardHead('حسب الدور')}${hbars(d.byRole.map(r => ({ label: r.ar, n: r.n })), { share: true })}</div>
+    <div class="card flat">${cardHead('حسب الصف')}${hbars(d.byGrade.map(r => ({ label: r.ar, n: r.n })), { share: true })}</div>
+    <div class="card flat">${cardHead('حسب الشعبة', 'csvSections()')}${hbars(d.bySection.map(r => ({ label: r.gradeAr + ' / الشعبة ' + r.section, n: r.n, color: '#2B4C7E' })))}</div>
+    <div class="card flat">${cardHead('قائمة المستخدمات (' + d.users.length + ')', 'csvUsers()')}
+      <input class="input tbl-search" placeholder="ابحثي بالاسم..." value="${esc(AD.q)}" oninput="AD.q=this.value;adFilterUsers()">
+      <div class="tbl-wrap" id="ad-users">${usersTable(list)}</div></div>`;
+}
+function usersTable(list) {
+  if (!list.length) return '<p class="muted small center">لا توجد نتائج.</p>';
+  return `<table class="tbl"><thead><tr><th>الاسم</th><th>الدور</th><th>الصف / الشعبة</th><th class="num">النقاط</th><th class="num">الدروس</th><th class="num">المستويات</th><th class="num">آخر نشاط</th></tr></thead>
+    <tbody>${list.slice(0, 200).map(u => `<tr><td>${esc(u.name)}</td><td>${esc(u.role)}</td><td>${u.inSchool ? secLabel(u) : '<span class="muted">خارج المدرسة</span>'}</td>
+      <td class="num">${u.points}</td><td class="num">${u.lessons}</td><td class="num">${u.levels}</td><td class="num">${esc(u.lastActive)}</td></tr>`).join('')}</tbody></table>
+    ${list.length > 200 ? `<p class="small muted center" style="margin-top:8px">يُعرض أول 200 اسم. القائمة كاملة في ملف التصدير.</p>` : ''}`;
+}
+function adFilterUsers() { const q = AD.q.trim(); $('#ad-users').innerHTML = usersTable(AD.d.users.filter(u => !q || u.name.indexOf(q) !== -1)); }
+
+function adLearning() {
+  const d = AD.d, tracks = d.tracks;
+  const LV = [{ k: 'l1', ar: 'مبتدئ', c: '#E6D7B4' }, { k: 'l2', ar: 'متوسط', c: '#C9A86A' }, { k: 'l3', ar: 'متقدم', c: '#2B4C7E' }, { k: 'done', ar: 'أتمّت المسار', c: '#0B1F3A' }];
+  const tk = Object.keys(tracks);
+  return `
+    <div class="card flat">${cardHead('توزيع المستويات في كل مسار', 'csvLevels()')}
+      ${d.levels.map(l => `<div style="padding:8px 0"><div class="card-head" style="margin:0 0 4px"><span style="font-size:14px">${esc(l.ar)} <span class="en-inline muted small">${esc(l.en)}</span></span><span class="small muted">${l.total} مستخدمة</span></div>
+        <div class="split" style="margin:0">${LV.map(v => l[v.k] ? `<span title="${v.ar}: ${l[v.k]}" style="width:${pct(l[v.k], l.total)}%;background:${v.c}"></span>` : '').join('')}</div>
+        <div class="legend" style="margin-top:4px">${LV.map(v => `<span><i style="background:${v.c}"></i>${v.ar} ${l[v.k]}</span>`).join('')}</div></div>`).join('')}
+    </div>
+    <div class="card flat">${cardHead('المهارة الأضعف في كل شعبة', 'csvSkills()')}
+      ${d.sectionSkills.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>الصف / الشعبة</th><th class="num">الطالبات</th><th>المهارة الأضعف</th>
+        ${tk.map(t => `<th class="num">${esc(tracks[t].ar)}</th>`).join('')}<th class="num">الإجمالي</th></tr></thead>
+        <tbody>${d.sectionSkills.map(r => `<tr><td>${secLabel(r)}</td><td class="num">${r.students}</td>
+          <td class="wk">${r.weakest ? esc(r.weakestAr) + ` <span class="en-inline">(${r.weakestPct}%)</span>` : '<span class="muted">—</span>'}</td>
+          ${tk.map(t => `<td class="num">${heat(r.acc[t])}</td>`).join('')}<td class="num">${heat(r.accuracy)}</td></tr>`).join('')}</tbody></table></div>
+        <div class="legend" style="margin-top:12px"><span><i style="background:#F3DDE2"></i>أقل من 50%</span><span><i style="background:#F6EBD3"></i>50–69%</span><span><i style="background:#E3EFE8"></i>70–84%</span><span><i style="background:#CFE4D8"></i>85% فأكثر</span></div>
+        <div class="note">${icon('info')}<span>النسبة = الإجابات الصحيحة ÷ كل الإجابات في المسار (الدروس، واختبارات المستوى، وتحديد المستوى، والمراجعة). تُحدَّد المهارة الأضعف من المسارات التي فيها ${AD.d.minAttempts} إجابات على الأقل.</span></div>`
+      : '<p class="muted small center">لا توجد إجابات من طالبات المدرسة بعد.</p>'}</div>`;
+}
+
+function adQuestions() {
+  const d = AD.d;
+  return `<div class="card flat">${cardHead('أكثر 10 أسئلة خطأً', 'csvMissed()')}
+      ${d.missed.length ? d.missed.map((m, i) => `<div class="ms-row"><span class="ms-rank">${i + 1}</span>
+        <div class="ms-body"><span class="chip" style="${m.step ? '' : trackVars(m.skill)}">${icon(m.step ? 'target' : (TRACK_ICONS[m.skill] || 'book'))}${esc(m.skillAr)}</span>
+          <div class="en" style="margin-top:8px">${esc(m.prompt)}</div>
+          <small>${m.where ? esc(m.where) + ' · ' : ''}<span class="en-inline">${esc(m.qid)}</span>${m.answer ? ` · الإجابة الصحيحة: <span class="en-inline ans">${esc(m.answer)}</span>` : ''}</small></div>
+        <div class="ms-pct"><b>${m.pct}%</b><small>خطأ<br>${m.wrong} من ${m.attempts}</small></div></div>`).join('')
+      : '<p class="muted small center">لا توجد إجابات خاطئة مسجلة بعد.</p>'}
+      <div class="note">${icon('info')}<span>${d.missedLowData ? 'البيانات ما زالت قليلة، لذلك تُعرض الأسئلة حتى لو كانت محاولاتها أقل من ' + d.minAttempts + '.' : 'تُحتسب الأسئلة التي أُجيب عنها ' + d.minAttempts + ' مرات على الأقل.'} يمكن تعديل نص أي سؤال أو شرحه من جدول Questions أو STEP_Bank باستخدام رمزه.</span></div></div>`;
+}
+
+function adStep() {
+  const s = AD.d.step, o = s.overall, SS = AD.d.stepSections || {};
+  const keys = ['reading', 'structure', 'listening', 'composition'];
+  const colors = { reading: TRACK_COLORS.reading.c, structure: TRACK_COLORS.grammar.c, listening: TRACK_COLORS.listening.c, composition: TRACK_COLORS.writing.c };
+  return `
+    <div class="kpis">
+      ${kpi('target', 'اختبارات محاكية', o.attempts, `${o.students} طالبة`)}
+      ${kpi('trending', 'متوسط الدرجة', o.percent == null ? '—' : o.percent + '%', '')}
+      ${kpi('alert', 'القسم الأضعف عموماً', o.weakestAr || '—', '')}
+    </div>
+    <div class="card flat">${cardHead('متوسط الدرجات حسب قسم الاختبار')}
+      ${o.attempts ? hbars(keys.map(k => ({ label: (SS[k] || {}).ar || k, n: o[k] == null ? 0 : o[k], color: colors[k] })), { suffix: '%' }) : '<p class="muted small center">لا توجد اختبارات محاكية بعد.</p>'}</div>
+    <div class="card flat">${cardHead('متوسط درجات STEP لكل شعبة', 'csvStep()')}
+      ${s.rows.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>الصف / الشعبة</th><th class="num">طالبات</th><th class="num">محاولات</th><th class="num">المتوسط</th>
+        ${keys.map(k => `<th class="num">${esc((SS[k] || {}).ar || k)}</th>`).join('')}<th>الأضعف</th></tr></thead>
+        <tbody>${s.rows.map(r => `<tr><td>${secLabel(r)}</td><td class="num">${r.students}</td><td class="num">${r.attempts}</td><td class="num">${heat(r.percent)}</td>
+          ${keys.map(k => `<td class="num">${heat(r[k])}</td>`).join('')}<td class="wk">${esc(r.weakestAr || '—')}</td></tr>`).join('')}</tbody></table></div>`
+      : '<p class="muted small center">لا توجد نتائج بعد.</p>'}</div>`;
+}
+
+function adVoice() {
+  const f = AD.d.feedback, sg = AD.d.suggestions;
+  return `
+    <div class="card flat">${cardHead('تقييم تجربة المنصة', 'csvFeedback()')}
+      <div class="fb-big"><div class="avg">${f.avg == null ? '—' : f.avg}<small> / 5</small></div>
+        <div>${starsLine(f.avg || 0)}<div class="small muted" style="margin-top:4px">من ${f.count} تقييماً</div></div></div>
+      <div style="margin-top:12px">${hbars([5, 4, 3, 2, 1].map(n => ({ label: n + ' نجوم', n: f.dist[n - 1], color: '#C9A86A' })), { share: true })}</div></div>
+    <div class="card flat">${cardHead('تعليقات التقييم (' + f.comments.length + ')')}
+      ${f.comments.length ? f.comments.slice(0, 60).map(c => `<div class="cm-row"><p>${esc(c.comment)}</p>
+        <small>${starsLine(c.stars)}<span>${esc(c.name)}</span><span>${esc(c.role)}${c.gradeAr ? ' · ' + esc(c.gradeAr) + (c.section ? ' / ' + esc(c.section) : '') : ''}</span><span class="en-inline">${c.date}</span></small></div>`).join('')
+      : '<p class="muted small center">لا توجد تعليقات بعد.</p>'}</div>
+    <div class="card flat">${cardHead('الاقتراحات حسب التصنيف')}${hbars(sg.byCat.map(c => ({ label: c.cat, n: c.n })), { share: true })}</div>
+    <div class="card flat">${cardHead('الاقتراحات (' + sg.count + ')', 'csvSuggestions()')}
+      ${sg.items.length ? sg.items.slice(0, 80).map(s => `<div class="cm-row"><p>${esc(s.text)}</p>
+        <small>${s.category ? `<span class="cat-tag">${esc(s.category)}</span>` : ''}<span>${esc(s.name)}</span><span>${esc(s.role)}${s.gradeAr ? ' · ' + esc(s.gradeAr) + (s.section ? ' / ' + esc(s.section) : '') : ''}</span><span class="en-inline">${s.date}</span></small></div>`).join('')
+      : '<p class="muted small center">لا توجد اقتراحات بعد.</p>'}</div>`;
+}
+
+
+/* =========================================================
+ * التصدير (CSV لكل جدول + ملف Excel شامل)
+ * ========================================================= */
+function admSheets() {
+  const d = AD.d, k = d.kpis, tk = Object.keys(d.tracks), SS = d.stepSections || {};
+  const stepK = ['reading', 'structure', 'listening', 'composition'];
+  const v = x => x == null ? '' : x;
+  return {
+    'الملخص': [['المؤشر', 'القيمة'],
+      ['إجمالي المسجّلات', k.users], ['طالبات ثانوي', k.students], ['من داخل المدرسة', k.inSchool], ['من خارج المدرسة', k.outSchool],
+      ['تسجيلات آخر 7 أيام', k.newWeek], ['نشطات اليوم', k.dau], ['نشطات آخر 7 أيام', k.wau], ['نشطات آخر 30 يوماً', k.mau],
+      ['الإجابات المسجلة', k.attempts], ['نسبة الصواب %', v(k.accuracy)], ['دروس مكتملة', k.lessonsDone], ['شهادات', k.certificates],
+      ['اختبارات STEP المحاكية', k.stepMocks], ['متوسط STEP %', v(d.step.overall.percent)], ['متوسط التقييم', v(k.feedbackAvg)], ['عدد التقييمات', k.feedbackCount],
+      ['الاقتراحات', k.suggestions], ['تاريخ التقرير', d.generatedAt],
+      [], ['الدور', 'العدد'], ...d.byRole.map(r => [r.ar, r.n]),
+      [], ['الصف', 'العدد'], ...d.byGrade.map(r => [r.ar, r.n])],
+    'المستخدمات': [['الاسم', 'الدور', 'داخل المدرسة', 'الصف', 'الشعبة', 'تاريخ التسجيل', 'آخر نشاط', 'النقاط', 'السلسلة', 'الدروس', 'المستويات', 'مسارات مكتملة'],
+      ...d.users.map(u => [u.name, u.role, u.inSchool ? 'نعم' : 'لا', u.gradeAr, u.section, u.created, u.lastActive, u.points, u.streak, u.lessons, u.levels, u.tracksDone])],
+    'حسب الشعبة': [['الصف', 'الشعبة', 'عدد المسجّلات'], ...d.bySection.map(r => [r.gradeAr, r.section, r.n])],
+    'النشاط اليومي': [['التاريخ', 'النشطات'], ...d.daily.map(x => [x.date, x.n]), [], ['من', 'إلى', 'النشطات أسبوعياً'], ...d.weekly.map(x => [x.from, x.to, x.n])],
+    'المستويات': [['المسار', 'مبتدئ', 'متوسط', 'متقدم', 'أتمّت المسار', 'الإجمالي'], ...d.levels.map(l => [l.ar, l.l1, l.l2, l.l3, l.done, l.total])],
+    'الأكثر خطأً': [['#', 'رمز السؤال', 'المهارة', 'الدرس', 'السؤال', 'الإجابة الصحيحة', 'المحاولات', 'الأخطاء', 'نسبة الخطأ %'],
+      ...d.missed.map((m, i) => [i + 1, m.qid, m.skillAr, m.where, m.prompt, m.answer, m.attempts, m.wrong, m.pct])],
+    'المهارات حسب الشعبة': [['الصف', 'الشعبة', 'الطالبات', 'الإجابات', 'المهارة الأضعف', 'نسبة الأضعف %', ...tk.map(t => d.tracks[t].ar + ' %'), 'الإجمالي %'],
+      ...d.sectionSkills.map(r => [r.gradeAr, r.section, r.students, r.attempts, r.weakestAr, v(r.weakestPct), ...tk.map(t => v(r.acc[t])), v(r.accuracy)])],
+    'STEP حسب الشعبة': [['الصف', 'الشعبة', 'الطالبات', 'المحاولات', 'المتوسط %', ...stepK.map(x => ((SS[x] || {}).ar || x) + ' %'), 'الأضعف'],
+      ...d.step.rows.map(r => [r.gradeAr, r.section, r.students, r.attempts, v(r.percent), ...stepK.map(x => v(r[x])), r.weakestAr]),
+      ['الإجمالي', '', d.step.overall.students, d.step.overall.attempts, v(d.step.overall.percent), ...stepK.map(x => v(d.step.overall[x])), d.step.overall.weakestAr]],
+    'التقييمات': [['التاريخ', 'الاسم', 'الدور', 'الصف', 'الشعبة', 'النجوم', 'التعليق'], ...d.feedback.comments.map(c => [c.date, c.name, c.role, c.gradeAr, c.section, c.stars, c.comment]),
+      [], ['النجوم', 'العدد'], ...[5, 4, 3, 2, 1].map(n => [n, d.feedback.dist[n - 1]])],
+    'الاقتراحات': [['التاريخ', 'الاسم', 'الدور', 'الصف', 'الشعبة', 'التصنيف', 'الاقتراح'], ...d.suggestions.items.map(s => [s.date, s.name, s.role, s.gradeAr, s.section, s.category, s.text])]
+  };
+}
+function downloadCSV(sheet, file) {
+  const rows = admSheets()[sheet];
+  const cell = x => { const s = String(x == null ? '' : x); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const csv = '﻿' + rows.map(r => r.map(cell).join(',')).join('\r\n');   // BOM حتى يقرأ Excel العربية بشكل صحيح
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = file + '-' + AD.d.generatedAt.slice(0, 10) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function csvActivity() { downloadCSV('النشاط اليومي', 'activity'); }
+function csvSections() { downloadCSV('حسب الشعبة', 'sections'); }
+function csvUsers() { downloadCSV('المستخدمات', 'users'); }
+function csvLevels() { downloadCSV('المستويات', 'levels'); }
+function csvSkills() { downloadCSV('المهارات حسب الشعبة', 'skills-by-section'); }
+function csvMissed() { downloadCSV('الأكثر خطأً', 'most-missed'); }
+function csvStep() { downloadCSV('STEP حسب الشعبة', 'step-by-section'); }
+function csvFeedback() { downloadCSV('التقييمات', 'feedback'); }
+function csvSuggestions() { downloadCSV('الاقتراحات', 'suggestions'); }
+
+async function exportExcel() {
+  loading(true, 'جارٍ إعداد ملف Excel...');
+  try {
+    if (!window.XLSX) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+    const wb = XLSX.utils.book_new();
+    wb.Workbook = { Views: [{ RTL: true }] };
+    const all = admSheets();
+    Object.keys(all).forEach(name => {
+      const ws = XLSX.utils.aoa_to_sheet(all[name]);
+      ws['!cols'] = (all[name][0] || []).map((h, i) => ({ wch: Math.min(60, Math.max(10, ...all[name].map(r => String(r[i] == null ? '' : r[i]).length + 2))) }));
+      XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
+    });
+    XLSX.writeFile(wb, 'ELC-Statistics-' + AD.d.generatedAt.slice(0, 10) + '.xlsx');
+    loading(false);
+    toast('تم تنزيل ملف Excel.', 'ok');
+  } catch (e) {
+    loading(false);
+    toast('تعذّر إنشاء ملف Excel. يمكنكِ تنزيل كل جدول بصيغة CSV.', 'err');
+  }
+}
 </script>
 
 
